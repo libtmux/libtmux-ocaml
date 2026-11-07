@@ -1,4 +1,17 @@
+<!-- libtmux-logo -->
+<div align="center">
+  <picture>
+    <source srcset="docs/assets/logo.svg" type="image/svg+xml">
+    <img src="docs/assets/logo-512.png" width="128" height="128" alt="libtmux for OCaml">
+  </picture>
+</div>
+<!-- /libtmux-logo -->
+
+<div align="center">
+
 # libtmux for OCaml
+
+</div>
 
 Drive tmux from OCaml: create sessions and panes, capture an immutable graph,
 query it locally, and observe output through Eio or a blocking client.
@@ -244,8 +257,9 @@ terminal history or an atomic capture/stream barrier. See
 | `libtmux-json` | `Libtmux_json` | Bounded query and workspace JSON decoding |
 | `libtmux-workspace` | `Libtmux_workspace` | Validated workspace configuration, plans and execution journals |
 
-Workspace delivery is in progress; the installed workspace CLI and MCP service
-are unfinished. There is no runnable MCP server to configure yet. See
+The `libtmux-workspace-cli` package installs `tmux-workspace` to validate, preview
+and apply JSON workspaces. See the [workspace package](workspace/README.md).
+The MCP service is unfinished. There is no runnable MCP server to configure yet. See
 [status and adoption gaps](docs/status.md) before choosing this checkout for a
 complete automation suite. macOS, Windows, remote-daemon binding and Java regex
 evaluation are outside the current support contract.
@@ -284,3 +298,5 @@ $ rmdir "$LIBTMUX_DEMO_DIR"
 
 For development, read [CONTRIBUTING.md](.github/CONTRIBUTING.md).
 Licensed under [MIT](LICENSE).
+
+[Branding assets](docs/branding.md) include the logo, icons, and social cards.

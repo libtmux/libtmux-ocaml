@@ -1,0 +1,228 @@
+{
+  "schemaVersion": 1,
+  "repository": "https://github.com/libtmux/assets",
+  "revision": "ef6c550b8d1120fe6873e610ddbe550f95016a46",
+  "language": "ocaml",
+  "primary": "#EF7A08",
+  "githubLanguageColors": "https://github.com/github-linguist/linguist/blob/538da05f034fa5c83bd81df128d144e208898da3/lib/linguist/languages.yml",
+  "mcpArtwork": "https://github.com/modelcontextprotocol/modelcontextprotocol/blob/088176704a4e8f20e7f1d237de1de8484aa412fd/docs/logo/light.svg",
+  "variant": "workspace",
+  "sourceDirectory": "assets/ocaml/workspace",
+  "files": [
+    {
+      "file": "logo.svg",
+      "bytes": 2405,
+      "sha256": "49f31f5d60ed0bd4cfd6072d38e9d761a90f378ed2eca2044aa6607f389d6392"
+    },
+    {
+      "file": "logo-16.png",
+      "bytes": 292,
+      "sha256": "a84aa0e6d9c7e924940c25e8cb8c83dcc4660405ff09791a823ceb2677ea6cde"
+    },
+    {
+      "file": "logo-24.png",
+      "bytes": 324,
+      "sha256": "f969a843eff7b1c43b11fb8f3cd21a8233bb101d0b1241e3c2279dd582cc681b"
+    },
+    {
+      "file": "logo-32.png",
+      "bytes": 417,
+      "sha256": "4b405de1a3d42c0ee96fccc0e4bb7ecf60ee2b80867bac085e13d0e1448761f9"
+    },
+    {
+      "file": "logo-48.png",
+      "bytes": 533,
+      "sha256": "4510e10be32ddd49d5d11c86ea57dd10bfb8f133a7ba4758a4335ac327985086"
+    },
+    {
+      "file": "logo-64.png",
+      "bytes": 647,
+      "sha256": "0b3e2fad2833887e77556da41c06342ea1c40fe167fd4d0a500682398c856ca0"
+    },
+    {
+      "file": "logo-96.png",
+      "bytes": 862,
+      "sha256": "f4d675d5d36ff825b53cc9421f0283202b1546821512afe9e49d6114b8991d8b"
+    },
+    {
+      "file": "logo-128.png",
+      "bytes": 1135,
+      "sha256": "6fc92b3b4526e9d1909288b9d0ab205aea57ef0795dd291c35ea602d9b1d6a11"
+    },
+    {
+      "file": "logo-144.png",
+      "bytes": 1291,
+      "sha256": "218538e5afaca868d61ddacd41fbf0760e341a59f62a900db7e0c524e5e6d1dd"
+    },
+    {
+      "file": "logo-152.png",
+      "bytes": 1350,
+      "sha256": "0fde0882f9ae503e40428786f92adfa1bca20e8669464a3e14b6e55abd754896"
+    },
+    {
+      "file": "logo-167.png",
+      "bytes": 1514,
+      "sha256": "f722a1b5f9274d1ae705e0cd2120926346d3ea4f0e51de6498e10d48bb24317e"
+    },
+    {
+      "file": "logo-180.png",
+      "bytes": 1645,
+      "sha256": "575c1faba6726db2dcc119c340efcb30a8c2a39e2e7832969caddf3c3f53bf75"
+    },
+    {
+      "file": "logo-192.png",
+      "bytes": 1769,
+      "sha256": "486c7b94fa339e5163840e319269b5c6c0dd51f449ae97b1b584ffeedb965041"
+    },
+    {
+      "file": "logo-256.png",
+      "bytes": 2456,
+      "sha256": "742177a7bf586968e8f7db1f3d3a61a4049275d04ba7208b1c9c31ae2bd665b3"
+    },
+    {
+      "file": "logo-384.png",
+      "bytes": 3771,
+      "sha256": "8c70bf905f777e9d96ea061261ccb9f0a31d3bcd3916440b91d5c3027fff7fb5"
+    },
+    {
+      "file": "logo-512.png",
+      "bytes": 5415,
+      "sha256": "ecc4a18aafb13b5dd5abe6924eb8ac88d3d2667cb433dbda2fc3c0a56278cd11"
+    },
+    {
+      "file": "logo-1024.png",
+      "bytes": 13836,
+      "sha256": "12ac0d7b4a80d535d0e1f22f7508ac2e6209ca29da978d50106997f75563a13c"
+    },
+    {
+      "file": "favicon.ico",
+      "bytes": 17558,
+      "sha256": "0b058ad6c18eba50766df9132d86e62a93df3eb1c9165b7ad8dd4a5a4894acc6"
+    },
+    {
+      "file": "safari-pinned-tab.svg",
+      "bytes": 2405,
+      "sha256": "7738ada39bb118c947fc8ef96d0ef3556787aafbe4dbb5df826eb8ddde8a25b0"
+    },
+    {
+      "file": "apple-touch-icon-light.png",
+      "bytes": 1319,
+      "sha256": "067742fe4dbfed8d1306482da50feb5420e19d8c2a977058981631cdc310f435"
+    },
+    {
+      "file": "app-icon-1024-light.png",
+      "bytes": 11541,
+      "sha256": "257d887c2b8eea354cfc7fa86ff6f13437238b7d47c7cacca6d69a2de6b9a9f4"
+    },
+    {
+      "file": "maskable-192-light.png",
+      "bytes": 1144,
+      "sha256": "c61cc67edc54376e2ba11a4456c5f0697e42774b675dd5da8dd8164e083a15e7"
+    },
+    {
+      "file": "maskable-512-light.png",
+      "bytes": 3846,
+      "sha256": "f8248aca7950eade76e5603067547a277fa566b81f4786d73c5389012f76cd29"
+    },
+    {
+      "file": "mstile-150-light.png",
+      "bytes": 994,
+      "sha256": "d72508bd3377332672937c47279dcecc5b8269044d37c59fe18e47edddfc250a"
+    },
+    {
+      "file": "mstile-310-light.png",
+      "bytes": 2243,
+      "sha256": "59497fb37d68a576b3e647d1cb2c07a7e1c48de0de72cf3c45d4a1955b471275"
+    },
+    {
+      "file": "opengraph-light.png",
+      "bytes": 23424,
+      "sha256": "fb85526ac31a8b9e933b5043c94d2777fde3a9b1d8134268f474b15876bdd00c"
+    },
+    {
+      "file": "opengraph-light.jpg",
+      "bytes": 44987,
+      "sha256": "09550eb4a45751cb90ac66a0d0d3be751c5be0d0674f0061466c1d557900886c"
+    },
+    {
+      "file": "twitter-light.png",
+      "bytes": 23278,
+      "sha256": "28b498a75c59ebac558b8af52d771986f4a08cc6846511251f6684a5383bb879"
+    },
+    {
+      "file": "social-square-light.png",
+      "bytes": 26331,
+      "sha256": "f71e0312c3b28db31769d05bb1b6107d4a94250d3af76944fee698f965bf5aff"
+    },
+    {
+      "file": "site.webmanifest",
+      "bytes": 735,
+      "sha256": "fa5ac439d36980454dcc48ff494221e89d00cb4e2c3a4211c5aa0d710c0e60ef"
+    },
+    {
+      "file": "browserconfig.xml",
+      "bytes": 238,
+      "sha256": "14133b25b414820f149eabd99b80cf44f1c142ba9af1b77118712c0408cb790c"
+    },
+    {
+      "file": "apple-touch-icon-dark.png",
+      "bytes": 1274,
+      "sha256": "4181b94058bbb68d14bbf24b89ebfe20c28c6946debf330039335dca90e10b79"
+    },
+    {
+      "file": "app-icon-1024-dark.png",
+      "bytes": 11293,
+      "sha256": "1c71283f8cf3e248a2327a21b9679d3a0f1a15828b63981e5a2429aef2e04d0b"
+    },
+    {
+      "file": "maskable-192-dark.png",
+      "bytes": 1116,
+      "sha256": "d3fe724876aec8129dd7e31890e4e1f0d5a532aac931fa9ac5a4e27a360b3950"
+    },
+    {
+      "file": "maskable-512-dark.png",
+      "bytes": 3772,
+      "sha256": "d968363d6cf94e1172035292e6bdad76c2d301077ba8d66594c7aaee71bf9ca0"
+    },
+    {
+      "file": "mstile-150-dark.png",
+      "bytes": 971,
+      "sha256": "723e035a16407b2a6ebcd0e36e9885294de2a2829f03766cb007b36d199ecdb1"
+    },
+    {
+      "file": "mstile-310-dark.png",
+      "bytes": 2178,
+      "sha256": "6c696cd235320048d9acb8dd68353e282bc7e930a427ec0e0d68f499e0352f4f"
+    },
+    {
+      "file": "opengraph-dark.png",
+      "bytes": 23449,
+      "sha256": "c297bc46fa1752584b8c21b5dc3dc4bf7634dd9b078671585e62b6b1f039dee6"
+    },
+    {
+      "file": "opengraph-dark.jpg",
+      "bytes": 42656,
+      "sha256": "ec6b865b4cb33911ddc2adbed51778ef27fd8aeada27e63c675d5f8666b6801a"
+    },
+    {
+      "file": "twitter-dark.png",
+      "bytes": 23302,
+      "sha256": "b8adbcaf4b961458293f58cd0949fb9057b61682cb717753c11b1318f0b2bce8"
+    },
+    {
+      "file": "social-square-dark.png",
+      "bytes": 26370,
+      "sha256": "37e5250e76c7d94ac510f97a9e29eee6aadd8a5b532afe2f5ad028d560f55220"
+    },
+    {
+      "file": "site-dark.webmanifest",
+      "bytes": 733,
+      "sha256": "d3c1278072ccb8d7326dd3b757d6ac3be07e9d6dede2508fcb58849a18ae6a33"
+    },
+    {
+      "file": "browserconfig-dark.xml",
+      "bytes": 236,
+      "sha256": "d6550a2d9d8074a5f7c4dcb03eaf68d469fe52d5cab8904597e83806ab357f2a"
+    }
+  ]
+}
