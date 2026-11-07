@@ -75,7 +75,7 @@
 (test
  (name runtime_test)
  (modules runtime_test)
- (libraries libtmux libtmux-unix alcotest unix))
+ (libraries libtmux libtmux-unix alcotest qcheck-core unix))
 
 (executable
  (name pid_race_peer)

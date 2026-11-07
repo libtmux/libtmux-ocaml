@@ -174,6 +174,46 @@ let option_records () =
   assert row.inherited;
   assert (row.value = Options.Array (Iarray.of_list []))
 
+let incremental_bytes () =
+  let module Pattern = Libtmux_unix__Byte_pattern in
+  let pattern = Pattern.create "ababac" in
+  Alcotest.(check (option int)) "prefix alone" None (Pattern.feed pattern "aba");
+  Alcotest.(check (option int))
+    "overlap crosses chunk boundary" (Some 4)
+    (Pattern.feed pattern "babac");
+  let binary = Pattern.create "ab\000cd" in
+  Alcotest.(check (option int)) "NUL prefix" None (Pattern.feed binary "ab\000");
+  Alcotest.(check (option int))
+    "NUL-spanning match" (Some 1) (Pattern.feed binary "cd");
+  let contains text needle =
+    let rec scan offset =
+      offset + String.length needle <= String.length text
+      && (String.sub text offset (String.length needle) = needle
+         || scan (offset + 1))
+    in
+    scan 0
+  in
+  let property (needle, body, embedded) =
+    let needle = needle ^ "x" in
+    let text = if embedded then body ^ needle ^ body else body in
+    let split = String.length text / 2 in
+    let pattern = Pattern.create needle in
+    let matched =
+      Option.is_some (Pattern.feed pattern (String.take_first split text))
+      || Option.is_some (Pattern.feed pattern (String.drop_first split text))
+    in
+    Bool.equal matched (contains text needle)
+  in
+  QCheck2.Test.check_exn
+    ~rand:(Random.State.make [| 2026; 11; 7 |])
+    (QCheck2.Test.make
+       ~name:"incremental bytes agree with native substring matching"
+       ~print:(fun (needle, body, embedded) ->
+         Printf.sprintf "needle=%S body=%S embedded=%b" needle body embedded)
+       ~count:1000
+       QCheck2.Gen.(triple string_small string_small bool)
+       property)
+
 let () =
   Alcotest.run "native resources"
     [
@@ -189,5 +229,7 @@ let () =
           Alcotest.test_case "environment records and limits" `Quick
             environment_records;
           Alcotest.test_case "option records and limits" `Quick option_records;
+          Alcotest.test_case "incremental byte matching" `Quick
+            incremental_bytes;
         ] );
     ]

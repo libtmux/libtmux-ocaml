@@ -24,6 +24,8 @@ for binary in sys.argv[1:]:
                 "    key = os.read(control, 1)\n"
                 "    if key == b'A': os.write(1, bytes(range(256)) + b'DONE')\n"
                 "    elif key == b'B': os.write(1, b'recovered')\n"
+                "    elif key == b'C': os.write(1, b'xxfuture\\x00matchyy')\n"
+                "    elif key == b'R': os.write(1, b'\\x1bc\\x1b[Hpresent-value')\n"
             )
             fixture.command("respawn-pane", "-k", "-t", "%0", "/usr/bin/python3", str(program))
             fixture.track_panes()
@@ -34,7 +36,7 @@ for binary in sys.argv[1:]:
             try:
                 with selectors.DefaultSelector() as ready:
                     ready.register(process.stdout, selectors.EVENT_READ)
-                    for expected in [b"READY\n", b"CHANGE\n", b"RECOVER\n", b"CAPACITY\n"]:
+                    for expected in [b"READY\n", b"CHANGE\n", b"RECOVER\n", b"FUTURE\n", b"RENDER\n", b"DETACH\n", b"RECOVER_AGAIN\n", b"CAPACITY\n", b"CANCEL_READY\n", b"LANE_CAPACITY\n"]:
                         assert ready.select(1), "streaming peer did not progress"
                         line = process.stdout.readline()
                         assert line == expected, (line, process.stderr.read())
@@ -45,6 +47,23 @@ for binary in sys.argv[1:]:
                             fixture.track_panes()
                         elif expected == b"RECOVER\n":
                             os.write(control, b"B")
+                        elif expected == b"FUTURE\n":
+                            os.write(control, b"C")
+                        elif expected == b"RENDER\n":
+                            os.write(control, b"R")
+                        elif expected == b"DETACH\n":
+                            rows = fixture.command("list-clients", "-F", "#{client_name}|#{client_flags}").stdout.splitlines()
+                            lanes = [row.split(b"|", 1)[0] for row in rows if b"ignore-size" in row]
+                            assert len(lanes) == 1, rows
+                            fixture.command("detach-client", "-t", lanes[0].decode() + ":")
+                        elif expected == b"RECOVER_AGAIN\n":
+                            os.write(control, b"B")
+                        elif expected == b"CANCEL_READY\n":
+                            process.stdin.write(b"CANCEL\n")
+                        elif expected == b"LANE_CAPACITY\n":
+                            assert len(fixture.command("list-clients").stdout.splitlines()) == 8
+                            fixture.track_panes()
+                            process.stdin.write(b"CHECKED\n")
                         else:
                             assert len(fixture.command("list-clients").stdout.splitlines()) == 2
                             process.stdin.write(b"CHECKED\n")

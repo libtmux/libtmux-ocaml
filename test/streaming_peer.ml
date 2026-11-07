@@ -8,6 +8,8 @@ type subscription = {
   next : unit -> Output.event option;
   poll : unit -> Output.event option;
   close : unit -> unit;
+  wait : string -> (Output.cursor, Output.wait_error) result;
+  cancel_wait : unit -> unit;
 }
 
 type runner = {
@@ -15,7 +17,12 @@ type runner = {
   subscribe : int -> Pane.t -> subscription;
   close : unit -> unit;
   line : unit -> string;
+  rendered : Pane.t -> string -> (Captured_text.t, Error.t) result;
+  reject_subscription : Pane.t -> unit;
+  reject_lane : Pane.t -> unit;
 }
+
+exception Cancel_wait
 
 let read_bytes sub expected =
   let result = Buffer.create 256 in
@@ -74,13 +81,69 @@ let exercise runner =
   print_endline "RECOVER";
   let after = read_bytes recovered "recovered" in
   assert (not (Generation.equal before.generation after.generation));
+  print_endline "FUTURE";
+  (match recovered.wait "future\000match" with
+  | Ok cursor ->
+      assert (Generation.equal cursor.generation after.generation);
+      assert (cursor.offset = 23L)
+  | Error _ -> failwith "future-byte match failed");
+  print_endline "RENDER";
+  let present = get (runner.rendered fresh "present-value") in
+  assert (String.starts_with ~prefix:"present-value" present.bytes);
+  let retained = get (runner.rendered fresh "present-value") in
+  assert (String.starts_with ~prefix:"present-value" retained.bytes);
+  ignore (read_bytes recovered "\027c\027[Hpresent-value");
+  print_endline "DETACH";
+  (match recovered.wait "absent-future-value" with
+  | Error (Output.Ended (Transport_error (Error.Disconnected _) as reason)) ->
+      assert (recovered.next () = Some (Output.End reason));
+      assert (recovered.next () = None)
+  | _ -> failwith "lost stream continued matching without an explicit gap");
+  assert (Iarray.length (Snapshot.clients (capture ())) = 1);
+  let recovered =
+    runner.subscribe 4096 (Iarray.get (Snapshot.panes (capture ())) 0)
+  in
+  print_endline "RECOVER_AGAIN";
+  let renewed = read_bytes recovered "recovered" in
+  assert (not (Generation.equal renewed.generation after.generation));
   recovered.close ();
   assert (recovered.next () = Some (Output.End Cancelled));
   let subscriptions = List.init 16 (fun _ -> runner.subscribe 1024 fresh) in
+  runner.reject_subscription fresh;
   assert (Iarray.length (Snapshot.clients (capture ())) = 2);
   print_endline "CAPACITY";
   assert (runner.line () = "CHECKED");
   List.iter (fun (sub : subscription) -> sub.close ()) subscriptions;
+  let cancelled = runner.subscribe 1024 fresh in
+  print_endline "CANCEL_READY";
+  cancelled.cancel_wait ();
+  assert (cancelled.poll () = Some (Output.End Cancelled));
+  assert (Iarray.length (Snapshot.clients (capture ())) = 1);
+  let created =
+    List.init 8 (fun index ->
+        runner.run
+          (Operations.create_session
+             ~name:(Printf.sprintf "coverage-%d" index)
+             ~spawn:(Spawn.make (Exec { program = "/bin/cat"; args = [] }))
+             ()))
+  in
+  let observed = capture () in
+  let pane_of (created : Created.t) =
+    Option.get (Snapshot.find_pane observed (Pane.Target.id created.pane))
+  in
+  let covered =
+    List.take 7 created
+    |> List.map (fun value -> runner.subscribe 128 (pane_of value))
+  in
+  runner.reject_lane (pane_of (List.nth created 7));
+  assert (Iarray.length (Snapshot.clients (capture ())) = 8);
+  print_endline "LANE_CAPACITY";
+  assert (runner.line () = "CHECKED");
+  List.iter (fun (sub : subscription) -> sub.close ()) covered;
+  List.iter
+    (fun (created : Created.t) ->
+      runner.run (Operations.kill_session created.session))
+    created;
   let final = runner.subscribe 1024 fresh in
   runner.close ();
   gap final Output.Client_closed;
@@ -106,9 +169,43 @@ let () =
                   next = (fun () -> get (S.next ~timeout:0.5 sub));
                   poll = (fun () -> get (S.poll sub));
                   close = (fun () -> get (S.close sub));
+                  wait = (fun text -> S.wait_for_bytes ~timeout:0.5 sub ~text);
+                  cancel_wait =
+                    (fun () ->
+                      Libtmux_unix.Cancellation.with_ (fun cancel ->
+                          let canceller =
+                            Domain.spawn (fun () ->
+                                assert (read_line () = "CANCEL");
+                                Libtmux_unix.Cancellation.cancel cancel)
+                          in
+                          Fun.protect
+                            ~finally:(fun () -> Domain.join canceller)
+                            (fun () ->
+                              match S.next ~cancel ~timeout:0.5 sub with
+                              | _ -> failwith "cancelled byte read returned"
+                              | exception Libtmux_unix.Cancellation.Cancelled ->
+                                  ())));
                 });
             close = (fun () -> get (C.close client));
             line = read_line;
+            rendered =
+              (fun pane text -> C.wait_for_text ~timeout:0.5 client pane ~text);
+            reject_lane =
+              (fun pane ->
+                match C.subscribe client pane with
+                | Error
+                    (Error.Capacity { resource = "client lanes"; limit = 8 }) ->
+                    ()
+                | _ -> failwith "lane limit did not reject before admission");
+            reject_subscription =
+              (fun pane ->
+                match C.subscribe client pane with
+                | Error
+                    (Error.Capacity { resource = "subscriptions"; limit = 16 })
+                  ->
+                    ()
+                | _ ->
+                    failwith "subscriber limit did not reject before admission");
           })
   else
     Eio_main.run (fun env ->
@@ -140,7 +237,52 @@ let () =
                           next = (fun () -> get (S.next ~timeout:0.5 sub));
                           poll = (fun () -> get (S.poll sub));
                           close = (fun () -> get (S.close sub));
+                          wait =
+                            (fun text ->
+                              S.wait_for_bytes ~timeout:0.5 sub ~text);
+                          cancel_wait =
+                            (fun () ->
+                              let context, resolve = Eio.Promise.create () in
+                              let cancelled =
+                                Eio.Fiber.fork_promise ~sw (fun () ->
+                                    Eio.Cancel.sub (fun scope ->
+                                        Eio.Promise.resolve resolve scope;
+                                        match S.next ~timeout:0.5 sub with
+                                        | _ ->
+                                            failwith
+                                              "cancelled byte read returned"
+                                        | exception
+                                            Eio.Cancel.Cancelled Cancel_wait ->
+                                            ()))
+                              in
+                              let scope = Eio.Promise.await context in
+                              assert (Eio.Buf_read.line input = "CANCEL");
+                              Eio.Cancel.cancel scope Cancel_wait;
+                              Eio.Promise.await_exn cancelled);
                         });
                     close = (fun () -> get (C.close client));
                     line = (fun () -> Eio.Buf_read.line input);
+                    rendered =
+                      (fun pane text ->
+                        C.wait_for_text ~timeout:0.5 client pane ~text);
+                    reject_lane =
+                      (fun pane ->
+                        match C.subscribe client pane with
+                        | Error
+                            (Error.Capacity
+                               { resource = "client lanes"; limit = 8 }) ->
+                            ()
+                        | _ ->
+                            failwith
+                              "lane limit did not reject before admission");
+                    reject_subscription =
+                      (fun pane ->
+                        match C.subscribe client pane with
+                        | Error
+                            (Error.Capacity
+                               { resource = "subscriptions"; limit = 16 }) ->
+                            ()
+                        | _ ->
+                            failwith
+                              "subscriber limit did not reject before admission");
                   })))
