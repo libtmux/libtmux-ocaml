@@ -23,10 +23,14 @@ input, streaming, rendered waits and client teardown.
 
 | Area | Required evidence before complete-suite adoption |
 | --- | --- |
-| Documentation site | Finish public `.cmti` export, shared-site rendering and deployed-link verification |
-| Benchmarks | [Serial capture baselines](benchmarking.md) exist; add concurrency, graph scaling, allocation and stream-latency workloads |
+| Documentation site | Qualify the final hosted reference and verify its deployed links; public `.cmti` export and local rendering are implemented |
 | Final qualification | Rerun every required component and exact release cell on the final source revision |
 | Package adoption | Obtain an independent caller-task review and resolve material findings |
+
+[Recorded benchmarks](benchmarking.md) cover blocking/Eio capture, graphs up to
+256 panes, concurrent requests, OCaml heap allocation, client/daemon CPU,
+future-output latency and cancellation cleanup. Their raw data preserves the
+workload, source identities and host conditions.
 
 The workspace model, JSON loader, blocking/Eio executors and installed CLI are
 implemented. The [workspace guide](workspaces.md) executes the installed command
@@ -53,8 +57,8 @@ Implicit reconnects, callback-driven property acquisition, a mandatory query
 wrapper or a required runtime for pure filtering would make the API harder to
 reason about.
 
-A 9.5/10 whole-package rating is not established. Broader benchmarking,
-documentation export and final qualification have open gates. Documentation
+A 9.5/10 whole-package rating is not established. Hosted documentation and
+final qualification have open gates. Documentation
 quality cannot substitute for those results. [Testing](testing.md) describes
 current evidence and how examples are kept in sync with source.
 
