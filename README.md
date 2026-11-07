@@ -1,4 +1,17 @@
+<!-- libtmux-logo -->
+<div align="center">
+  <picture>
+    <source srcset="docs/assets/logo.svg" type="image/svg+xml">
+    <img src="docs/assets/logo-512.png" width="128" height="128" alt="libtmux for OCaml">
+  </picture>
+</div>
+<!-- /libtmux-logo -->
+
+<div align="center">
+
 # libtmux for OCaml
+
+</div>
 
 Drive tmux from OCaml: create sessions and panes, capture an immutable graph,
 query it locally, and observe output through Eio or a blocking client.
@@ -284,3 +297,5 @@ $ rmdir "$LIBTMUX_DEMO_DIR"
 
 For development, read [CONTRIBUTING.md](.github/CONTRIBUTING.md).
 Licensed under [MIT](LICENSE).
+
+[Branding assets](docs/branding.md) include the logo, icons, and social cards.
