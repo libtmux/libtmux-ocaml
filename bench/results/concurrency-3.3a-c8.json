@@ -1,0 +1,2085 @@
+{
+  "schema": "libtmux.concurrency-benchmark/1",
+  "measured_at_utc": "2026-11-07T19:40:50.660144+00:00",
+  "head": "e7cd06e1ba5e04166348568b423bb30497fafa7c",
+  "source_sha256": "c0095648f7adc387712bb1a1402631de03ab025cbb421c3f4ce07225c4289962",
+  "compiler": "5.5.2",
+  "tmux": "3.3a",
+  "binary_sha256": "6afd01583b60a3296d43d4417b160b6153105413443ce608f4b6cfba8b18ae52",
+  "platform": {
+    "system": "Linux",
+    "kernel": "6.18.54.1-microsoft-standard-WSL2",
+    "architecture": "x86_64",
+    "available_cpus": 12,
+    "load_average_start": [
+      4.0205078125,
+      3.0810546875,
+      3.25048828125
+    ]
+  },
+  "workload": {
+    "requests": 128,
+    "concurrency": 8,
+    "streams": 10,
+    "cancels": 10,
+    "repeat": 3
+  },
+  "samples": [
+    {
+      "requests": {
+        "seconds": 0.222350737,
+        "loop_allocated_bytes": 20496616.0,
+        "rows": [
+          {
+            "index": 0,
+            "value": "value-0",
+            "seconds": 0.002114019
+          },
+          {
+            "index": 1,
+            "value": "value-1",
+            "seconds": 0.003798062
+          },
+          {
+            "index": 2,
+            "value": "value-2",
+            "seconds": 0.005398328
+          },
+          {
+            "index": 3,
+            "value": "value-3",
+            "seconds": 0.007172283
+          },
+          {
+            "index": 4,
+            "value": "value-4",
+            "seconds": 0.008847481
+          },
+          {
+            "index": 5,
+            "value": "value-5",
+            "seconds": 0.010389367
+          },
+          {
+            "index": 6,
+            "value": "value-6",
+            "seconds": 0.011952271
+          },
+          {
+            "index": 7,
+            "value": "value-7",
+            "seconds": 0.013670166
+          },
+          {
+            "index": 8,
+            "value": "value-0",
+            "seconds": 0.013250427
+          },
+          {
+            "index": 9,
+            "value": "value-1",
+            "seconds": 0.013289625
+          },
+          {
+            "index": 10,
+            "value": "value-2",
+            "seconds": 0.013367207
+          },
+          {
+            "index": 11,
+            "value": "value-3",
+            "seconds": 0.01318057
+          },
+          {
+            "index": 12,
+            "value": "value-4",
+            "seconds": 0.013085005
+          },
+          {
+            "index": 13,
+            "value": "value-5",
+            "seconds": 0.013074191
+          },
+          {
+            "index": 14,
+            "value": "value-6",
+            "seconds": 0.013089863
+          },
+          {
+            "index": 15,
+            "value": "value-7",
+            "seconds": 0.012930942
+          },
+          {
+            "index": 16,
+            "value": "value-0",
+            "seconds": 0.012782759
+          },
+          {
+            "index": 17,
+            "value": "value-1",
+            "seconds": 0.012662087
+          },
+          {
+            "index": 18,
+            "value": "value-2",
+            "seconds": 0.012501656
+          },
+          {
+            "index": 19,
+            "value": "value-3",
+            "seconds": 0.012387448
+          },
+          {
+            "index": 20,
+            "value": "value-4",
+            "seconds": 0.012350399
+          },
+          {
+            "index": 21,
+            "value": "value-5",
+            "seconds": 0.012400238
+          },
+          {
+            "index": 22,
+            "value": "value-6",
+            "seconds": 0.012505097
+          },
+          {
+            "index": 23,
+            "value": "value-7",
+            "seconds": 0.012638855
+          },
+          {
+            "index": 24,
+            "value": "value-0",
+            "seconds": 0.012696859
+          },
+          {
+            "index": 25,
+            "value": "value-1",
+            "seconds": 0.012760031
+          },
+          {
+            "index": 26,
+            "value": "value-2",
+            "seconds": 0.012842155
+          },
+          {
+            "index": 27,
+            "value": "value-3",
+            "seconds": 0.012933493
+          },
+          {
+            "index": 28,
+            "value": "value-4",
+            "seconds": 0.012893432
+          },
+          {
+            "index": 29,
+            "value": "value-5",
+            "seconds": 0.012859321
+          },
+          {
+            "index": 30,
+            "value": "value-6",
+            "seconds": 0.012806519
+          },
+          {
+            "index": 31,
+            "value": "value-7",
+            "seconds": 0.012670924
+          },
+          {
+            "index": 32,
+            "value": "value-0",
+            "seconds": 0.012761327
+          },
+          {
+            "index": 33,
+            "value": "value-1",
+            "seconds": 0.012829312
+          },
+          {
+            "index": 34,
+            "value": "value-2",
+            "seconds": 0.012935454
+          },
+          {
+            "index": 35,
+            "value": "value-3",
+            "seconds": 0.01299675
+          },
+          {
+            "index": 36,
+            "value": "value-4",
+            "seconds": 0.013067106
+          },
+          {
+            "index": 37,
+            "value": "value-5",
+            "seconds": 0.01315872
+          },
+          {
+            "index": 38,
+            "value": "value-6",
+            "seconds": 0.013227521
+          },
+          {
+            "index": 39,
+            "value": "value-7",
+            "seconds": 0.013308407
+          },
+          {
+            "index": 40,
+            "value": "value-0",
+            "seconds": 0.013141162
+          },
+          {
+            "index": 41,
+            "value": "value-1",
+            "seconds": 0.013116872
+          },
+          {
+            "index": 42,
+            "value": "value-2",
+            "seconds": 0.013213242
+          },
+          {
+            "index": 43,
+            "value": "value-3",
+            "seconds": 0.01316525
+          },
+          {
+            "index": 44,
+            "value": "value-4",
+            "seconds": 0.013251268
+          },
+          {
+            "index": 45,
+            "value": "value-5",
+            "seconds": 0.013415944
+          },
+          {
+            "index": 46,
+            "value": "value-6",
+            "seconds": 0.014004956
+          },
+          {
+            "index": 47,
+            "value": "value-7",
+            "seconds": 0.013983107
+          },
+          {
+            "index": 48,
+            "value": "value-0",
+            "seconds": 0.014162389
+          },
+          {
+            "index": 49,
+            "value": "value-1",
+            "seconds": 0.014030889
+          },
+          {
+            "index": 50,
+            "value": "value-2",
+            "seconds": 0.013790051
+          },
+          {
+            "index": 51,
+            "value": "value-3",
+            "seconds": 0.01390964
+          },
+          {
+            "index": 52,
+            "value": "value-4",
+            "seconds": 0.013920419
+          },
+          {
+            "index": 53,
+            "value": "value-5",
+            "seconds": 0.013767357
+          },
+          {
+            "index": 54,
+            "value": "value-6",
+            "seconds": 0.013215754
+          },
+          {
+            "index": 55,
+            "value": "value-7",
+            "seconds": 0.013378232
+          },
+          {
+            "index": 56,
+            "value": "value-0",
+            "seconds": 0.013375875
+          },
+          {
+            "index": 57,
+            "value": "value-1",
+            "seconds": 0.013477605
+          },
+          {
+            "index": 58,
+            "value": "value-2",
+            "seconds": 0.013685831
+          },
+          {
+            "index": 59,
+            "value": "value-3",
+            "seconds": 0.013517815
+          },
+          {
+            "index": 60,
+            "value": "value-4",
+            "seconds": 0.013438977
+          },
+          {
+            "index": 61,
+            "value": "value-5",
+            "seconds": 0.013425811
+          },
+          {
+            "index": 62,
+            "value": "value-6",
+            "seconds": 0.013330865
+          },
+          {
+            "index": 63,
+            "value": "value-7",
+            "seconds": 0.01345297
+          },
+          {
+            "index": 64,
+            "value": "value-0",
+            "seconds": 0.013325011
+          },
+          {
+            "index": 65,
+            "value": "value-1",
+            "seconds": 0.013339952
+          },
+          {
+            "index": 66,
+            "value": "value-2",
+            "seconds": 0.013136965
+          },
+          {
+            "index": 67,
+            "value": "value-3",
+            "seconds": 0.013194468
+          },
+          {
+            "index": 68,
+            "value": "value-4",
+            "seconds": 0.013224287
+          },
+          {
+            "index": 69,
+            "value": "value-5",
+            "seconds": 0.013139007
+          },
+          {
+            "index": 70,
+            "value": "value-6",
+            "seconds": 0.013568935
+          },
+          {
+            "index": 71,
+            "value": "value-7",
+            "seconds": 0.013295937
+          },
+          {
+            "index": 72,
+            "value": "value-0",
+            "seconds": 0.013391599
+          },
+          {
+            "index": 73,
+            "value": "value-1",
+            "seconds": 0.013665563
+          },
+          {
+            "index": 74,
+            "value": "value-2",
+            "seconds": 0.013870761
+          },
+          {
+            "index": 75,
+            "value": "value-3",
+            "seconds": 0.013972015
+          },
+          {
+            "index": 76,
+            "value": "value-4",
+            "seconds": 0.014000786
+          },
+          {
+            "index": 77,
+            "value": "value-5",
+            "seconds": 0.014280197
+          },
+          {
+            "index": 78,
+            "value": "value-6",
+            "seconds": 0.014214384
+          },
+          {
+            "index": 79,
+            "value": "value-7",
+            "seconds": 0.01466312
+          },
+          {
+            "index": 80,
+            "value": "value-0",
+            "seconds": 0.014634293
+          },
+          {
+            "index": 81,
+            "value": "value-1",
+            "seconds": 0.014426947
+          },
+          {
+            "index": 82,
+            "value": "value-2",
+            "seconds": 0.014357876
+          },
+          {
+            "index": 83,
+            "value": "value-3",
+            "seconds": 0.014562624
+          },
+          {
+            "index": 84,
+            "value": "value-4",
+            "seconds": 0.01502617
+          },
+          {
+            "index": 85,
+            "value": "value-5",
+            "seconds": 0.015432992
+          },
+          {
+            "index": 86,
+            "value": "value-6",
+            "seconds": 0.015442641
+          },
+          {
+            "index": 87,
+            "value": "value-7",
+            "seconds": 0.015182226
+          },
+          {
+            "index": 88,
+            "value": "value-0",
+            "seconds": 0.015092197
+          },
+          {
+            "index": 89,
+            "value": "value-1",
+            "seconds": 0.015103922
+          },
+          {
+            "index": 90,
+            "value": "value-2",
+            "seconds": 0.015096989
+          },
+          {
+            "index": 91,
+            "value": "value-3",
+            "seconds": 0.014938093
+          },
+          {
+            "index": 92,
+            "value": "value-4",
+            "seconds": 0.014670307
+          },
+          {
+            "index": 93,
+            "value": "value-5",
+            "seconds": 0.014060915
+          },
+          {
+            "index": 94,
+            "value": "value-6",
+            "seconds": 0.013650409
+          },
+          {
+            "index": 95,
+            "value": "value-7",
+            "seconds": 0.014176033
+          },
+          {
+            "index": 96,
+            "value": "value-0",
+            "seconds": 0.014767047
+          },
+          {
+            "index": 97,
+            "value": "value-1",
+            "seconds": 0.015112319
+          },
+          {
+            "index": 98,
+            "value": "value-2",
+            "seconds": 0.015419075
+          },
+          {
+            "index": 99,
+            "value": "value-3",
+            "seconds": 0.015639038
+          },
+          {
+            "index": 100,
+            "value": "value-4",
+            "seconds": 0.01596611
+          },
+          {
+            "index": 101,
+            "value": "value-5",
+            "seconds": 0.016504662
+          },
+          {
+            "index": 102,
+            "value": "value-6",
+            "seconds": 0.017041119
+          },
+          {
+            "index": 103,
+            "value": "value-7",
+            "seconds": 0.016894361
+          },
+          {
+            "index": 104,
+            "value": "value-0",
+            "seconds": 0.016875198
+          },
+          {
+            "index": 105,
+            "value": "value-1",
+            "seconds": 0.016829149
+          },
+          {
+            "index": 106,
+            "value": "value-2",
+            "seconds": 0.017145863
+          },
+          {
+            "index": 107,
+            "value": "value-3",
+            "seconds": 0.016897649
+          },
+          {
+            "index": 108,
+            "value": "value-4",
+            "seconds": 0.016688916
+          },
+          {
+            "index": 109,
+            "value": "value-5",
+            "seconds": 0.016154521
+          },
+          {
+            "index": 110,
+            "value": "value-6",
+            "seconds": 0.015825692
+          },
+          {
+            "index": 111,
+            "value": "value-7",
+            "seconds": 0.015449884
+          },
+          {
+            "index": 112,
+            "value": "value-0",
+            "seconds": 0.014884013
+          },
+          {
+            "index": 113,
+            "value": "value-1",
+            "seconds": 0.014409935
+          },
+          {
+            "index": 114,
+            "value": "value-2",
+            "seconds": 0.013597308
+          },
+          {
+            "index": 115,
+            "value": "value-3",
+            "seconds": 0.013699605
+          },
+          {
+            "index": 116,
+            "value": "value-4",
+            "seconds": 0.013479762
+          },
+          {
+            "index": 117,
+            "value": "value-5",
+            "seconds": 0.01336369
+          },
+          {
+            "index": 118,
+            "value": "value-6",
+            "seconds": 0.013435475
+          },
+          {
+            "index": 119,
+            "value": "value-7",
+            "seconds": 0.013601095
+          },
+          {
+            "index": 120,
+            "value": "value-0",
+            "seconds": 0.013520289
+          },
+          {
+            "index": 121,
+            "value": "value-1",
+            "seconds": 0.013694208
+          },
+          {
+            "index": 122,
+            "value": "value-2",
+            "seconds": 0.013707217
+          },
+          {
+            "index": 123,
+            "value": "value-3",
+            "seconds": 0.013445982
+          },
+          {
+            "index": 124,
+            "value": "value-4",
+            "seconds": 0.013417724
+          },
+          {
+            "index": 125,
+            "value": "value-5",
+            "seconds": 0.01332943
+          },
+          {
+            "index": 126,
+            "value": "value-6",
+            "seconds": 0.013180396
+          },
+          {
+            "index": 127,
+            "value": "value-7",
+            "seconds": 0.012843257
+          }
+        ]
+      },
+      "stream_seconds": [
+        0.000406086,
+        0.000299546,
+        0.000339363,
+        0.000253909,
+        0.000383809,
+        0.000236072,
+        0.000259484,
+        0.00036685,
+        0.000254271,
+        0.000275254
+      ],
+      "cancellation_seconds": [
+        0.000188879,
+        0.000209501,
+        0.000185924,
+        0.000167127,
+        0.000218115,
+        0.000187547,
+        0.000177396,
+        0.00020145,
+        0.000152815,
+        0.000197906
+      ],
+      "max_clients": 2,
+      "whole_sample_seconds": 0.26484224000159884,
+      "primary_child_processes": 1,
+      "stream_child_processes": 2,
+      "child_cpu_seconds": 0.28104999999999997
+    },
+    {
+      "requests": {
+        "seconds": 0.218829034,
+        "loop_allocated_bytes": 20336336.0,
+        "rows": [
+          {
+            "index": 0,
+            "value": "value-0",
+            "seconds": 0.002046562
+          },
+          {
+            "index": 1,
+            "value": "value-1",
+            "seconds": 0.003773536
+          },
+          {
+            "index": 2,
+            "value": "value-2",
+            "seconds": 0.00543617
+          },
+          {
+            "index": 3,
+            "value": "value-3",
+            "seconds": 0.007162391
+          },
+          {
+            "index": 4,
+            "value": "value-4",
+            "seconds": 0.008949365
+          },
+          {
+            "index": 5,
+            "value": "value-5",
+            "seconds": 0.010505491
+          },
+          {
+            "index": 6,
+            "value": "value-6",
+            "seconds": 0.012093134
+          },
+          {
+            "index": 7,
+            "value": "value-7",
+            "seconds": 0.01367988
+          },
+          {
+            "index": 8,
+            "value": "value-0",
+            "seconds": 0.013213758
+          },
+          {
+            "index": 9,
+            "value": "value-1",
+            "seconds": 0.013104478
+          },
+          {
+            "index": 10,
+            "value": "value-2",
+            "seconds": 0.013041636
+          },
+          {
+            "index": 11,
+            "value": "value-3",
+            "seconds": 0.01307122
+          },
+          {
+            "index": 12,
+            "value": "value-4",
+            "seconds": 0.013238384
+          },
+          {
+            "index": 13,
+            "value": "value-5",
+            "seconds": 0.013351226
+          },
+          {
+            "index": 14,
+            "value": "value-6",
+            "seconds": 0.013396628
+          },
+          {
+            "index": 15,
+            "value": "value-7",
+            "seconds": 0.01341902
+          },
+          {
+            "index": 16,
+            "value": "value-0",
+            "seconds": 0.013411579
+          },
+          {
+            "index": 17,
+            "value": "value-1",
+            "seconds": 0.013347217
+          },
+          {
+            "index": 18,
+            "value": "value-2",
+            "seconds": 0.013420947
+          },
+          {
+            "index": 19,
+            "value": "value-3",
+            "seconds": 0.013245579
+          },
+          {
+            "index": 20,
+            "value": "value-4",
+            "seconds": 0.012849271
+          },
+          {
+            "index": 21,
+            "value": "value-5",
+            "seconds": 0.012858801
+          },
+          {
+            "index": 22,
+            "value": "value-6",
+            "seconds": 0.013141052
+          },
+          {
+            "index": 23,
+            "value": "value-7",
+            "seconds": 0.013413144
+          },
+          {
+            "index": 24,
+            "value": "value-0",
+            "seconds": 0.013806236
+          },
+          {
+            "index": 25,
+            "value": "value-1",
+            "seconds": 0.01411748
+          },
+          {
+            "index": 26,
+            "value": "value-2",
+            "seconds": 0.014123721
+          },
+          {
+            "index": 27,
+            "value": "value-3",
+            "seconds": 0.014136084
+          },
+          {
+            "index": 28,
+            "value": "value-4",
+            "seconds": 0.014171732
+          },
+          {
+            "index": 29,
+            "value": "value-5",
+            "seconds": 0.013994273
+          },
+          {
+            "index": 30,
+            "value": "value-6",
+            "seconds": 0.013841115
+          },
+          {
+            "index": 31,
+            "value": "value-7",
+            "seconds": 0.013694465
+          },
+          {
+            "index": 32,
+            "value": "value-0",
+            "seconds": 0.013622408
+          },
+          {
+            "index": 33,
+            "value": "value-1",
+            "seconds": 0.013598271
+          },
+          {
+            "index": 34,
+            "value": "value-2",
+            "seconds": 0.013672095
+          },
+          {
+            "index": 35,
+            "value": "value-3",
+            "seconds": 0.013647844
+          },
+          {
+            "index": 36,
+            "value": "value-4",
+            "seconds": 0.01376163
+          },
+          {
+            "index": 37,
+            "value": "value-5",
+            "seconds": 0.013897234
+          },
+          {
+            "index": 38,
+            "value": "value-6",
+            "seconds": 0.013767504
+          },
+          {
+            "index": 39,
+            "value": "value-7",
+            "seconds": 0.013609289
+          },
+          {
+            "index": 40,
+            "value": "value-0",
+            "seconds": 0.014075078
+          },
+          {
+            "index": 41,
+            "value": "value-1",
+            "seconds": 0.014017981
+          },
+          {
+            "index": 42,
+            "value": "value-2",
+            "seconds": 0.014051779
+          },
+          {
+            "index": 43,
+            "value": "value-3",
+            "seconds": 0.014156644
+          },
+          {
+            "index": 44,
+            "value": "value-4",
+            "seconds": 0.014009225
+          },
+          {
+            "index": 45,
+            "value": "value-5",
+            "seconds": 0.013932477
+          },
+          {
+            "index": 46,
+            "value": "value-6",
+            "seconds": 0.013858062
+          },
+          {
+            "index": 47,
+            "value": "value-7",
+            "seconds": 0.01381079
+          },
+          {
+            "index": 48,
+            "value": "value-0",
+            "seconds": 0.013008372
+          },
+          {
+            "index": 49,
+            "value": "value-1",
+            "seconds": 0.013149613
+          },
+          {
+            "index": 50,
+            "value": "value-2",
+            "seconds": 0.014603395
+          },
+          {
+            "index": 51,
+            "value": "value-3",
+            "seconds": 0.013541772
+          },
+          {
+            "index": 52,
+            "value": "value-4",
+            "seconds": 0.013709792
+          },
+          {
+            "index": 53,
+            "value": "value-5",
+            "seconds": 0.013893858
+          },
+          {
+            "index": 54,
+            "value": "value-6",
+            "seconds": 0.013992179
+          },
+          {
+            "index": 55,
+            "value": "value-7",
+            "seconds": 0.014125462
+          },
+          {
+            "index": 56,
+            "value": "value-0",
+            "seconds": 0.01412686
+          },
+          {
+            "index": 57,
+            "value": "value-1",
+            "seconds": 0.013585989
+          },
+          {
+            "index": 58,
+            "value": "value-2",
+            "seconds": 0.012437546
+          },
+          {
+            "index": 59,
+            "value": "value-3",
+            "seconds": 0.013455324
+          },
+          {
+            "index": 60,
+            "value": "value-4",
+            "seconds": 0.013408815
+          },
+          {
+            "index": 61,
+            "value": "value-5",
+            "seconds": 0.013229444
+          },
+          {
+            "index": 62,
+            "value": "value-6",
+            "seconds": 0.013117266
+          },
+          {
+            "index": 63,
+            "value": "value-7",
+            "seconds": 0.013184469
+          },
+          {
+            "index": 64,
+            "value": "value-0",
+            "seconds": 0.013542156
+          },
+          {
+            "index": 65,
+            "value": "value-1",
+            "seconds": 0.013529373
+          },
+          {
+            "index": 66,
+            "value": "value-2",
+            "seconds": 0.013426821
+          },
+          {
+            "index": 67,
+            "value": "value-3",
+            "seconds": 0.013504828
+          },
+          {
+            "index": 68,
+            "value": "value-4",
+            "seconds": 0.013437772
+          },
+          {
+            "index": 69,
+            "value": "value-5",
+            "seconds": 0.013405888
+          },
+          {
+            "index": 70,
+            "value": "value-6",
+            "seconds": 0.013447288
+          },
+          {
+            "index": 71,
+            "value": "value-7",
+            "seconds": 0.013345139
+          },
+          {
+            "index": 72,
+            "value": "value-0",
+            "seconds": 0.013148511
+          },
+          {
+            "index": 73,
+            "value": "value-1",
+            "seconds": 0.01313091
+          },
+          {
+            "index": 74,
+            "value": "value-2",
+            "seconds": 0.013240145
+          },
+          {
+            "index": 75,
+            "value": "value-3",
+            "seconds": 0.013292663
+          },
+          {
+            "index": 76,
+            "value": "value-4",
+            "seconds": 0.013468443
+          },
+          {
+            "index": 77,
+            "value": "value-5",
+            "seconds": 0.013668811
+          },
+          {
+            "index": 78,
+            "value": "value-6",
+            "seconds": 0.013763731
+          },
+          {
+            "index": 79,
+            "value": "value-7",
+            "seconds": 0.01418281
+          },
+          {
+            "index": 80,
+            "value": "value-0",
+            "seconds": 0.014290714
+          },
+          {
+            "index": 81,
+            "value": "value-1",
+            "seconds": 0.014350346
+          },
+          {
+            "index": 82,
+            "value": "value-2",
+            "seconds": 0.014203674
+          },
+          {
+            "index": 83,
+            "value": "value-3",
+            "seconds": 0.014224791
+          },
+          {
+            "index": 84,
+            "value": "value-4",
+            "seconds": 0.014162526
+          },
+          {
+            "index": 85,
+            "value": "value-5",
+            "seconds": 0.0140636
+          },
+          {
+            "index": 86,
+            "value": "value-6",
+            "seconds": 0.01397756
+          },
+          {
+            "index": 87,
+            "value": "value-7",
+            "seconds": 0.013510265
+          },
+          {
+            "index": 88,
+            "value": "value-0",
+            "seconds": 0.013635996
+          },
+          {
+            "index": 89,
+            "value": "value-1",
+            "seconds": 0.013474506
+          },
+          {
+            "index": 90,
+            "value": "value-2",
+            "seconds": 0.013447692
+          },
+          {
+            "index": 91,
+            "value": "value-3",
+            "seconds": 0.013597261
+          },
+          {
+            "index": 92,
+            "value": "value-4",
+            "seconds": 0.013451839
+          },
+          {
+            "index": 93,
+            "value": "value-5",
+            "seconds": 0.013725919
+          },
+          {
+            "index": 94,
+            "value": "value-6",
+            "seconds": 0.013741229
+          },
+          {
+            "index": 95,
+            "value": "value-7",
+            "seconds": 0.013904548
+          },
+          {
+            "index": 96,
+            "value": "value-0",
+            "seconds": 0.013788094
+          },
+          {
+            "index": 97,
+            "value": "value-1",
+            "seconds": 0.01384288
+          },
+          {
+            "index": 98,
+            "value": "value-2",
+            "seconds": 0.013992055
+          },
+          {
+            "index": 99,
+            "value": "value-3",
+            "seconds": 0.013735129
+          },
+          {
+            "index": 100,
+            "value": "value-4",
+            "seconds": 0.013962753
+          },
+          {
+            "index": 101,
+            "value": "value-5",
+            "seconds": 0.013657943
+          },
+          {
+            "index": 102,
+            "value": "value-6",
+            "seconds": 0.013759806
+          },
+          {
+            "index": 103,
+            "value": "value-7",
+            "seconds": 0.013931648
+          },
+          {
+            "index": 104,
+            "value": "value-0",
+            "seconds": 0.013978742
+          },
+          {
+            "index": 105,
+            "value": "value-1",
+            "seconds": 0.014127525
+          },
+          {
+            "index": 106,
+            "value": "value-2",
+            "seconds": 0.014054032
+          },
+          {
+            "index": 107,
+            "value": "value-3",
+            "seconds": 0.014170757
+          },
+          {
+            "index": 108,
+            "value": "value-4",
+            "seconds": 0.013844013
+          },
+          {
+            "index": 109,
+            "value": "value-5",
+            "seconds": 0.013976186
+          },
+          {
+            "index": 110,
+            "value": "value-6",
+            "seconds": 0.01378572
+          },
+          {
+            "index": 111,
+            "value": "value-7",
+            "seconds": 0.013859839
+          },
+          {
+            "index": 112,
+            "value": "value-0",
+            "seconds": 0.013777571
+          },
+          {
+            "index": 113,
+            "value": "value-1",
+            "seconds": 0.013787424
+          },
+          {
+            "index": 114,
+            "value": "value-2",
+            "seconds": 0.013870746
+          },
+          {
+            "index": 115,
+            "value": "value-3",
+            "seconds": 0.013865976
+          },
+          {
+            "index": 116,
+            "value": "value-4",
+            "seconds": 0.013997375
+          },
+          {
+            "index": 117,
+            "value": "value-5",
+            "seconds": 0.013800426
+          },
+          {
+            "index": 118,
+            "value": "value-6",
+            "seconds": 0.013996098
+          },
+          {
+            "index": 119,
+            "value": "value-7",
+            "seconds": 0.013731339
+          },
+          {
+            "index": 120,
+            "value": "value-0",
+            "seconds": 0.013563669
+          },
+          {
+            "index": 121,
+            "value": "value-1",
+            "seconds": 0.013391608
+          },
+          {
+            "index": 122,
+            "value": "value-2",
+            "seconds": 0.01332868
+          },
+          {
+            "index": 123,
+            "value": "value-3",
+            "seconds": 0.013332475
+          },
+          {
+            "index": 124,
+            "value": "value-4",
+            "seconds": 0.013494829
+          },
+          {
+            "index": 125,
+            "value": "value-5",
+            "seconds": 0.013662013
+          },
+          {
+            "index": 126,
+            "value": "value-6",
+            "seconds": 0.013523368
+          },
+          {
+            "index": 127,
+            "value": "value-7",
+            "seconds": 0.013191259
+          }
+        ]
+      },
+      "stream_seconds": [
+        0.000362159,
+        0.000481508,
+        0.000368101,
+        0.000357226,
+        0.000453724,
+        0.000289328,
+        0.000279927,
+        0.000386292,
+        0.000327403,
+        0.000267246
+      ],
+      "cancellation_seconds": [
+        0.000186906,
+        0.000167209,
+        0.000166098,
+        0.00023756,
+        0.000193512,
+        0.000203336,
+        0.000153411,
+        0.00016825,
+        0.000211948,
+        0.000190879
+      ],
+      "max_clients": 2,
+      "whole_sample_seconds": 0.2606182949966751,
+      "primary_child_processes": 1,
+      "stream_child_processes": 2,
+      "child_cpu_seconds": 0.2786240000000001
+    },
+    {
+      "requests": {
+        "seconds": 0.213899138,
+        "loop_allocated_bytes": 20607400.0,
+        "rows": [
+          {
+            "index": 0,
+            "value": "value-0",
+            "seconds": 0.00213469
+          },
+          {
+            "index": 1,
+            "value": "value-1",
+            "seconds": 0.003729932
+          },
+          {
+            "index": 2,
+            "value": "value-2",
+            "seconds": 0.00536459
+          },
+          {
+            "index": 3,
+            "value": "value-3",
+            "seconds": 0.0070353
+          },
+          {
+            "index": 4,
+            "value": "value-4",
+            "seconds": 0.009500023
+          },
+          {
+            "index": 5,
+            "value": "value-5",
+            "seconds": 0.01166827
+          },
+          {
+            "index": 6,
+            "value": "value-6",
+            "seconds": 0.013447522
+          },
+          {
+            "index": 7,
+            "value": "value-7",
+            "seconds": 0.015078337
+          },
+          {
+            "index": 8,
+            "value": "value-0",
+            "seconds": 0.014608382
+          },
+          {
+            "index": 9,
+            "value": "value-1",
+            "seconds": 0.014714211
+          },
+          {
+            "index": 10,
+            "value": "value-2",
+            "seconds": 0.014612728
+          },
+          {
+            "index": 11,
+            "value": "value-3",
+            "seconds": 0.014525642
+          },
+          {
+            "index": 12,
+            "value": "value-4",
+            "seconds": 0.013716265
+          },
+          {
+            "index": 13,
+            "value": "value-5",
+            "seconds": 0.013138839
+          },
+          {
+            "index": 14,
+            "value": "value-6",
+            "seconds": 0.013048725
+          },
+          {
+            "index": 15,
+            "value": "value-7",
+            "seconds": 0.012997808
+          },
+          {
+            "index": 16,
+            "value": "value-0",
+            "seconds": 0.013019831
+          },
+          {
+            "index": 17,
+            "value": "value-1",
+            "seconds": 0.012954639
+          },
+          {
+            "index": 18,
+            "value": "value-2",
+            "seconds": 0.013579901
+          },
+          {
+            "index": 19,
+            "value": "value-3",
+            "seconds": 0.013727776
+          },
+          {
+            "index": 20,
+            "value": "value-4",
+            "seconds": 0.013686095
+          },
+          {
+            "index": 21,
+            "value": "value-5",
+            "seconds": 0.013766486
+          },
+          {
+            "index": 22,
+            "value": "value-6",
+            "seconds": 0.013810347
+          },
+          {
+            "index": 23,
+            "value": "value-7",
+            "seconds": 0.013907675
+          },
+          {
+            "index": 24,
+            "value": "value-0",
+            "seconds": 0.013819545
+          },
+          {
+            "index": 25,
+            "value": "value-1",
+            "seconds": 0.0138921
+          },
+          {
+            "index": 26,
+            "value": "value-2",
+            "seconds": 0.013358614
+          },
+          {
+            "index": 27,
+            "value": "value-3",
+            "seconds": 0.013161066
+          },
+          {
+            "index": 28,
+            "value": "value-4",
+            "seconds": 0.013192299
+          },
+          {
+            "index": 29,
+            "value": "value-5",
+            "seconds": 0.013162793
+          },
+          {
+            "index": 30,
+            "value": "value-6",
+            "seconds": 0.013207333
+          },
+          {
+            "index": 31,
+            "value": "value-7",
+            "seconds": 0.013080992
+          },
+          {
+            "index": 32,
+            "value": "value-0",
+            "seconds": 0.01313429
+          },
+          {
+            "index": 33,
+            "value": "value-1",
+            "seconds": 0.013044411
+          },
+          {
+            "index": 34,
+            "value": "value-2",
+            "seconds": 0.013019192
+          },
+          {
+            "index": 35,
+            "value": "value-3",
+            "seconds": 0.013040931
+          },
+          {
+            "index": 36,
+            "value": "value-4",
+            "seconds": 0.013163373
+          },
+          {
+            "index": 37,
+            "value": "value-5",
+            "seconds": 0.013070647
+          },
+          {
+            "index": 38,
+            "value": "value-6",
+            "seconds": 0.012934204
+          },
+          {
+            "index": 39,
+            "value": "value-7",
+            "seconds": 0.013071401
+          },
+          {
+            "index": 40,
+            "value": "value-0",
+            "seconds": 0.013063725
+          },
+          {
+            "index": 41,
+            "value": "value-1",
+            "seconds": 0.013028743
+          },
+          {
+            "index": 42,
+            "value": "value-2",
+            "seconds": 0.013069771
+          },
+          {
+            "index": 43,
+            "value": "value-3",
+            "seconds": 0.01318687
+          },
+          {
+            "index": 44,
+            "value": "value-4",
+            "seconds": 0.013092225
+          },
+          {
+            "index": 45,
+            "value": "value-5",
+            "seconds": 0.013177177
+          },
+          {
+            "index": 46,
+            "value": "value-6",
+            "seconds": 0.013087459
+          },
+          {
+            "index": 47,
+            "value": "value-7",
+            "seconds": 0.01302531
+          },
+          {
+            "index": 48,
+            "value": "value-0",
+            "seconds": 0.013081531
+          },
+          {
+            "index": 49,
+            "value": "value-1",
+            "seconds": 0.013064082
+          },
+          {
+            "index": 50,
+            "value": "value-2",
+            "seconds": 0.013234667
+          },
+          {
+            "index": 51,
+            "value": "value-3",
+            "seconds": 0.013179508
+          },
+          {
+            "index": 52,
+            "value": "value-4",
+            "seconds": 0.013228207
+          },
+          {
+            "index": 53,
+            "value": "value-5",
+            "seconds": 0.013185862
+          },
+          {
+            "index": 54,
+            "value": "value-6",
+            "seconds": 0.013242169
+          },
+          {
+            "index": 55,
+            "value": "value-7",
+            "seconds": 0.013258428
+          },
+          {
+            "index": 56,
+            "value": "value-0",
+            "seconds": 0.01318428
+          },
+          {
+            "index": 57,
+            "value": "value-1",
+            "seconds": 0.013229037
+          },
+          {
+            "index": 58,
+            "value": "value-2",
+            "seconds": 0.012995438
+          },
+          {
+            "index": 59,
+            "value": "value-3",
+            "seconds": 0.012959983
+          },
+          {
+            "index": 60,
+            "value": "value-4",
+            "seconds": 0.012981611
+          },
+          {
+            "index": 61,
+            "value": "value-5",
+            "seconds": 0.013002118
+          },
+          {
+            "index": 62,
+            "value": "value-6",
+            "seconds": 0.013053571
+          },
+          {
+            "index": 63,
+            "value": "value-7",
+            "seconds": 0.013153612
+          },
+          {
+            "index": 64,
+            "value": "value-0",
+            "seconds": 0.013207183
+          },
+          {
+            "index": 65,
+            "value": "value-1",
+            "seconds": 0.013187297
+          },
+          {
+            "index": 66,
+            "value": "value-2",
+            "seconds": 0.013457424
+          },
+          {
+            "index": 67,
+            "value": "value-3",
+            "seconds": 0.013605309
+          },
+          {
+            "index": 68,
+            "value": "value-4",
+            "seconds": 0.013456925
+          },
+          {
+            "index": 69,
+            "value": "value-5",
+            "seconds": 0.013525405
+          },
+          {
+            "index": 70,
+            "value": "value-6",
+            "seconds": 0.013384025
+          },
+          {
+            "index": 71,
+            "value": "value-7",
+            "seconds": 0.013293298
+          },
+          {
+            "index": 72,
+            "value": "value-0",
+            "seconds": 0.013292094
+          },
+          {
+            "index": 73,
+            "value": "value-1",
+            "seconds": 0.013173187
+          },
+          {
+            "index": 74,
+            "value": "value-2",
+            "seconds": 0.012914147
+          },
+          {
+            "index": 75,
+            "value": "value-3",
+            "seconds": 0.012703706
+          },
+          {
+            "index": 76,
+            "value": "value-4",
+            "seconds": 0.012688621
+          },
+          {
+            "index": 77,
+            "value": "value-5",
+            "seconds": 0.012649396
+          },
+          {
+            "index": 78,
+            "value": "value-6",
+            "seconds": 0.012619063
+          },
+          {
+            "index": 79,
+            "value": "value-7",
+            "seconds": 0.012602835
+          },
+          {
+            "index": 80,
+            "value": "value-0",
+            "seconds": 0.012689281
+          },
+          {
+            "index": 81,
+            "value": "value-1",
+            "seconds": 0.012895763
+          },
+          {
+            "index": 82,
+            "value": "value-2",
+            "seconds": 0.012975193
+          },
+          {
+            "index": 83,
+            "value": "value-3",
+            "seconds": 0.01325287
+          },
+          {
+            "index": 84,
+            "value": "value-4",
+            "seconds": 0.013544154
+          },
+          {
+            "index": 85,
+            "value": "value-5",
+            "seconds": 0.013566249
+          },
+          {
+            "index": 86,
+            "value": "value-6",
+            "seconds": 0.013729043
+          },
+          {
+            "index": 87,
+            "value": "value-7",
+            "seconds": 0.013722636
+          },
+          {
+            "index": 88,
+            "value": "value-0",
+            "seconds": 0.013764167
+          },
+          {
+            "index": 89,
+            "value": "value-1",
+            "seconds": 0.013709515
+          },
+          {
+            "index": 90,
+            "value": "value-2",
+            "seconds": 0.013879945
+          },
+          {
+            "index": 91,
+            "value": "value-3",
+            "seconds": 0.013781731
+          },
+          {
+            "index": 92,
+            "value": "value-4",
+            "seconds": 0.013577357
+          },
+          {
+            "index": 93,
+            "value": "value-5",
+            "seconds": 0.013631346
+          },
+          {
+            "index": 94,
+            "value": "value-6",
+            "seconds": 0.013574175
+          },
+          {
+            "index": 95,
+            "value": "value-7",
+            "seconds": 0.013527972
+          },
+          {
+            "index": 96,
+            "value": "value-0",
+            "seconds": 0.013445381
+          },
+          {
+            "index": 97,
+            "value": "value-1",
+            "seconds": 0.013391014
+          },
+          {
+            "index": 98,
+            "value": "value-2",
+            "seconds": 0.013391592
+          },
+          {
+            "index": 99,
+            "value": "value-3",
+            "seconds": 0.013408726
+          },
+          {
+            "index": 100,
+            "value": "value-4",
+            "seconds": 0.013499159
+          },
+          {
+            "index": 101,
+            "value": "value-5",
+            "seconds": 0.013578341
+          },
+          {
+            "index": 102,
+            "value": "value-6",
+            "seconds": 0.013688055
+          },
+          {
+            "index": 103,
+            "value": "value-7",
+            "seconds": 0.013787672
+          },
+          {
+            "index": 104,
+            "value": "value-0",
+            "seconds": 0.013702859
+          },
+          {
+            "index": 105,
+            "value": "value-1",
+            "seconds": 0.01375224
+          },
+          {
+            "index": 106,
+            "value": "value-2",
+            "seconds": 0.013558151
+          },
+          {
+            "index": 107,
+            "value": "value-3",
+            "seconds": 0.013534777
+          },
+          {
+            "index": 108,
+            "value": "value-4",
+            "seconds": 0.013399547
+          },
+          {
+            "index": 109,
+            "value": "value-5",
+            "seconds": 0.013305518
+          },
+          {
+            "index": 110,
+            "value": "value-6",
+            "seconds": 0.013260499
+          },
+          {
+            "index": 111,
+            "value": "value-7",
+            "seconds": 0.013135778
+          },
+          {
+            "index": 112,
+            "value": "value-0",
+            "seconds": 0.013410786
+          },
+          {
+            "index": 113,
+            "value": "value-1",
+            "seconds": 0.013333459
+          },
+          {
+            "index": 114,
+            "value": "value-2",
+            "seconds": 0.013210183
+          },
+          {
+            "index": 115,
+            "value": "value-3",
+            "seconds": 0.013154011
+          },
+          {
+            "index": 116,
+            "value": "value-4",
+            "seconds": 0.013061933
+          },
+          {
+            "index": 117,
+            "value": "value-5",
+            "seconds": 0.013174999
+          },
+          {
+            "index": 118,
+            "value": "value-6",
+            "seconds": 0.013079133
+          },
+          {
+            "index": 119,
+            "value": "value-7",
+            "seconds": 0.013017306
+          },
+          {
+            "index": 120,
+            "value": "value-0",
+            "seconds": 0.012911374
+          },
+          {
+            "index": 121,
+            "value": "value-1",
+            "seconds": 0.012938666
+          },
+          {
+            "index": 122,
+            "value": "value-2",
+            "seconds": 0.013181115
+          },
+          {
+            "index": 123,
+            "value": "value-3",
+            "seconds": 0.013137672
+          },
+          {
+            "index": 124,
+            "value": "value-4",
+            "seconds": 0.013322233
+          },
+          {
+            "index": 125,
+            "value": "value-5",
+            "seconds": 0.013244652
+          },
+          {
+            "index": 126,
+            "value": "value-6",
+            "seconds": 0.013230036
+          },
+          {
+            "index": 127,
+            "value": "value-7",
+            "seconds": 0.012971914
+          }
+        ]
+      },
+      "stream_seconds": [
+        0.00052096,
+        0.000529914,
+        0.000277718,
+        0.000286714,
+        0.000333849,
+        0.000284636,
+        0.000281338,
+        0.000352995,
+        0.000260627,
+        0.000284141
+      ],
+      "cancellation_seconds": [
+        0.000223505,
+        0.000195338,
+        0.000176352,
+        0.000146476,
+        0.000190639,
+        0.000182763,
+        0.000172286,
+        0.00015679,
+        0.000172495,
+        0.00018093
+      ],
+      "max_clients": 2,
+      "whole_sample_seconds": 0.25673851099418243,
+      "primary_child_processes": 1,
+      "stream_child_processes": 2,
+      "child_cpu_seconds": 0.27235
+    }
+  ],
+  "summary": {
+    "request_latency": {
+      "count": 384,
+      "min_seconds": 0.002046562,
+      "median_seconds": 0.013431148,
+      "p95_seconds": 0.015096989,
+      "max_seconds": 0.017145863
+    },
+    "stream_latency": {
+      "count": 30,
+      "min_seconds": 0.000236072,
+      "median_seconds": 0.00031347449999999995,
+      "p95_seconds": 0.00052096,
+      "max_seconds": 0.000529914
+    },
+    "cancellation_latency": {
+      "count": 30,
+      "min_seconds": 0.000146476,
+      "median_seconds": 0.000186415,
+      "p95_seconds": 0.000223505,
+      "max_seconds": 0.00023756
+    },
+    "median_requests_per_second": 584.9315223865586
+  },
+  "whole_command_seconds": 0.866788904000714
+}

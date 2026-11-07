@@ -13,6 +13,7 @@ let exercise count capture =
   assert (read_line () = "run");
   let matches = Expr.compile expression in
   let max_clients = ref 0 in
+  let allocated_before = Gc.allocated_bytes () in
   let rows =
     List.init count (fun _ ->
         let snapshot = capture () in
@@ -31,8 +32,14 @@ let exercise count capture =
           failwith "query results differ";
         `List (List.map (fun id -> `String (Pane.Id.to_string id)) declarative))
   in
+  let allocated_bytes = Gc.allocated_bytes () -. allocated_before in
   Yojson.Safe.to_channel stdout
-    (`Assoc [ ("results", `List rows); ("max_clients", `Int !max_clients) ]);
+    (`Assoc
+       [
+         ("results", `List rows);
+         ("max_clients", `Int !max_clients);
+         ("loop_allocated_bytes", `Float allocated_bytes);
+       ]);
   print_newline ()
 
 let () =

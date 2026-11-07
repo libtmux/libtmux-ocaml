@@ -1,3 +1,9 @@
 (executable
  (name capture)
+ (modules capture)
  (libraries libtmux libtmux-unix libtmux-eio eio_main yojson unix))
+
+(executable
+ (name concurrency)
+ (modules concurrency)
+ (libraries libtmux libtmux-eio eio_main mtime yojson))

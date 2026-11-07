@@ -1,0 +1,99 @@
+{
+  "schema": "libtmux.benchmark/1",
+  "measured_at_utc": "2026-11-07T19:40:56.167666+00:00",
+  "head": "e7cd06e1ba5e04166348568b423bb30497fafa7c",
+  "source_sha256": "c0095648f7adc387712bb1a1402631de03ab025cbb421c3f4ce07225c4289962",
+  "compiler": "5.5.2",
+  "tmux": "3.8",
+  "binary_sha256": "8d26a03aea063272363af174dfe9f6847fc831d9da53b4688da26f3fd24a2ab8",
+  "platform": {
+    "system": "Linux",
+    "kernel": "6.18.54.1-microsoft-standard-WSL2",
+    "architecture": "x86_64",
+    "available_cpus": 12,
+    "load_average_start": [
+      3.7783203125,
+      3.04638671875,
+      3.23828125
+    ]
+  },
+  "workload": {
+    "sessions": 1,
+    "windows": 4,
+    "panes": 16,
+    "captures": 50,
+    "selected_ids": [
+      "%0",
+      "%1",
+      "%2",
+      "%3"
+    ]
+  },
+  "samples": {
+    "unix": [
+      {
+        "seconds": 0.06663470499916002,
+        "child_processes": 1,
+        "observed_clients": 1,
+        "child_cpu_seconds": 0.024736999999999995,
+        "daemon_cpu_seconds": 0.04000000000000001,
+        "loop_allocated_bytes": 19400760.0
+      },
+      {
+        "seconds": 0.048726947999966796,
+        "child_processes": 1,
+        "observed_clients": 1,
+        "child_cpu_seconds": 0.01788499999999999,
+        "daemon_cpu_seconds": 0.03,
+        "loop_allocated_bytes": 19406008.0
+      },
+      {
+        "seconds": 0.05195577599806711,
+        "child_processes": 1,
+        "observed_clients": 1,
+        "child_cpu_seconds": 0.018897999999999984,
+        "daemon_cpu_seconds": 0.03,
+        "loop_allocated_bytes": 19406008.0
+      }
+    ],
+    "eio": [
+      {
+        "seconds": 0.06904242100426927,
+        "child_processes": 1,
+        "observed_clients": 1,
+        "child_cpu_seconds": 0.028623,
+        "daemon_cpu_seconds": 0.04999999999999999,
+        "loop_allocated_bytes": 21956552.0
+      },
+      {
+        "seconds": 0.06710798900166992,
+        "child_processes": 1,
+        "observed_clients": 1,
+        "child_cpu_seconds": 0.027250999999999994,
+        "daemon_cpu_seconds": 0.04000000000000001,
+        "loop_allocated_bytes": 21948424.0
+      },
+      {
+        "seconds": 0.05244485800358234,
+        "child_processes": 1,
+        "observed_clients": 1,
+        "child_cpu_seconds": 0.022030999999999967,
+        "daemon_cpu_seconds": 0.04000000000000001,
+        "loop_allocated_bytes": 21948424.0
+      }
+    ]
+  },
+  "summary": {
+    "unix": {
+      "median_seconds": 0.05195577599806711,
+      "min_seconds": 0.048726947999966796,
+      "max_seconds": 0.06663470499916002
+    },
+    "eio": {
+      "median_seconds": 0.06710798900166992,
+      "min_seconds": 0.05244485800358234,
+      "max_seconds": 0.06904242100426927
+    }
+  },
+  "whole_command_seconds": 0.5214860089981812
+}
