@@ -16,6 +16,37 @@ for binary in sys.argv[1:]:
                 ready.register(process.stdout, selectors.EVENT_READ)
                 assert ready.select(1), "workspace peer not ready"
                 line = process.stdout.readline()
+                if line == b"CONTEXT_READY\n":
+                    fixture.command("set-hook", "-g", "after-new-session",
+                                    "link-window -t fixture:")
+                    process.stdin.write(b"continue\n")
+                    process.stdin.flush()
+                    assert ready.select(1), "workspace context result not ready"
+                    line = process.stdout.readline()
+                    if line != b"CONTEXT_PASSED\n":
+                        stdout, stderr = process.communicate(timeout=1)
+                        raise AssertionError((line, stdout, stderr))
+                    fixture.command("set-hook", "-gu", "after-new-session")
+                    process.stdin.write(b"continue\n")
+                    process.stdin.flush()
+                    assert ready.select(1), "workspace safety probe not ready"
+                    line = process.stdout.readline()
+                if line.startswith(b"SAFETY_READY "):
+                    foreign = line.decode().strip().split()[1]
+                    fixture.command("set-hook", "-g", "after-new-window",
+                                    f"join-pane -s {foreign}")
+                    process.stdin.write(b"continue\n")
+                    process.stdin.flush()
+                    assert ready.select(1), "workspace safety result not ready"
+                    line = process.stdout.readline()
+                    if line != b"SAFETY_PASSED\n":
+                        stdout, stderr = process.communicate(timeout=1)
+                        raise AssertionError((line, stdout, stderr))
+                    fixture.command("set-hook", "-gu", "after-new-window")
+                    process.stdin.write(b"continue\n")
+                    process.stdin.flush()
+                    assert ready.select(1), "workspace cancellation not ready"
+                    line = process.stdout.readline()
                 if line != b"CANCEL_READY\n":
                     stdout, stderr = process.communicate(timeout=1)
                     raise AssertionError((line, stdout, stderr))

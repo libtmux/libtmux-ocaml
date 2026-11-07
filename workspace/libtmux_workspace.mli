@@ -1,6 +1,9 @@
 (** Workspace validation and planning are pure. Execution delegates I/O to an
     explicit executor. *)
 
+(** Validate native workspace values without contacting tmux or reading the
+    filesystem. Relative directories resolve against the document directory;
+    only declared variables participate in expansion. *)
 module Config : sig
   type error = { path : string; message : string }
 
@@ -77,6 +80,9 @@ module Config : sig
   val dimensions : t -> int * int
 end
 
+(** Preview ordered workspace actions against one observed daemon generation.
+    A plan retains collision policy and bound targets; it is not a portable
+    command script. *)
 module Plan : sig
   type server_policy = Create_if_missing | Require_existing_server
   type window_collision = Reject
@@ -147,12 +153,10 @@ module Plan : sig
       printed or serialized preview cannot supply operational targets. *)
 end
 
+(** Apply a plan once and retain an immutable journal of effects, uncertainty
+    and cleanup. Ordinary applications use their backend's Workspace module;
+    executors below integrate another transport. *)
 module Execution : sig
-  type resource =
-    | Session of Libtmux.Session.target
-    | Window of Libtmux.Window.target
-    | Pane of Libtmux.Pane.target
-
   type hint = {
     session : Libtmux.Session.Id.t;
     window : Libtmux.Window.Id.t;
@@ -203,7 +207,7 @@ module Execution : sig
   }
 
   type cleanup = {
-    resource : resource;
+    pane : Libtmux.Pane.target;
     outcome : (unit, Libtmux.Error.t) result;
   }
 
@@ -244,7 +248,9 @@ module Execution : sig
       cancellation, propagate after recording progress and bounded compensation.
       Subsequent calls only return the retained receipt; mutations never retry.
 
-      Compensation removes only proven newly created resources in reverse order.
-      New containers cover their created children. Pre-existing sessions in
-      append mode are retained. Cleanup failures have separate outcomes. *)
+      Compensation kills only panes reported by completed creation commands, in
+      reverse creation order. tmux removes windows and sessions that become
+      empty. Containers with foreign panes or window links remain; adding a
+      borrowed pane never makes it eligible for cleanup. Cleanup failures have
+      separate outcomes. *)
 end

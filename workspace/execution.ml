@@ -1,11 +1,6 @@
 module P = Plan
 open Libtmux
 
-type resource =
-  | Session of Session.target
-  | Window of Window.target
-  | Pane of Pane.target
-
 type hint = {
   session : Session.Id.t;
   window : Window.Id.t;
@@ -48,7 +43,7 @@ type step = {
   unbound : hint option;
 }
 
-type cleanup = { resource : resource; outcome : (unit, Error.t) result }
+type cleanup = { pane : Pane.target; outcome : (unit, Error.t) result }
 
 type status =
   | Queued
@@ -75,7 +70,7 @@ type t = {
   mutable status : status;
   steps : step array;
   mutable cleanup : cleanup list;
-  mutable owned : resource list;
+  mutable owned : Pane.target list;
   mutable session : Session.target option;
   mutable cleanup_error : Error.t option;
   mutable pending : (int * (unit -> observation)) option;
@@ -155,30 +150,16 @@ let skip_pending (t : t) =
         t.steps.(index) <- { step with status = Skipped })
     t.steps
 
-let remember (t : t) action created =
-  let session_owned =
-    List.exists (function Session _ -> true | _ -> false) t.owned
-  in
+let remember (t : t) created =
   List.iter
     (fun (value : Created.t) ->
-      let resource =
-        match action with
-        | P.Create_session _ -> Some (Session value.session)
-        | Create_window _ when not session_owned -> Some (Window value.window)
-        | Split_pane _
-          when (not session_owned)
-               && not
-                    (List.exists
-                       (function
-                         | Window target ->
-                             Window.Id.equal (Window.Target.id target)
-                               (Window.Target.id value.window)
-                         | _ -> false)
-                       t.owned) ->
-            Some (Pane value.pane)
-        | _ -> None
-      in
-      Option.iter (fun resource -> t.owned <- resource :: t.owned) resource)
+      if
+        not
+          (List.exists
+             (fun pane ->
+               Pane.Id.equal (Pane.Target.id pane) (Pane.Target.id value.pane))
+             t.owned)
+      then t.owned <- value.pane :: t.owned)
     created
 
 let settle (t : t) index ~error ~interrupted =
@@ -200,28 +181,22 @@ let settle (t : t) index ~error ~interrupted =
       created = observation.created;
       unbound = observation.unbound;
     };
-  remember t step.action observation.created
+  remember t observation.created
 
 let compensate (t : t) =
   let result =
     t.executor.protect (fun () ->
         List.iter
-          (fun resource ->
-            let command =
-              match resource with
-              | Session target -> Operations.kill_session target
-              | Window target -> Operations.kill_window target
-              | Pane target -> Operations.kill_pane target
-            in
+          (fun pane ->
             t.cleanup <-
               {
-                resource;
+                pane;
                 outcome =
                   Error (Error.Outcome_unknown "compensation has not returned");
               }
               :: t.cleanup;
-            let outcome = t.executor.run command in
-            t.cleanup <- { resource; outcome } :: List.tl t.cleanup)
+            let outcome = t.executor.run (Operations.kill_pane pane) in
+            t.cleanup <- { pane; outcome } :: List.tl t.cleanup)
           t.owned)
   in
   match result with Ok () -> () | Error error -> t.cleanup_error <- Some error
@@ -258,9 +233,7 @@ let await ?(compensate_on_failure = true) (t : t) =
           let created = ref [] in
           let remember_created wi pi value =
             created := [ value ];
-            t.session <- Some value.Created.session;
-            Hashtbl.replace t.windows wi value.window;
-            Hashtbl.replace t.panes (wi, pi) value.pane
+            Hashtbl.replace t.panes (wi, pi) value.Created.pane
           in
           let run command = get (t.executor.run command) in
           (match action with
@@ -273,16 +246,29 @@ let await ?(compensate_on_failure = true) (t : t) =
                     (Operations.create_session ~name ~window_name ~spawn ~width
                        ~height ())
               in
+              t.session <- Some value.session;
+              Hashtbl.replace t.windows 0 value.window;
               remember_created 0 0 value
           | Create_window { window = wi; name; spawn } ->
-              remember_created wi 0
-                (run (Operations.create_window ~name ~spawn (session ())))
+              let value =
+                run (Operations.create_window ~name ~spawn (session ()))
+              in
+              Hashtbl.replace t.windows wi value.window;
+              remember_created wi 0 value
           | Split_pane { window = wi; pane = pi; spawn; direction; size } ->
-              remember_created wi pi
-                (run
-                   (Operations.split_pane ?size ~spawn
-                      (pane wi (pi - 1))
-                      ~direction))
+              let value =
+                run
+                  (Operations.split_pane ?size ~spawn
+                     (pane wi (pi - 1))
+                     ~direction)
+              in
+              if
+                not
+                  (Window.Id.equal
+                     (Window.Target.id (window wi))
+                     (Window.Target.id value.window))
+              then ignore (get (Error Error.Stale_target));
+              remember_created wi pi value
           | Set_environment (name, value) ->
               run
                 (Operations.set_environment
@@ -307,7 +293,7 @@ let await ?(compensate_on_failure = true) (t : t) =
           let step = t.steps.(index) in
           t.steps.(index) <-
             { step with status = Completed; created = !created };
-          remember t action !created
+          remember t !created
         in
         let cleanup () =
           skip_pending t;

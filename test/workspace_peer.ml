@@ -84,8 +84,11 @@ let () =
           (fun (step : X.step) ->
             match step.status with Failed _ -> true | _ -> false)
           receipt.steps);
-      assert (Iarray.length receipt.cleanup = 1);
-      assert ((Iarray.get receipt.cleanup 0).outcome = Ok ());
+      assert (Iarray.length receipt.cleanup = 3);
+      assert (
+        Iarray.for_all
+          (fun (c : X.cleanup) -> c.outcome = Ok ())
+          receipt.cleanup);
       let snapshot = get (C.capture client) in
       assert (
         not
@@ -101,10 +104,11 @@ let () =
           ]
       in
       let receipt = execute (plan ~collision_policy:append cfg) in
-      assert (receipt.status = X.Partial && Iarray.length receipt.cleanup = 1);
-      (match (Iarray.get receipt.cleanup 0).resource with
-      | X.Window _ -> ()
-      | _ -> failwith "append compensated pre-existing session");
+      assert (receipt.status = X.Partial && Iarray.length receipt.cleanup = 2);
+      assert (
+        Iarray.for_all
+          (fun (c : X.cleanup) -> c.outcome = Ok ())
+          receipt.cleanup);
       let snapshot = get (C.capture client) in
       let original = Iarray.get (Snapshot.panes initial) 0 in
       assert (Snapshot.find_pane snapshot (Pane.id original) |> Option.is_some);
@@ -141,6 +145,53 @@ let () =
           let receipt = get (W.await operation) in
           assert (receipt.status = X.Rejected P.Stale);
           ignore (get (W.close operation)));
+      print_endline "CONTEXT_READY";
+      assert (read_line () = "continue");
+      let receipt =
+        execute
+          (plan
+             (config ~session:"workspace-linked"
+                [
+                  window "linked" [ pane (); pane () ];
+                  window "kept" [ pane () ];
+                ]))
+      in
+      assert (receipt.status = X.Succeeded);
+      let linked =
+        get (C.capture client)
+        |> Snapshot.sessions
+        |> Iarray.find_opt (fun session ->
+            Session.name session = "workspace-linked")
+        |> Option.get
+      in
+      assert (Iarray.length (Session.windows linked) = 2);
+      print_endline "CONTEXT_PASSED";
+      assert (read_line () = "continue");
+      let foreign =
+        run
+          (Operations.split_pane (Pane.target original)
+             ~spawn:(Spawn.make (Shell "exec cat"))
+             ~direction:Geometry.Below)
+      in
+      Printf.printf "SAFETY_READY %s\n%!"
+        (Pane.Id.to_string (Pane.Target.id foreign.pane));
+      assert (read_line () = "continue");
+      let receipt =
+        execute
+          (plan ~collision_policy:append
+             (config ~session:"fixture"
+                [
+                  window "borrowed-injection"
+                    [ pane (); pane ~size:(Geometry.Cells 1) (); pane () ];
+                ]))
+      in
+      assert (receipt.status = X.Partial);
+      let snapshot = get (C.capture client) in
+      assert (
+        Option.is_some
+          (Snapshot.find_pane snapshot (Pane.Target.id foreign.pane)));
+      print_endline "SAFETY_PASSED";
+      assert (read_line () = "continue");
       print_endline "CANCEL_READY";
       assert (read_line () = "continue");
       let cfg =
