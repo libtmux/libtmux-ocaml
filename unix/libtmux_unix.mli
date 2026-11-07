@@ -136,7 +136,8 @@ module Client : sig
       and daemon must share the PID namespace and filesystem. A local socket
       pathname alone does not establish these preconditions. [timeout] is the
       maximum seconds per control exchange, defaulting to one second. Requires
-      Linux pidfd support. The client belongs to the current domain. *)
+      Linux pidfd support. The client belongs to the current domain. Initial and
+      auxiliary attachments suppress tmux's [update-environment] behavior. *)
 
   val source : t -> Libtmux.Source.t
   (** Read the retained endpoint, daemon PID and connection generation without

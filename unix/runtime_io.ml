@@ -120,7 +120,7 @@ let endpoint_arguments ?(start_server = false) ~binary endpoint =
 
 let arguments ~binary endpoint =
   endpoint_arguments ~binary endpoint
-  @ [ "-C"; "attach-session"; "-f"; "no-output" ]
+  @ [ "-C"; "attach-session"; "-E"; "-f"; "no-output" ]
 
 let write io process ~pidfd ~deadline bytes =
   let length = String.length bytes in

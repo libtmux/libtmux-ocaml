@@ -8,9 +8,12 @@ peer = Path(__file__).resolve().parents[1] / "_build/default/test/environment_pe
 for binary in sys.argv[1:]:
     for backend in ["unix", "eio"]:
         with TmuxFixture(binary) as fixture:
+            fixture.command("set-option", "-t", "$0", "update-environment", "LIBTMUX_CONNECT_VALUE")
+            fixture.command("set-environment", "-t", "$0", "LIBTMUX_CONNECT_VALUE", "server")
+            environment = dict(fixture.environment, LIBTMUX_CONNECT_VALUE="client")
             result = subprocess.run(
                 [str(peer), fixture.binary, str(fixture.socket), backend],
-                env=fixture.environment, capture_output=True, timeout=1,
+                env=environment, capture_output=True, timeout=1,
             )
             assert result.returncode == 0, (binary, backend, result.stdout, result.stderr)
             assert result.stdout == b"PASS environment bytes, scopes, hidden values and lifetime\n"

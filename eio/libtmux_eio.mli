@@ -118,7 +118,9 @@ module Client : sig
     (t, Libtmux.Error.t) result
   (** Attach to an existing local Linux daemon in the same PID namespace and
       shared filesystem. Requires pidfd support. Default exchange timeout: one
-      second. All client calls belong to the connecting OCaml domain. *)
+      second. All client calls belong to the connecting OCaml domain. Initial
+      and auxiliary attachments suppress tmux's [update-environment] behavior.
+  *)
 
   val source : t -> Libtmux.Source.t
   (** Read the retained endpoint, daemon PID and connection generation without

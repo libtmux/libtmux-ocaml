@@ -1,6 +1,9 @@
 open Libtmux
 
-type runner = { run : 'a. 'a Command.t -> ('a, Error.t) result }
+type runner = {
+  run : 'a. 'a Command.t -> ('a, Error.t) result;
+  observe : Pane.t -> (unit, Error.t) result;
+}
 
 let get = function
   | Ok value -> value
@@ -24,6 +27,14 @@ let exercise runner =
     if Environment.lookup table name <> expected then
       failwith ("environment value mismatch: " ^ name)
   in
+  check (read local) "LIBTMUX_CONNECT_VALUE" (Some (Value "server"));
+  set local "LIBTMUX_CONNECT_VALUE" "after-primary";
+  get (runner.observe (Iarray.get (Snapshot.panes snapshot) 0));
+  check (read local) "LIBTMUX_CONNECT_VALUE" (Some (Value "after-primary"));
+  set local "LIBTMUX_CONNECT_VALUE" "after-stream";
+  run (Operations.signal "environment-probe");
+  run (Operations.wait_for "environment-probe");
+  check (read local) "LIBTMUX_CONNECT_VALUE" (Some (Value "after-stream"));
   set Global "LIBTMUX_BYTES" payload;
   let captured = read Global in
   check captured "LIBTMUX_BYTES" (Some (Value payload));
@@ -74,7 +85,14 @@ let () =
           ~finally:(fun () -> ignore (get (Libtmux_unix.Client.close client)))
           (fun () ->
             exercise
-              { run = (fun command -> Libtmux_unix.Client.run client command) })
+              {
+                run = (fun command -> Libtmux_unix.Client.run client command);
+                observe =
+                  (fun pane ->
+                    Result.bind
+                      (Libtmux_unix.Client.subscribe client pane)
+                      Libtmux_unix.Subscription.close);
+              })
       in
       assert (Array.length (Sys.readdir "/proc/self/fd") = before);
       captured)
@@ -96,6 +114,11 @@ let () =
                     {
                       run =
                         (fun command -> Libtmux_eio.Client.run client command);
+                      observe =
+                        (fun pane ->
+                          Result.bind
+                            (Libtmux_eio.Client.subscribe client pane)
+                            Libtmux_eio.Subscription.close);
                     })))
   in
   assert (Environment.lookup retained "LIBTMUX_BYTES" = Some (Value payload));

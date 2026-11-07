@@ -242,7 +242,7 @@ let selected_session pane requested =
 let open_lane manager session =
   let c = manager.connection in
   let arguments =
-    Runtime_io.arguments ~binary:c.binary (Source.endpoint c.source) @ [ "-E" ]
+    Runtime_io.arguments ~binary:c.binary (Source.endpoint c.source)
   in
   let control = C.open_process c arguments in
   try
