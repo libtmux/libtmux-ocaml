@@ -1037,9 +1037,12 @@ end
 
 (** Construct typed tmux operations for a backend client. Observations are
     immutable, mutations use explicit targets, and no command retries a mutation
-    against another connection generation. *)
+    against another connection generation. Construction performs no I/O; the
+    descriptions below state what execution does. *)
 module Operations : sig
   val capture : unit -> Snapshot.t Command.t
+  (** Capture and validate the complete session/window-link/pane graph. The
+      result records an acquisition interval, not an atomic server instant. *)
 
   val capture_text :
     ?scratch_dir:string ->
@@ -1047,9 +1050,18 @@ module Operations : sig
     start:int ->
     end_:int ->
     Captured_text.t Command.t
+  (** Capture inclusive visible rows through an operation-owned temporary file.
+      Require [0 <= start <= end_ < Pane.height pane]; scrollback is excluded.
+      Retained bytes survive client close. The scratch directory must share the
+      daemon filesystem. *)
 
   val rename_window : Window.target -> name:string -> unit Command.t
+  (** Set the global window name. Every session link observes the new name on
+      its next capture; existing snapshots retain the old value. *)
+
   val rename_session : Session.target -> name:string -> unit Command.t
+  (** Set the session name, rejecting a conflicting existing name. Bound IDs
+      remain usable; existing snapshots retain their captured names. *)
 
   val switch_client_at :
     ?update_environment:bool ->
@@ -1076,11 +1088,15 @@ module Operations : sig
   (** Literal bytes, without an implicit Enter. NUL is rejected at admission. *)
 
   val send_keys : Pane.target -> Key.t list -> unit Command.t
+  (** Send named tmux keys in order, without an implicit Enter. Use {!send_text}
+      for literal bytes rather than key interpretation. *)
 
   val wait_for : string -> unit Command.t
   (** Wait on a named tmux semaphore using a dedicated bound lane. *)
 
   val signal : string -> unit Command.t
+  (** Signal a named tmux semaphore, releasing a waiter or retaining the signal
+      for a later {!wait_for}. This does not signal an OS process. *)
 
   val capture_environment :
     ?hidden:bool -> Environment.scope -> Environment.t Command.t
@@ -1091,6 +1107,9 @@ module Operations : sig
 
   val set_environment :
     ?hidden:bool -> Environment.scope -> name:string -> string -> unit Command.t
+  (** Set a local environment value for future pane processes. [hidden] defaults
+      to false; hidden values remain internal to tmux. Existing processes keep
+      their environment. *)
 
   val unset_environment : Environment.scope -> string -> unit Command.t
   (** Remove the local entry, allowing a global value to apply to future panes.
@@ -1146,6 +1165,8 @@ module Operations : sig
     Options.scope ->
     string ->
     Options.value option Command.t
+  (** Read an exact hook name. Inheritance is included by default; [None] means
+      no entry under the selected policy. Missing targets remain errors. *)
 
   val set_hook :
     ?index:int ->
@@ -1163,6 +1184,8 @@ module Operations : sig
       outside the supported control transport contract. *)
 
   val remove_hook : ?index:int -> Options.scope -> string -> unit Command.t
+  (** Remove the local hook or one indexed array entry. An inherited hook may
+      become effective again; this does not stop work it already started. *)
 
   val run_hook : Options.scope -> string -> unit Command.t
   (** Run the effective hook in an explicit session, window or pane context. A
@@ -1196,6 +1219,9 @@ module Operations : sig
     Pane.target ->
     direction:Geometry.direction ->
     Created.t Command.t
+  (** Create a detached pane beside the target and return the IDs reported by
+      tmux. Omitted [size] lets tmux choose the split; tmux rejects splits when
+      no space remains. *)
 
   val break_pane :
     ?name:string ->
@@ -1203,10 +1229,21 @@ module Operations : sig
     session:Session.target ->
     index:int ->
     Created.t Command.t
+  (** Move the pane into a new window at an explicit session index. An occupied
+      destination fails. The returned IDs describe the resulting context; the
+      pane itself already existed. *)
 
   val kill_session : Session.target -> unit Command.t
+  (** Remove the session and its window links. Windows with no other links and
+      their panes are destroyed. Removing the last session may stop tmux. *)
+
   val kill_window : Window.target -> unit Command.t
+  (** Destroy the window, all its session links and every contained pane. This
+      acts on the global window, not a single contextual link. *)
+
   val kill_pane : Pane.target -> unit Command.t
+  (** Destroy the target pane and its running process. tmux removes a window
+      that becomes empty and may remove its now-empty sessions. *)
 
   val select_window_at : Session.target -> index:int -> unit Command.t
   (** Operate on the session's current index at execution, not an old link
@@ -1219,6 +1256,8 @@ module Operations : sig
 
   val link_window :
     Window.target -> session:Session.target -> index:int -> unit Command.t
+  (** Add a session-specific link to the global window at [index], rejecting an
+      occupied index. The source window and its panes stay shared. *)
 
   val move_window_at :
     Session.target ->
@@ -1230,14 +1269,30 @@ module Operations : sig
       collisions fail. *)
 
   val select_pane : Pane.target -> unit Command.t
+  (** Make the pane active in its containing window. This does not open or
+      attach a terminal client. *)
+
   val set_pane_title : Pane.target -> title:string -> unit Command.t
+  (** Set the pane title as literal text, without tmux format expansion. A
+      running terminal application can subsequently replace the title. *)
+
   val resize_pane : ?width:int -> ?height:int -> Pane.target -> unit Command.t
+  (** Request positive cell dimensions, supplying at least one dimension. Omit
+      either dimension to retain it. tmux can constrain the result to the
+      available layout. Capture again to observe the actual dimensions. *)
 
   val resize_window :
     ?width:int -> ?height:int -> Window.target -> unit Command.t
+  (** Request positive cell dimensions, supplying at least one dimension. Omit
+      either dimension to retain it. Client-size and window-size policies can
+      affect subsequent sizing. *)
 
   val select_layout : Window.target -> Layout.t -> unit Command.t
+  (** Apply a preset or validated custom layout to the window. Pane geometry
+      follows tmux layout rules; capture again to observe the result. *)
+
   val cycle_layout : Window.target -> [ `Next | `Previous ] -> unit Command.t
+  (** Select the next or previous tmux preset layout for this window. *)
 
   val move_pane :
     ?size:Geometry.size ->
@@ -1245,15 +1300,28 @@ module Operations : sig
     beside:Pane.target ->
     direction:Geometry.direction ->
     unit Command.t
+  (** Move the source pane beside another pane, optionally setting the split
+      size. Both targets must belong to the same bound generation. An emptied
+      source window is removed by tmux. *)
 
   val swap_panes : Pane.target -> Pane.target -> unit Command.t
+  (** Exchange pane positions without exchanging their identities or running
+      processes. Both targets must belong to the same bound generation. *)
+
   val rotate_panes : Window.target -> [ `Forward | `Backward ] -> unit Command.t
+  (** Rotate pane positions in the selected direction. Pane identities and
+      running processes remain attached to their panes. *)
 
   val zoom_pane : Pane.target -> unit Command.t
   (** Toggle the window's zoom state around this pane. *)
 
   val respawn_pane :
     ?kill_running:bool -> Pane.target -> Spawn.t -> unit Command.t
+  (** Start the supplied command in the existing pane. A running process causes
+      failure unless [kill_running:true] explicitly replaces it. The pane ID
+      remains unchanged. *)
 
   val clear_history : Pane.target -> unit Command.t
+  (** Clear stored scrollback for this pane. The visible screen and running
+      process remain; later captures cannot recover discarded history. *)
 end

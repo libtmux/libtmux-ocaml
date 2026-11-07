@@ -5,7 +5,7 @@
       "()"
     ],
     "signature": "unit -> Snapshot.t Command.t",
-    "documentation": "",
+    "documentation": "(** Capture and validate the complete session/window-link/pane graph. The\n      result records an acquisition interval, not an atomic server instant. *)",
     "convenience": "handwritten"
   },
   {
@@ -17,7 +17,7 @@
       "~end_"
     ],
     "signature": "?scratch_dir:string -> Pane.t -> start:int -> end_:int -> Captured_text.t Command.t",
-    "documentation": "",
+    "documentation": "(** Capture inclusive visible rows through an operation-owned temporary file.\n      Require [0 <= start <= end_ < Pane.height pane]; scrollback is excluded.\n      Retained bytes survive client close. The scratch directory must share the\n      daemon filesystem. *)",
     "convenience": "handwritten"
   },
   {
@@ -27,7 +27,7 @@
       "~name"
     ],
     "signature": "Window.target -> name:string -> unit Command.t",
-    "documentation": "",
+    "documentation": "(** Set the global window name. Every session link observes the new name on\n      its next capture; existing snapshots retain the old value. *)",
     "convenience": "generated"
   },
   {
@@ -37,7 +37,7 @@
       "~name"
     ],
     "signature": "Session.target -> name:string -> unit Command.t",
-    "documentation": "",
+    "documentation": "(** Set the session name, rejecting a conflicting existing name. Bound IDs\n      remain usable; existing snapshots retain their captured names. *)",
     "convenience": "generated"
   },
   {
@@ -98,7 +98,7 @@
       "keys"
     ],
     "signature": "Pane.target -> Key.t list -> unit Command.t",
-    "documentation": "",
+    "documentation": "(** Send named tmux keys in order, without an implicit Enter. Use {!send_text}\n      for literal bytes rather than key interpretation. *)",
     "convenience": "generated"
   },
   {
@@ -116,7 +116,7 @@
       "channel"
     ],
     "signature": "string -> unit Command.t",
-    "documentation": "",
+    "documentation": "(** Signal a named tmux semaphore, releasing a waiter or retaining the signal\n      for a later {!wait_for}. This does not signal an OS process. *)",
     "convenience": "generated"
   },
   {
@@ -138,7 +138,7 @@
       "value"
     ],
     "signature": "?hidden:bool -> Environment.scope -> name:string -> string -> unit Command.t",
-    "documentation": "",
+    "documentation": "(** Set a local environment value for future pane processes. [hidden] defaults\n      to false; hidden values remain internal to tmux. Existing processes keep\n      their environment. *)",
     "convenience": "generated"
   },
   {
@@ -233,7 +233,7 @@
       "name"
     ],
     "signature": "?include_inherited:bool -> Options.scope -> string -> Options.value option Command.t",
-    "documentation": "",
+    "documentation": "(** Read an exact hook name. Inheritance is included by default; [None] means\n      no entry under the selected policy. Missing targets remain errors. *)",
     "convenience": "generated"
   },
   {
@@ -257,7 +257,7 @@
       "name"
     ],
     "signature": "?index:int -> Options.scope -> string -> unit Command.t",
-    "documentation": "",
+    "documentation": "(** Remove the local hook or one indexed array entry. An inherited hook may\n      become effective again; this does not stop work it already started. *)",
     "convenience": "generated"
   },
   {
@@ -305,7 +305,7 @@
       "~direction"
     ],
     "signature": "?size:Geometry.size -> ?spawn:Spawn.t -> Pane.target -> direction:Geometry.direction -> Created.t Command.t",
-    "documentation": "",
+    "documentation": "(** Create a detached pane beside the target and return the IDs reported by\n      tmux. Omitted [size] lets tmux choose the split; tmux rejects splits when\n      no space remains. *)",
     "convenience": "generated"
   },
   {
@@ -317,7 +317,7 @@
       "~index"
     ],
     "signature": "?name:string -> Pane.target -> session:Session.target -> index:int -> Created.t Command.t",
-    "documentation": "",
+    "documentation": "(** Move the pane into a new window at an explicit session index. An occupied\n      destination fails. The returned IDs describe the resulting context; the\n      pane itself already existed. *)",
     "convenience": "generated"
   },
   {
@@ -326,7 +326,7 @@
       "session"
     ],
     "signature": "Session.target -> unit Command.t",
-    "documentation": "",
+    "documentation": "(** Remove the session and its window links. Windows with no other links and\n      their panes are destroyed. Removing the last session may stop tmux. *)",
     "convenience": "generated"
   },
   {
@@ -335,7 +335,7 @@
       "window"
     ],
     "signature": "Window.target -> unit Command.t",
-    "documentation": "",
+    "documentation": "(** Destroy the window, all its session links and every contained pane. This\n      acts on the global window, not a single contextual link. *)",
     "convenience": "generated"
   },
   {
@@ -344,7 +344,7 @@
       "pane"
     ],
     "signature": "Pane.target -> unit Command.t",
-    "documentation": "",
+    "documentation": "(** Destroy the target pane and its running process. tmux removes a window\n      that becomes empty and may remove its now-empty sessions. *)",
     "convenience": "generated"
   },
   {
@@ -376,7 +376,7 @@
       "~index"
     ],
     "signature": "Window.target -> session:Session.target -> index:int -> unit Command.t",
-    "documentation": "",
+    "documentation": "(** Add a session-specific link to the global window at [index], rejecting an\n      occupied index. The source window and its panes stay shared. *)",
     "convenience": "generated"
   },
   {
@@ -397,7 +397,7 @@
       "pane"
     ],
     "signature": "Pane.target -> unit Command.t",
-    "documentation": "",
+    "documentation": "(** Make the pane active in its containing window. This does not open or\n      attach a terminal client. *)",
     "convenience": "generated"
   },
   {
@@ -407,7 +407,7 @@
       "~title"
     ],
     "signature": "Pane.target -> title:string -> unit Command.t",
-    "documentation": "",
+    "documentation": "(** Set the pane title as literal text, without tmux format expansion. A\n      running terminal application can subsequently replace the title. *)",
     "convenience": "generated"
   },
   {
@@ -418,7 +418,7 @@
       "pane"
     ],
     "signature": "?width:int -> ?height:int -> Pane.target -> unit Command.t",
-    "documentation": "",
+    "documentation": "(** Request positive cell dimensions, supplying at least one dimension. Omit\n      either dimension to retain it. tmux can constrain the result to the\n      available layout. Capture again to observe the actual dimensions. *)",
     "convenience": "generated"
   },
   {
@@ -429,7 +429,7 @@
       "window"
     ],
     "signature": "?width:int -> ?height:int -> Window.target -> unit Command.t",
-    "documentation": "",
+    "documentation": "(** Request positive cell dimensions, supplying at least one dimension. Omit\n      either dimension to retain it. Client-size and window-size policies can\n      affect subsequent sizing. *)",
     "convenience": "generated"
   },
   {
@@ -439,7 +439,7 @@
       "layout"
     ],
     "signature": "Window.target -> Layout.t -> unit Command.t",
-    "documentation": "",
+    "documentation": "(** Apply a preset or validated custom layout to the window. Pane geometry\n      follows tmux layout rules; capture again to observe the result. *)",
     "convenience": "generated"
   },
   {
@@ -449,7 +449,7 @@
       "direction"
     ],
     "signature": "Window.target -> [ `Next | `Previous ] -> unit Command.t",
-    "documentation": "",
+    "documentation": "(** Select the next or previous tmux preset layout for this window. *)",
     "convenience": "generated"
   },
   {
@@ -461,7 +461,7 @@
       "~direction"
     ],
     "signature": "?size:Geometry.size -> Pane.target -> beside:Pane.target -> direction:Geometry.direction -> unit Command.t",
-    "documentation": "",
+    "documentation": "(** Move the source pane beside another pane, optionally setting the split\n      size. Both targets must belong to the same bound generation. An emptied\n      source window is removed by tmux. *)",
     "convenience": "generated"
   },
   {
@@ -471,7 +471,7 @@
       "other"
     ],
     "signature": "Pane.target -> Pane.target -> unit Command.t",
-    "documentation": "",
+    "documentation": "(** Exchange pane positions without exchanging their identities or running\n      processes. Both targets must belong to the same bound generation. *)",
     "convenience": "generated"
   },
   {
@@ -481,7 +481,7 @@
       "direction"
     ],
     "signature": "Window.target -> [ `Forward | `Backward ] -> unit Command.t",
-    "documentation": "",
+    "documentation": "(** Rotate pane positions in the selected direction. Pane identities and\n      running processes remain attached to their panes. *)",
     "convenience": "generated"
   },
   {
@@ -501,7 +501,7 @@
       "spawn"
     ],
     "signature": "?kill_running:bool -> Pane.target -> Spawn.t -> unit Command.t",
-    "documentation": "",
+    "documentation": "(** Start the supplied command in the existing pane. A running process causes\n      failure unless [kill_running:true] explicitly replaces it. The pane ID\n      remains unchanged. *)",
     "convenience": "generated"
   },
   {
@@ -510,7 +510,7 @@
       "pane"
     ],
     "signature": "Pane.target -> unit Command.t",
-    "documentation": "",
+    "documentation": "(** Clear stored scrollback for this pane. The visible screen and running\n      process remain; later captures cannot recover discarded history. *)",
     "convenience": "generated"
   }
 ]

@@ -189,9 +189,13 @@ module Client : sig
   (* BEGIN GENERATED OPERATIONS *)
   val rename_window :
     t -> Libtmux.Window.target -> name:string -> (unit, Libtmux.Error.t) result
+  (** Set the global window name. Every session link observes the new name on
+      its next capture; existing snapshots retain the old value. *)
 
   val rename_session :
     t -> Libtmux.Session.target -> name:string -> (unit, Libtmux.Error.t) result
+  (** Set the session name, rejecting a conflicting existing name. Bound IDs
+      remain usable; existing snapshots retain their captured names. *)
 
   val switch_client_at :
     ?update_environment:bool ->
@@ -233,11 +237,15 @@ module Client : sig
     Libtmux.Pane.target ->
     Libtmux.Key.t list ->
     (unit, Libtmux.Error.t) result
+  (** Send named tmux keys in order, without an implicit Enter. Use {!send_text}
+      for literal bytes rather than key interpretation. *)
 
   val wait_for : t -> string -> (unit, Libtmux.Error.t) result
   (** Wait on a named tmux semaphore using a dedicated bound lane. *)
 
   val signal : t -> string -> (unit, Libtmux.Error.t) result
+  (** Signal a named tmux semaphore, releasing a waiter or retaining the signal
+      for a later {!wait_for}. This does not signal an OS process. *)
 
   val capture_environment :
     ?hidden:bool ->
@@ -256,6 +264,9 @@ module Client : sig
     name:string ->
     string ->
     (unit, Libtmux.Error.t) result
+  (** Set a local environment value for future pane processes. [hidden] defaults
+      to false; hidden values remain internal to tmux. Existing processes keep
+      their environment. *)
 
   val unset_environment :
     t -> Libtmux.Environment.scope -> string -> (unit, Libtmux.Error.t) result
@@ -326,6 +337,8 @@ module Client : sig
     Libtmux.Options.scope ->
     string ->
     (Libtmux.Options.value option, Libtmux.Error.t) result
+  (** Read an exact hook name. Inheritance is included by default; [None] means
+      no entry under the selected policy. Missing targets remain errors. *)
 
   val set_hook :
     ?index:int ->
@@ -349,6 +362,8 @@ module Client : sig
     Libtmux.Options.scope ->
     string ->
     (unit, Libtmux.Error.t) result
+  (** Remove the local hook or one indexed array entry. An inherited hook may
+      become effective again; this does not stop work it already started. *)
 
   val run_hook :
     t -> Libtmux.Options.scope -> string -> (unit, Libtmux.Error.t) result
@@ -386,6 +401,9 @@ module Client : sig
     Libtmux.Pane.target ->
     direction:Libtmux.Geometry.direction ->
     (Libtmux.Created.t, Libtmux.Error.t) result
+  (** Create a detached pane beside the target and return the IDs reported by
+      tmux. Omitted [size] lets tmux choose the split; tmux rejects splits when
+      no space remains. *)
 
   val break_pane :
     ?name:string ->
@@ -394,12 +412,22 @@ module Client : sig
     session:Libtmux.Session.target ->
     index:int ->
     (Libtmux.Created.t, Libtmux.Error.t) result
+  (** Move the pane into a new window at an explicit session index. An occupied
+      destination fails. The returned IDs describe the resulting context; the
+      pane itself already existed. *)
 
   val kill_session :
     t -> Libtmux.Session.target -> (unit, Libtmux.Error.t) result
+  (** Remove the session and its window links. Windows with no other links and
+      their panes are destroyed. Removing the last session may stop tmux. *)
 
   val kill_window : t -> Libtmux.Window.target -> (unit, Libtmux.Error.t) result
+  (** Destroy the window, all its session links and every contained pane. This
+      acts on the global window, not a single contextual link. *)
+
   val kill_pane : t -> Libtmux.Pane.target -> (unit, Libtmux.Error.t) result
+  (** Destroy the target pane and its running process. tmux removes a window
+      that becomes empty and may remove its now-empty sessions. *)
 
   val select_window_at :
     t -> Libtmux.Session.target -> index:int -> (unit, Libtmux.Error.t) result
@@ -421,6 +449,8 @@ module Client : sig
     session:Libtmux.Session.target ->
     index:int ->
     (unit, Libtmux.Error.t) result
+  (** Add a session-specific link to the global window at [index], rejecting an
+      occupied index. The source window and its panes stay shared. *)
 
   val move_window_at :
     t ->
@@ -433,9 +463,13 @@ module Client : sig
       collisions fail. *)
 
   val select_pane : t -> Libtmux.Pane.target -> (unit, Libtmux.Error.t) result
+  (** Make the pane active in its containing window. This does not open or
+      attach a terminal client. *)
 
   val set_pane_title :
     t -> Libtmux.Pane.target -> title:string -> (unit, Libtmux.Error.t) result
+  (** Set the pane title as literal text, without tmux format expansion. A
+      running terminal application can subsequently replace the title. *)
 
   val resize_pane :
     ?width:int ->
@@ -443,6 +477,9 @@ module Client : sig
     t ->
     Libtmux.Pane.target ->
     (unit, Libtmux.Error.t) result
+  (** Request positive cell dimensions, supplying at least one dimension. Omit
+      either dimension to retain it. tmux can constrain the result to the
+      available layout. Capture again to observe the actual dimensions. *)
 
   val resize_window :
     ?width:int ->
@@ -450,18 +487,24 @@ module Client : sig
     t ->
     Libtmux.Window.target ->
     (unit, Libtmux.Error.t) result
+  (** Request positive cell dimensions, supplying at least one dimension. Omit
+      either dimension to retain it. Client-size and window-size policies can
+      affect subsequent sizing. *)
 
   val select_layout :
     t ->
     Libtmux.Window.target ->
     Libtmux.Layout.t ->
     (unit, Libtmux.Error.t) result
+  (** Apply a preset or validated custom layout to the window. Pane geometry
+      follows tmux layout rules; capture again to observe the result. *)
 
   val cycle_layout :
     t ->
     Libtmux.Window.target ->
     [ `Next | `Previous ] ->
     (unit, Libtmux.Error.t) result
+  (** Select the next or previous tmux preset layout for this window. *)
 
   val move_pane :
     ?size:Libtmux.Geometry.size ->
@@ -470,18 +513,25 @@ module Client : sig
     beside:Libtmux.Pane.target ->
     direction:Libtmux.Geometry.direction ->
     (unit, Libtmux.Error.t) result
+  (** Move the source pane beside another pane, optionally setting the split
+      size. Both targets must belong to the same bound generation. An emptied
+      source window is removed by tmux. *)
 
   val swap_panes :
     t ->
     Libtmux.Pane.target ->
     Libtmux.Pane.target ->
     (unit, Libtmux.Error.t) result
+  (** Exchange pane positions without exchanging their identities or running
+      processes. Both targets must belong to the same bound generation. *)
 
   val rotate_panes :
     t ->
     Libtmux.Window.target ->
     [ `Forward | `Backward ] ->
     (unit, Libtmux.Error.t) result
+  (** Rotate pane positions in the selected direction. Pane identities and
+      running processes remain attached to their panes. *)
 
   val zoom_pane : t -> Libtmux.Pane.target -> (unit, Libtmux.Error.t) result
   (** Toggle the window's zoom state around this pane. *)
@@ -492,8 +542,13 @@ module Client : sig
     Libtmux.Pane.target ->
     Libtmux.Spawn.t ->
     (unit, Libtmux.Error.t) result
+  (** Start the supplied command in the existing pane. A running process causes
+      failure unless [kill_running:true] explicitly replaces it. The pane ID
+      remains unchanged. *)
 
   val clear_history : t -> Libtmux.Pane.target -> (unit, Libtmux.Error.t) result
+  (** Clear stored scrollback for this pane. The visible screen and running
+      process remain; later captures cannot recover discarded history. *)
 
   (* END GENERATED OPERATIONS *)
 

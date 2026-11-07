@@ -1,4 +1,4 @@
-# libtmux-ocaml
+# libtmux for OCaml
 
 Drive tmux from OCaml: create sessions and panes, capture an immutable graph,
 query it locally, and observe output through Eio or a blocking client.
