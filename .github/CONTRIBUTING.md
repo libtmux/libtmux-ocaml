@@ -18,6 +18,14 @@ the compiler dependency exact and replace it when adopting a newer stable
 release. Older OCaml versions, backports, and compatibility matrices for them
 are outside the project scope.
 
+Dependency and GitHub Actions upgrades are reviewed manually. Do not add
+scheduled Dependabot or Renovate version-update PRs. Keep security alerts
+enabled; automatic security-fix PRs are a separate, currently disabled setting.
+GitHub's [supported Dependabot ecosystems][dependabot-ecosystems] do not include
+opam, so this setting does not establish coverage for OCaml dependencies.
+
+[dependabot-ecosystems]: https://docs.github.com/en/code-security/reference/supply-chain-security/supported-ecosystems-and-repositories
+
 The initial versions were checked against the upstream releases:
 [opam 2.6.1](https://github.com/ocaml/opam/releases/tag/2.6.1),
 [OCaml 5.5.2](https://github.com/ocaml/ocaml/releases/tag/5.5.2), and
