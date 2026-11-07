@@ -4,4 +4,4 @@
  (package libtmux-workspace-cli)
  (modules main runtime)
  (libraries libtmux libtmux-workspace libtmux-json libtmux-eio libtmux-unix
-  yojson eio_main cmdliner unix))
+  yojson eio_main cmdliner cstruct optint unix))

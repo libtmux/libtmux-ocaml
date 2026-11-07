@@ -79,15 +79,30 @@ let with_deadline mono_clock seconds f =
       Eio.Time.Mono.sleep mono_clock seconds;
       native Error.Deadline_exceeded)
 
+let read_document file =
+  if (Eio.File.stat file).kind <> `Regular_file then
+    Eio.Buf_read.of_flow ~max_size:65_537 file |> Eio.Buf_read.take_all
+  else
+    (* Mounted files can repeat implicit-position reads. Keep the offset explicit. *)
+    let buffer = Cstruct.create 65_537 in
+    let rec read offset =
+      if offset = Cstruct.length buffer then
+        raise Eio.Buf_read.Buffer_limit_exceeded;
+      match
+        Eio.File.pread file
+          ~file_offset:(Optint.Int63.of_int offset)
+          [ Cstruct.shift buffer offset ]
+      with
+      | 0 -> Cstruct.to_string ~len:offset buffer
+      | count -> read (offset + count)
+      | exception End_of_file -> Cstruct.to_string ~len:offset buffer
+    in
+    read 0
+
 let load fs path =
   let path = absolute path in
   let raw =
-    try
-      Eio.Path.with_open_in
-        Eio.Path.(fs / path)
-        (fun flow ->
-          Eio.Buf_read.of_flow ~max_size:65_537 flow |> Eio.Buf_read.take_all)
-    with
+    try Eio.Path.with_open_in Eio.Path.(fs / path) read_document with
     | Eio.Buf_read.Buffer_limit_exceeded ->
         decode_error
           J.Decode_error.

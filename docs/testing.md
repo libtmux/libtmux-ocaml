@@ -46,6 +46,14 @@ release cells and separate 3.2a rejection. Each native cell installs the package
 into a temporary prefix and runs a consumer outside the checkout. Consumer
 features still in development need their own later acceptance gates.
 
+The CLI document check exercises regular files and piped input on both Eio
+backends, including the inclusive 64 KiB boundary. Pass `--directory` to
+exercise a mounted filesystem using an owned temporary directory:
+
+```console
+$ opam exec -- python3 test/workspace_document_test.py
+```
+
 `ocaml/setup-ocaml` caches opam and the switch. The tmux composite action caches
 only an installed prefix, keyed by source, runner image/version, architecture,
 compiler, package versions and build/probe recipes. Dependencies are installed
