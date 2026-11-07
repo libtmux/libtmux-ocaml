@@ -1,0 +1,37 @@
+# Build and tool output
+/_build/
+/_opam/
+/.opam-switch/
+/build/
+/dist/
+/coverage/
+/tmp/
+/docs/_build/
+*.log
+
+# OCaml tooling
+/.merlin
+*.install
+
+# Editors and operating systems
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*~
+*.swp
+*.swo
+
+# Local environment and worktrees
+/.direnv/
+/.envrc.local
+.env
+.env.*
+!.env.example
+/.worktrees/
+/worktrees/
+/scratch/
+
+# Local agent configuration
+CLAUDE.local.md
+.claude/settings.local.json
