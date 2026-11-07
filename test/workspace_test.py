@@ -19,7 +19,9 @@ for binary in [arg for arg in sys.argv[1:] if arg != "--eio"]:
                 line = process.stdout.readline()
                 if line == b"CONTEXT_READY\n":
                     fixture.command("set-hook", "-g", "after-new-session",
-                                    "link-window -t fixture:")
+                                    "wait-for workspace-pane-ready ; link-window -t fixture:")
+                    fixture.command("set-hook", "-g", "after-split-window",
+                                    "wait-for workspace-pane-ready")
                     process.stdin.write(b"continue\n")
                     process.stdin.flush()
                     assert ready.select(1), "workspace context result not ready"
@@ -28,6 +30,7 @@ for binary in [arg for arg in sys.argv[1:] if arg != "--eio"]:
                         stdout, stderr = process.communicate(timeout=1)
                         raise AssertionError((line, stdout, stderr))
                     fixture.command("set-hook", "-gu", "after-new-session")
+                    fixture.command("set-hook", "-gu", "after-split-window")
                     process.stdin.write(b"continue\n")
                     process.stdin.flush()
                     assert ready.select(1), "workspace safety probe not ready"

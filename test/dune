@@ -155,9 +155,16 @@
 (executable
  (name workspace_eio_peer)
  (modules workspace_eio_peer)
+ (link_deps workspace_pane_ready.exe)
  (libraries libtmux libtmux-workspace libtmux-eio workspace_scenarios eio_main))
 
 (executable
  (name workspace_peer)
  (modules workspace_peer)
+ (link_deps workspace_pane_ready.exe)
  (libraries libtmux libtmux-workspace libtmux-unix workspace_scenarios unix))
+
+(executable
+ (name workspace_pane_ready)
+ (modules workspace_pane_ready)
+ (libraries unix))

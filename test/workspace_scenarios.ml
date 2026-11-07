@@ -235,12 +235,30 @@ module Make (B : Backend) = struct
             ignore (get (W.close operation)));
         print_endline "CONTEXT_READY";
         assert (B.read_line () = "continue");
+        let ready_pane () =
+          let executable =
+            Filename.concat
+              (Filename.dirname Sys.executable_name)
+              "workspace_pane_ready.exe"
+          in
+          let socket =
+            match Endpoint.kind endpoint with
+            | Socket_path path -> path
+            | Named_socket _ ->
+                failwith "context fixture requires a socket path"
+          in
+          Config.pane
+            ~spawn:
+              (Spawn.make
+                 (Exec { program = executable; args = [ binary; socket ] }))
+            ()
+        in
         let receipt =
           execute
             (plan
                (config ~session:"workspace-linked"
                   [
-                    window "linked" [ pane (); pane () ];
+                    window "linked" [ ready_pane (); ready_pane () ];
                     window "kept" [ pane () ];
                   ]))
         in
