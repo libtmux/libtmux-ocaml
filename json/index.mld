@@ -11,3 +11,11 @@ violations before constructing typed OCaml values.
 argv and shell code remain distinct. Relative directories resolve against the
 file directory; decoding never reads the process environment or evaluates
 shell expansion.
+
+{1 Plan and receipt output}
+
+{!Libtmux_json.Workspace.encode_plan} describes an advisory preview; imported
+IDs never establish a live binding. {!Libtmux_json.Workspace.encode_receipt}
+retains step outcomes and cleanup results with bounded diagnostics and explicit
+truncation. Invalid UTF-8 uses tagged bytes. {!Libtmux_json.Error} provides the
+shared structured native-error representation.

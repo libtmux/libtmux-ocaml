@@ -2,6 +2,10 @@ open Libtmux
 open Document
 module Decode_error = Document.Decode_error
 
+module Error = struct
+  let encode value = Workspace_output.error (ref 0) value
+end
+
 let shared_fields =
   [
     "pane_id";
@@ -243,4 +247,9 @@ module Expr = struct
     Result.map Yojson.Safe.to_string (encode model expression)
 end
 
-module Workspace = Workspace_json
+module Workspace = struct
+  include Workspace_json
+
+  let encode_plan = Workspace_output.plan
+  let encode_receipt = Workspace_output.receipt
+end
