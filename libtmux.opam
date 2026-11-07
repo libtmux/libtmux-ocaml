@@ -1,0 +1,19 @@
+opam-version: "2.0"
+synopsis: "Scaffold for an OCaml interface to tmux"
+description: """
+Package metadata for the standalone OCaml libtmux port.
+The library has not been implemented or released.
+"""
+maintainer: "https://github.com/libtmux/libtmux-ocaml/issues"
+authors: "libtmux contributors"
+license: "MIT"
+homepage: "https://github.com/libtmux/libtmux-ocaml"
+bug-reports: "https://github.com/libtmux/libtmux-ocaml/issues"
+dev-repo: "git+https://github.com/libtmux/libtmux-ocaml.git"
+depends: [
+  "ocaml" {= "5.5.2"}
+  "dune" {= "3.24.2"}
+]
+build: [
+  ["dune" "build" "-p" name "-j" jobs]
+]
