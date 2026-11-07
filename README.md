@@ -257,8 +257,9 @@ terminal history or an atomic capture/stream barrier. See
 | `libtmux-json` | `Libtmux_json` | Bounded query and workspace JSON decoding |
 | `libtmux-workspace` | `Libtmux_workspace` | Validated workspace configuration, plans and execution journals |
 
-Workspace delivery is in progress; the installed workspace CLI and MCP service
-are unfinished. There is no runnable MCP server to configure yet. See
+The `libtmux-workspace-cli` package installs `tmux-workspace` to validate, preview
+and apply JSON workspaces. See the [workspace package](workspace/README.md).
+The MCP service is unfinished. There is no runnable MCP server to configure yet. See
 [status and adoption gaps](docs/status.md) before choosing this checkout for a
 complete automation suite. macOS, Windows, remote-daemon binding and Java regex
 evaluation are outside the current support contract.

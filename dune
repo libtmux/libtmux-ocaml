@@ -27,6 +27,13 @@
   (docs/branding.md as docs/branding.md)))
 
 (install
+ (package libtmux-workspace-cli)
+ (section doc)
+ (files
+  (glob_files docs/assets/*)
+  (docs/branding.md as docs/branding.md)))
+
+(install
  (package libtmux-workspace)
  (section doc)
  (files
