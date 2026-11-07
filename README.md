@@ -253,8 +253,8 @@ evaluation are outside the current support contract.
 [API documentation](docs/api.md) comes from the public `.mli` files using odoc.
 The [testing guide](docs/testing.md) explains typed Alcotest assertions,
 ppx_expect diagnostics, QCheck properties, installed examples and cached tmux
-builds. [Benchmarks](docs/benchmarking.md) provide a reproducible same-graph
-blocking/Eio capture harness. [Compatibility](docs/compatibility.md) records
+builds. [Benchmarks](docs/benchmarking.md) include reproducible same-graph
+blocking/Eio capture data. [Compatibility](docs/compatibility.md) records
 component-level evidence.
 
 ## Clean up the demo

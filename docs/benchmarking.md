@@ -34,13 +34,23 @@ per-sample process time and CPU usage. Samples include program startup, binding,
 the capture loop and client closure. Fixture creation and compilation are
 outside the per-sample interval. Mode order alternates across repetitions.
 
-## Interpret the samples
+## Recorded baseline
 
-Compare modes on the same graph, exact compiler and tmux release. Read the raw
-sample range and host load alongside each median. A serial capture workload
-exercises capture and query agreement; concurrent saturation, large graph
-scaling, allocation profiling and streaming cancellation latency need separate
-workloads.
+These observations use OCaml 5.5.2 on one shared Linux host. Each table entry is
+median milliseconds for 100 captures, followed by its min–max across five
+samples. The raw files retain the source commit, behavior hash and host load.
+
+| tmux | Blocking, ms | Eio, ms | Evidence |
+| --- | --- | --- | --- |
+| 3.3 | 165.0 (124.8–175.0) | 164.5 (146.7–180.1) | [Raw data](../bench/results/capture-3.3.json) |
+| 3.3a | 118.0 (114.2–122.8) | 124.2 (114.4–126.4) | [Raw data](../bench/results/capture-3.3a.json) |
+| 3.4 | 142.9 (110.5–174.2) | 152.9 (121.6–183.2) | [Raw data](../bench/results/capture-3.4.json) |
+| 3.8 | 136.1 (122.3–143.3) | 157.9 (138.7–167.6) | [Raw data](../bench/results/capture-3.8.json) |
+
+The sample ranges overlap, and the host was running other work. They do not
+establish a fastest backend. This serial workload exercises capture and query
+agreement; concurrent saturation, large graph scaling, allocation profiling
+and streaming cancellation latency need separate workloads.
 
 Benchmarks are a separate tier. Correctness gates and test-loop timings are
 listed in [testing](testing.md), not used as throughput measurements. Keep a

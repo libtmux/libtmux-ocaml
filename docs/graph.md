@@ -14,7 +14,9 @@ A window can be linked to multiple sessions, or linked more than once within
 one session. `Session.window_links` retains each context and index.
 `Session.windows` returns distinct global windows in first-link order.
 `Window.panes` contains that global window's captured panes. Local traversal
-performs no I/O, lazy refresh or per-object subprocess calls.
+performs no I/O, lazy refresh or per-object subprocess calls. Captured client
+rows and attached-client counts include the library's control connection when
+it is present.
 
 The [graph program](../examples/native_graph.ml) deliberately walks links. To
 see the same window in two sessions, run the [README setup](../README.md#read-a-real-tmux-graph),

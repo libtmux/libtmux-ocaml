@@ -1,0 +1,111 @@
+{
+  "schema": "libtmux.benchmark/1",
+  "measured_at_utc": "2026-11-07T14:43:24.459409+00:00",
+  "head": "99614b947f493292dffb4ac4ca7d3f97f347f1f3",
+  "source_sha256": "d70cc1539af90e2a0730c2f2a4c3526880f14745c42c8c69892050cb639049df",
+  "compiler": "5.5.2",
+  "tmux": "3.3",
+  "binary_sha256": "49972aac9c6389688632650a86bc60d220250f7660b3ccd6107f2e96b4790a11",
+  "platform": {
+    "system": "Linux",
+    "kernel": "6.18.54.1-microsoft-standard-WSL2",
+    "architecture": "x86_64",
+    "available_cpus": 12,
+    "load_average_start": [
+      10.30859375,
+      6.3017578125,
+      5.95458984375
+    ]
+  },
+  "workload": {
+    "sessions": 1,
+    "windows": 4,
+    "panes": 16,
+    "captures": 100,
+    "selected_ids": [
+      "%0",
+      "%1",
+      "%2",
+      "%3"
+    ]
+  },
+  "samples": {
+    "unix": [
+      {
+        "seconds": 0.17504475799796637,
+        "child_processes": 1,
+        "observed_clients": 1,
+        "child_cpu_seconds": 0.06384100000000001
+      },
+      {
+        "seconds": 0.12479116299800808,
+        "child_processes": 1,
+        "observed_clients": 1,
+        "child_cpu_seconds": 0.046928999999999985
+      },
+      {
+        "seconds": 0.1541813110015937,
+        "child_processes": 1,
+        "observed_clients": 1,
+        "child_cpu_seconds": 0.05562200000000006
+      },
+      {
+        "seconds": 0.16502341300292755,
+        "child_processes": 1,
+        "observed_clients": 1,
+        "child_cpu_seconds": 0.055782
+      },
+      {
+        "seconds": 0.1733494990003237,
+        "child_processes": 1,
+        "observed_clients": 1,
+        "child_cpu_seconds": 0.05877200000000002
+      }
+    ],
+    "eio": [
+      {
+        "seconds": 0.14667679999911343,
+        "child_processes": 1,
+        "observed_clients": 1,
+        "child_cpu_seconds": 0.060270000000000004
+      },
+      {
+        "seconds": 0.16453344500041567,
+        "child_processes": 1,
+        "observed_clients": 1,
+        "child_cpu_seconds": 0.065577
+      },
+      {
+        "seconds": 0.18011202400157345,
+        "child_processes": 1,
+        "observed_clients": 1,
+        "child_cpu_seconds": 0.07211699999999996
+      },
+      {
+        "seconds": 0.16292943799999193,
+        "child_processes": 1,
+        "observed_clients": 1,
+        "child_cpu_seconds": 0.06513499999999998
+      },
+      {
+        "seconds": 0.17118289499921957,
+        "child_processes": 1,
+        "observed_clients": 1,
+        "child_cpu_seconds": 0.06991299999999995
+      }
+    ]
+  },
+  "summary": {
+    "unix": {
+      "median_seconds": 0.16502341300292755,
+      "min_seconds": 0.12479116299800808,
+      "max_seconds": 0.17504475799796637
+    },
+    "eio": {
+      "median_seconds": 0.16453344500041567,
+      "min_seconds": 0.14667679999911343,
+      "max_seconds": 0.18011202400157345
+    }
+  },
+  "whole_command_seconds": 1.8956366530001105
+}

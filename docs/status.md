@@ -26,7 +26,7 @@ input, streaming, rendered waits and client teardown.
 | Workspaces | Finish the Eio adapter, installed CLI, versioned receipts and recovery checks |
 | MCP | Ship the stdio service, discovery/catalog schemas, bounded targets and operation lookup; run conformance and host tests |
 | Documentation site | Finish public `.cmti` export, shared-site rendering and deployed-link verification |
-| Benchmarks | A [serial capture harness](benchmarking.md) is available; add concurrency, graph scaling, allocation and stream-latency workloads |
+| Benchmarks | [Serial capture baselines](benchmarking.md) exist; add concurrency, graph scaling, allocation and stream-latency workloads |
 | Final qualification | Rerun every required component and exact release cell on the final source revision |
 | Package adoption | Obtain an independent caller-task review and resolve material findings |
 
