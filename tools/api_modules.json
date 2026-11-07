@@ -1,0 +1,10 @@
+{
+  "schema": "libtmux.ocaml-public/1",
+  "modules": [
+    {"module": "Libtmux", "package": "libtmux", "product": "core", "source": "lib/libtmux.mli"},
+    {"module": "Libtmux_workspace", "package": "libtmux-workspace", "product": "workspace", "source": "workspace/libtmux_workspace.mli"},
+    {"module": "Libtmux_json", "package": "libtmux-json", "product": "core", "source": "json/libtmux_json.mli"},
+    {"module": "Libtmux_unix", "package": "libtmux-unix", "product": "core", "source": "unix/libtmux_unix.mli"},
+    {"module": "Libtmux_eio", "package": "libtmux-eio", "product": "core", "source": "eio/libtmux_eio.mli"}
+  ]
+}

@@ -1,0 +1,5 @@
+(executable
+ (name api_export)
+ (modules api_export api_doc)
+ (libraries compiler-libs.common yojson odoc-parser)
+ (enabled_if (= %{env:LIBTMUX_API_EXPORT=0} 1)))

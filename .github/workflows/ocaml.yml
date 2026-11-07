@@ -34,6 +34,13 @@ jobs:
         run: |
           opam exec -- dune build @all @install @doc
           opam exec -- dune runtest --force
+      - name: Export and verify public typed interfaces
+        env:
+          LIBTMUX_API_EXPORT: '1'
+        run: |
+          opam exec -- dune build tools/api_export.exe
+          opam exec -- python3 test/api_export_test.py
+          opam exec -- python3 tools/export_api.py --output _build/docs/ocaml.json
       - name: Verify format and generated catalogs
         run: |
           python3 tools/docs_snippets.py

@@ -37,6 +37,35 @@ There is no published OCaml API site yet. Shared-site export and publication
 are separate acceptance gates; a successful local odoc build does not prove a
 remote deployment. See [current status](status.md).
 
+## Export public interfaces for the shared site
+
+The development exporter reads the five public `.cmti` interfaces listed in
+[`api_modules.json`](../tools/api_modules.json), verifies their Dune installation
+entries and embedded signatures, and checks that source bytes match the library
+commit. It preserves native declarations, doc comments, labels and opaque types.
+It rejects stale annotations and `.cmi`-only input. Internal compilation units
+stay outside the reference.
+
+With the development dependencies installed, build the optional tool:
+
+```console
+$ LIBTMUX_API_EXPORT=1 opam exec -- dune build @install tools/api_export.exe
+```
+
+Export the checked-out public interfaces:
+
+```console
+$ opam exec -- python3 tools/export_api.py \
+    --output _build/docs/ocaml.json
+```
+
+The artifact records the library commit, exporter commit and input hashes
+separately. Uncommitted exporter changes have hashes and a null exporter
+revision. Optional arguments have no invented default. When a type and value
+share a spelling, the type's reference ID ends in `:type`; its native qualified
+name remains unchanged. Compiler libraries, odoc-parser and JSON tooling belong
+to this opt-in development tool, not the core runtime.
+
 ## Read the effect boundary
 
 `Snapshot.panes`, `Window.panes`, field access and `Expr.compile` read captured
