@@ -1,0 +1,4 @@
+(library
+ (name libtmux_json)
+ (public_name libtmux-json)
+ (libraries libtmux yojson))

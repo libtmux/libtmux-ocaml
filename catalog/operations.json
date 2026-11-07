@@ -1,0 +1,516 @@
+[
+  {
+    "name": "capture",
+    "parameters": [
+      "()"
+    ],
+    "signature": "unit -> Snapshot.t Command.t",
+    "documentation": "",
+    "convenience": "handwritten"
+  },
+  {
+    "name": "capture_text",
+    "parameters": [
+      "?scratch_dir",
+      "pane",
+      "~start",
+      "~end_"
+    ],
+    "signature": "?scratch_dir:string -> Pane.t -> start:int -> end_:int -> Captured_text.t Command.t",
+    "documentation": "",
+    "convenience": "handwritten"
+  },
+  {
+    "name": "rename_window",
+    "parameters": [
+      "target",
+      "~name"
+    ],
+    "signature": "Window.target -> name:string -> unit Command.t",
+    "documentation": "",
+    "convenience": "generated"
+  },
+  {
+    "name": "rename_session",
+    "parameters": [
+      "target",
+      "~name"
+    ],
+    "signature": "Session.target -> name:string -> unit Command.t",
+    "documentation": "",
+    "convenience": "generated"
+  },
+  {
+    "name": "switch_client_at",
+    "parameters": [
+      "?update_environment",
+      "client",
+      "~session"
+    ],
+    "signature": "?update_environment:bool -> Client_name.t -> session:Session.target -> unit Command.t",
+    "documentation": "(** Switch the client currently bearing this name to the bound session.\n      Environment updates are disabled by default. This can move either a\n      terminal client or a control client; it does not open a new terminal. *)",
+    "convenience": "generated"
+  },
+  {
+    "name": "request_detach_client_at",
+    "parameters": [
+      "client"
+    ],
+    "signature": "Client_name.t -> unit Command.t",
+    "documentation": "(** Request detachment of the client currently bearing this name. Success\n      confirms request processing, not peer exit. Detaching the library's own\n      primary lane can lose the response and retire its generation. *)",
+    "convenience": "generated"
+  },
+  {
+    "name": "refresh_client_at",
+    "parameters": [
+      "?status_only",
+      "client"
+    ],
+    "signature": "?status_only:bool -> Client_name.t -> unit Command.t",
+    "documentation": "(** Request a redraw; no terminal-rendering completion is implied. *)",
+    "convenience": "generated"
+  },
+  {
+    "name": "resize_control_client_at",
+    "parameters": [
+      "client",
+      "~width",
+      "~height"
+    ],
+    "signature": "Client_name.t -> width:int -> height:int -> unit Command.t",
+    "documentation": "(** Set a control client's reported size. tmux rejects terminal clients. *)",
+    "convenience": "generated"
+  },
+  {
+    "name": "send_text",
+    "parameters": [
+      "target",
+      "~text"
+    ],
+    "signature": "Pane.target -> text:string -> unit Command.t",
+    "documentation": "(** Literal bytes, without an implicit Enter. NUL is rejected at admission. *)",
+    "convenience": "generated"
+  },
+  {
+    "name": "send_keys",
+    "parameters": [
+      "target",
+      "keys"
+    ],
+    "signature": "Pane.target -> Key.t list -> unit Command.t",
+    "documentation": "",
+    "convenience": "generated"
+  },
+  {
+    "name": "wait_for",
+    "parameters": [
+      "channel"
+    ],
+    "signature": "string -> unit Command.t",
+    "documentation": "(** Wait on a named tmux semaphore using a dedicated bound lane. *)",
+    "convenience": "generated"
+  },
+  {
+    "name": "signal",
+    "parameters": [
+      "channel"
+    ],
+    "signature": "string -> unit Command.t",
+    "documentation": "",
+    "convenience": "generated"
+  },
+  {
+    "name": "capture_environment",
+    "parameters": [
+      "?hidden",
+      "scope"
+    ],
+    "signature": "?hidden:bool -> Environment.scope -> Environment.t Command.t",
+    "documentation": "(** Acquire a bounded table through a read-only command process. Its response\n      must identify the bound daemon while the original pidfd remains live.\n      Unsupported external variable names fail decoding; they are not omitted.\n  *)",
+    "convenience": "generated"
+  },
+  {
+    "name": "set_environment",
+    "parameters": [
+      "?hidden",
+      "scope",
+      "~name",
+      "value"
+    ],
+    "signature": "?hidden:bool -> Environment.scope -> name:string -> string -> unit Command.t",
+    "documentation": "",
+    "convenience": "generated"
+  },
+  {
+    "name": "unset_environment",
+    "parameters": [
+      "scope",
+      "name"
+    ],
+    "signature": "Environment.scope -> string -> unit Command.t",
+    "documentation": "(** Remove the local entry, allowing a global value to apply to future panes.\n  *)",
+    "convenience": "generated"
+  },
+  {
+    "name": "remove_environment",
+    "parameters": [
+      "scope",
+      "name"
+    ],
+    "signature": "Environment.scope -> string -> unit Command.t",
+    "documentation": "(** Store a removal marker, excluding the variable from future panes. *)",
+    "convenience": "generated"
+  },
+  {
+    "name": "capture_options",
+    "parameters": [
+      "?include_inherited",
+      "scope"
+    ],
+    "signature": "?include_inherited:bool -> Options.scope -> Options.t Command.t",
+    "documentation": "(** Acquire one bounded option table, excluding hooks. The default includes\n      only local entries. Inherited table enumeration includes built-ins;\n      inherited user options require [read_option] with their explicit name.\n      Built-in descriptors are qualified on tmux 3.3, 3.3a, 3.4 and 3.8; other\n      versions return [Unsupported]. *)",
+    "convenience": "generated"
+  },
+  {
+    "name": "read_option",
+    "parameters": [
+      "?include_inherited",
+      "scope",
+      "name"
+    ],
+    "signature": "?include_inherited:bool -> Options.scope -> string -> Options.value option Command.t",
+    "documentation": "(** Read one exact name, including user-option inheritance. [None] means no\n      entry under the selected policy. An invalid target remains an error. The\n      default follows inheritance; this does not identify the defining parent\n      scope. *)",
+    "convenience": "generated"
+  },
+  {
+    "name": "set_option",
+    "parameters": [
+      "?index",
+      "?append",
+      "scope",
+      "~name",
+      "value"
+    ],
+    "signature": "?index:int -> ?append:bool -> Options.scope -> name:string -> Options.scalar -> unit Command.t",
+    "documentation": "(** Validate the scope and scalar kind before admission. Array values require\n      an index, or [append:true]. Without an index, tmux splits appended text\n      using the option's separator and fills the lowest unused indexes. Text is\n      literal; tmux format expansion is disabled. Hooks use a separate\n      operation. *)",
+    "convenience": "generated"
+  },
+  {
+    "name": "unset_option",
+    "parameters": [
+      "?index",
+      "scope",
+      "name"
+    ],
+    "signature": "?index:int -> Options.scope -> string -> unit Command.t",
+    "documentation": "(** Remove a local override or one array element. Global built-ins reset to\n      their tmux defaults; this does not recursively unset child overrides. *)",
+    "convenience": "generated"
+  },
+  {
+    "name": "clear_option_array",
+    "parameters": [
+      "scope",
+      "name"
+    ],
+    "signature": "Options.scope -> string -> unit Command.t",
+    "documentation": "(** Set a local empty array, masking inheritance. *)",
+    "convenience": "generated"
+  },
+  {
+    "name": "capture_hooks",
+    "parameters": [
+      "scope"
+    ],
+    "signature": "Options.scope -> Options.t Command.t",
+    "documentation": "(** Capture locally configured built-in hooks. Command values are tmux's\n      printed representation, retained as data. *)",
+    "convenience": "generated"
+  },
+  {
+    "name": "read_hook",
+    "parameters": [
+      "?include_inherited",
+      "scope",
+      "name"
+    ],
+    "signature": "?include_inherited:bool -> Options.scope -> string -> Options.value option Command.t",
+    "documentation": "",
+    "convenience": "generated"
+  },
+  {
+    "name": "set_hook",
+    "parameters": [
+      "?index",
+      "?append",
+      "scope",
+      "~name",
+      "commands"
+    ],
+    "signature": "?index:int -> ?append:bool -> Options.scope -> name:string -> Hook.command list -> unit Command.t",
+    "documentation": "(** Set a hook to a nonempty command list. Without an index, replace the whole\n      hook array, or fill the lowest free index when appending. An explicit\n      [@name] custom hook stores command text as a user option; it requires\n      complete replacement and has no array indexes. [read_hook] returns its\n      [Options.Text] value; bulk hook capture includes built-ins. Commands may\n      cause arbitrary tmux effects when triggered. Hooks that print output are\n      outside the supported control transport contract. *)",
+    "convenience": "generated"
+  },
+  {
+    "name": "remove_hook",
+    "parameters": [
+      "?index",
+      "scope",
+      "name"
+    ],
+    "signature": "?index:int -> Options.scope -> string -> unit Command.t",
+    "documentation": "",
+    "convenience": "generated"
+  },
+  {
+    "name": "run_hook",
+    "parameters": [
+      "scope",
+      "name"
+    ],
+    "signature": "Options.scope -> string -> unit Command.t",
+    "documentation": "(** Run the effective hook in an explicit session, window or pane context. A\n      successful result follows completion of its synchronous command queue.\n      Background work started by a hook has its own lifetime. A later hook\n      failure returns an uncertain outcome; preceding effects remain. Named [@]\n      hooks return [Unsupported] because tmux can hide their parse failures in\n      the server log. Configuration and inspection remain available. *)",
+    "convenience": "generated"
+  },
+  {
+    "name": "create_session",
+    "parameters": [
+      "?window_name",
+      "?width",
+      "?height",
+      "?spawn",
+      "~name",
+      "()"
+    ],
+    "signature": "?window_name:string -> ?width:int -> ?height:int -> ?spawn:Spawn.t -> name:string -> unit -> Created.t Command.t",
+    "documentation": "(** Create a detached session on the bound daemon. Name collisions fail. *)",
+    "convenience": "generated"
+  },
+  {
+    "name": "create_window",
+    "parameters": [
+      "?index",
+      "?name",
+      "?spawn",
+      "session"
+    ],
+    "signature": "?index:int -> ?name:string -> ?spawn:Spawn.t -> Session.target -> Created.t Command.t",
+    "documentation": "(** Create detached, rejecting an occupied explicit index. *)",
+    "convenience": "generated"
+  },
+  {
+    "name": "split_pane",
+    "parameters": [
+      "?size",
+      "?spawn",
+      "pane",
+      "~direction"
+    ],
+    "signature": "?size:Geometry.size -> ?spawn:Spawn.t -> Pane.target -> direction:Geometry.direction -> Created.t Command.t",
+    "documentation": "",
+    "convenience": "generated"
+  },
+  {
+    "name": "break_pane",
+    "parameters": [
+      "?name",
+      "pane",
+      "~session",
+      "~index"
+    ],
+    "signature": "?name:string -> Pane.target -> session:Session.target -> index:int -> Created.t Command.t",
+    "documentation": "",
+    "convenience": "generated"
+  },
+  {
+    "name": "kill_session",
+    "parameters": [
+      "session"
+    ],
+    "signature": "Session.target -> unit Command.t",
+    "documentation": "",
+    "convenience": "generated"
+  },
+  {
+    "name": "kill_window",
+    "parameters": [
+      "window"
+    ],
+    "signature": "Window.target -> unit Command.t",
+    "documentation": "",
+    "convenience": "generated"
+  },
+  {
+    "name": "kill_pane",
+    "parameters": [
+      "pane"
+    ],
+    "signature": "Pane.target -> unit Command.t",
+    "documentation": "",
+    "convenience": "generated"
+  },
+  {
+    "name": "select_window_at",
+    "parameters": [
+      "session",
+      "~index"
+    ],
+    "signature": "Session.target -> index:int -> unit Command.t",
+    "documentation": "(** Operate on the session's current index at execution, not an old link\n      incarnation. *)",
+    "convenience": "generated"
+  },
+  {
+    "name": "unlink_window_at",
+    "parameters": [
+      "?allow_kill",
+      "session",
+      "~index"
+    ],
+    "signature": "?allow_kill:bool -> Session.target -> index:int -> unit Command.t",
+    "documentation": "(** Without [allow_kill], tmux rejects removal of the last link to a window.\n  *)",
+    "convenience": "generated"
+  },
+  {
+    "name": "link_window",
+    "parameters": [
+      "window",
+      "~session",
+      "~index"
+    ],
+    "signature": "Window.target -> session:Session.target -> index:int -> unit Command.t",
+    "documentation": "",
+    "convenience": "generated"
+  },
+  {
+    "name": "move_window_at",
+    "parameters": [
+      "from_session",
+      "~from_index",
+      "~session",
+      "~index"
+    ],
+    "signature": "Session.target -> from_index:int -> session:Session.target -> index:int -> unit Command.t",
+    "documentation": "(** Move the source session's current link at [from_index]. Destination\n      collisions fail. *)",
+    "convenience": "generated"
+  },
+  {
+    "name": "select_pane",
+    "parameters": [
+      "pane"
+    ],
+    "signature": "Pane.target -> unit Command.t",
+    "documentation": "",
+    "convenience": "generated"
+  },
+  {
+    "name": "set_pane_title",
+    "parameters": [
+      "pane",
+      "~title"
+    ],
+    "signature": "Pane.target -> title:string -> unit Command.t",
+    "documentation": "",
+    "convenience": "generated"
+  },
+  {
+    "name": "resize_pane",
+    "parameters": [
+      "?width",
+      "?height",
+      "pane"
+    ],
+    "signature": "?width:int -> ?height:int -> Pane.target -> unit Command.t",
+    "documentation": "",
+    "convenience": "generated"
+  },
+  {
+    "name": "resize_window",
+    "parameters": [
+      "?width",
+      "?height",
+      "window"
+    ],
+    "signature": "?width:int -> ?height:int -> Window.target -> unit Command.t",
+    "documentation": "",
+    "convenience": "generated"
+  },
+  {
+    "name": "select_layout",
+    "parameters": [
+      "window",
+      "layout"
+    ],
+    "signature": "Window.target -> Layout.t -> unit Command.t",
+    "documentation": "",
+    "convenience": "generated"
+  },
+  {
+    "name": "cycle_layout",
+    "parameters": [
+      "window",
+      "direction"
+    ],
+    "signature": "Window.target -> [ `Next | `Previous ] -> unit Command.t",
+    "documentation": "",
+    "convenience": "generated"
+  },
+  {
+    "name": "move_pane",
+    "parameters": [
+      "?size",
+      "pane",
+      "~beside",
+      "~direction"
+    ],
+    "signature": "?size:Geometry.size -> Pane.target -> beside:Pane.target -> direction:Geometry.direction -> unit Command.t",
+    "documentation": "",
+    "convenience": "generated"
+  },
+  {
+    "name": "swap_panes",
+    "parameters": [
+      "pane",
+      "other"
+    ],
+    "signature": "Pane.target -> Pane.target -> unit Command.t",
+    "documentation": "",
+    "convenience": "generated"
+  },
+  {
+    "name": "rotate_panes",
+    "parameters": [
+      "window",
+      "direction"
+    ],
+    "signature": "Window.target -> [ `Forward | `Backward ] -> unit Command.t",
+    "documentation": "",
+    "convenience": "generated"
+  },
+  {
+    "name": "zoom_pane",
+    "parameters": [
+      "pane"
+    ],
+    "signature": "Pane.target -> unit Command.t",
+    "documentation": "(** Toggle the window's zoom state around this pane. *)",
+    "convenience": "generated"
+  },
+  {
+    "name": "respawn_pane",
+    "parameters": [
+      "?kill_running",
+      "pane",
+      "spawn"
+    ],
+    "signature": "?kill_running:bool -> Pane.target -> Spawn.t -> unit Command.t",
+    "documentation": "",
+    "convenience": "generated"
+  },
+  {
+    "name": "clear_history",
+    "parameters": [
+      "pane"
+    ],
+    "signature": "Pane.target -> unit Command.t",
+    "documentation": "",
+    "convenience": "generated"
+  }
+]

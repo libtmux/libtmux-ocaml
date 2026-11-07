@@ -1,0 +1,1151 @@
+{
+  "java_revision": "e8a39689d8d60968ac978a1dd2a89c6112333896",
+  "panes": [
+    {
+      "pane_id": "%1",
+      "pane_current_command": "nvim",
+      "pane_index": 0,
+      "pane_active": true,
+      "pane_title": "editor",
+      "pane_current_path": "/srv/project",
+      "pane_width": 120,
+      "pane_height": 48,
+      "pane_left": 0,
+      "pane_top": 0
+    },
+    {
+      "pane_id": "%2",
+      "pane_current_command": "sh",
+      "pane_index": 1,
+      "pane_active": false,
+      "pane_title": "shell",
+      "pane_current_path": "/tmp",
+      "pane_width": 39,
+      "pane_height": 48,
+      "pane_left": 121,
+      "pane_top": 0
+    },
+    {
+      "pane_id": "%3",
+      "pane_current_command": "nvim",
+      "pane_index": 2,
+      "pane_active": false,
+      "pane_title": "雪😀\napi",
+      "pane_current_path": "/srv/雪",
+      "pane_width": 80,
+      "pane_height": 12,
+      "pane_left": 0,
+      "pane_top": 49
+    }
+  ],
+  "cases": [
+    {
+      "name": "pane_id:equals:%1",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_id",
+          "op": "equals",
+          "value": "%1"
+        }
+      },
+      "matches": [
+        "%1"
+      ]
+    },
+    {
+      "name": "pane_id:not_equals:%1",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_id",
+          "op": "not_equals",
+          "value": "%1"
+        }
+      },
+      "matches": [
+        "%2",
+        "%3"
+      ]
+    },
+    {
+      "name": "pane_id:starts_with:%1",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_id",
+          "op": "starts_with",
+          "value": "%1"
+        }
+      },
+      "matches": [
+        "%1"
+      ]
+    },
+    {
+      "name": "pane_id:ends_with:%1",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_id",
+          "op": "ends_with",
+          "value": "%1"
+        }
+      },
+      "matches": [
+        "%1"
+      ]
+    },
+    {
+      "name": "pane_id:contains:",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_id",
+          "op": "contains",
+          "value": ""
+        }
+      },
+      "matches": [
+        "%1",
+        "%2",
+        "%3"
+      ]
+    },
+    {
+      "name": "pane_id:in:['%1', '雪😀\\napi']",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_id",
+          "op": "in",
+          "value": [
+            "%1",
+            "雪😀\napi"
+          ]
+        }
+      },
+      "matches": [
+        "%1"
+      ]
+    },
+    {
+      "name": "pane_id:in:[]",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_id",
+          "op": "in",
+          "value": []
+        }
+      },
+      "matches": []
+    },
+    {
+      "name": "pane_current_command:equals:nvim",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_current_command",
+          "op": "equals",
+          "value": "nvim"
+        }
+      },
+      "matches": [
+        "%1",
+        "%3"
+      ]
+    },
+    {
+      "name": "pane_current_command:not_equals:nvim",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_current_command",
+          "op": "not_equals",
+          "value": "nvim"
+        }
+      },
+      "matches": [
+        "%2"
+      ]
+    },
+    {
+      "name": "pane_current_command:starts_with:nv",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_current_command",
+          "op": "starts_with",
+          "value": "nv"
+        }
+      },
+      "matches": [
+        "%1",
+        "%3"
+      ]
+    },
+    {
+      "name": "pane_current_command:ends_with:im",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_current_command",
+          "op": "ends_with",
+          "value": "im"
+        }
+      },
+      "matches": [
+        "%1",
+        "%3"
+      ]
+    },
+    {
+      "name": "pane_current_command:contains:",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_current_command",
+          "op": "contains",
+          "value": ""
+        }
+      },
+      "matches": [
+        "%1",
+        "%2",
+        "%3"
+      ]
+    },
+    {
+      "name": "pane_current_command:in:['nvim', '雪😀\\napi']",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_current_command",
+          "op": "in",
+          "value": [
+            "nvim",
+            "雪😀\napi"
+          ]
+        }
+      },
+      "matches": [
+        "%1",
+        "%3"
+      ]
+    },
+    {
+      "name": "pane_current_command:in:[]",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_current_command",
+          "op": "in",
+          "value": []
+        }
+      },
+      "matches": []
+    },
+    {
+      "name": "pane_index:equals:0",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_index",
+          "op": "equals",
+          "value": 0
+        }
+      },
+      "matches": [
+        "%1"
+      ]
+    },
+    {
+      "name": "pane_index:not_equals:0",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_index",
+          "op": "not_equals",
+          "value": 0
+        }
+      },
+      "matches": [
+        "%2",
+        "%3"
+      ]
+    },
+    {
+      "name": "pane_index:less_than:0",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_index",
+          "op": "less_than",
+          "value": 0
+        }
+      },
+      "matches": []
+    },
+    {
+      "name": "pane_index:at_most:0",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_index",
+          "op": "at_most",
+          "value": 0
+        }
+      },
+      "matches": [
+        "%1"
+      ]
+    },
+    {
+      "name": "pane_index:greater_than:0",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_index",
+          "op": "greater_than",
+          "value": 0
+        }
+      },
+      "matches": [
+        "%2",
+        "%3"
+      ]
+    },
+    {
+      "name": "pane_index:at_least:0",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_index",
+          "op": "at_least",
+          "value": 0
+        }
+      },
+      "matches": [
+        "%1",
+        "%2",
+        "%3"
+      ]
+    },
+    {
+      "name": "pane_active:equals:True",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_active",
+          "op": "equals",
+          "value": true
+        }
+      },
+      "matches": [
+        "%1"
+      ]
+    },
+    {
+      "name": "pane_active:not_equals:True",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_active",
+          "op": "not_equals",
+          "value": true
+        }
+      },
+      "matches": [
+        "%2",
+        "%3"
+      ]
+    },
+    {
+      "name": "pane_title:equals:editor",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_title",
+          "op": "equals",
+          "value": "editor"
+        }
+      },
+      "matches": [
+        "%1"
+      ]
+    },
+    {
+      "name": "pane_title:not_equals:editor",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_title",
+          "op": "not_equals",
+          "value": "editor"
+        }
+      },
+      "matches": [
+        "%2",
+        "%3"
+      ]
+    },
+    {
+      "name": "pane_title:starts_with:ed",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_title",
+          "op": "starts_with",
+          "value": "ed"
+        }
+      },
+      "matches": [
+        "%1"
+      ]
+    },
+    {
+      "name": "pane_title:ends_with:or",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_title",
+          "op": "ends_with",
+          "value": "or"
+        }
+      },
+      "matches": [
+        "%1"
+      ]
+    },
+    {
+      "name": "pane_title:contains:",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_title",
+          "op": "contains",
+          "value": ""
+        }
+      },
+      "matches": [
+        "%1",
+        "%2",
+        "%3"
+      ]
+    },
+    {
+      "name": "pane_title:in:['editor', '雪😀\\napi']",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_title",
+          "op": "in",
+          "value": [
+            "editor",
+            "雪😀\napi"
+          ]
+        }
+      },
+      "matches": [
+        "%1",
+        "%3"
+      ]
+    },
+    {
+      "name": "pane_title:in:[]",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_title",
+          "op": "in",
+          "value": []
+        }
+      },
+      "matches": []
+    },
+    {
+      "name": "pane_current_path:equals:/srv/project",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_current_path",
+          "op": "equals",
+          "value": "/srv/project"
+        }
+      },
+      "matches": [
+        "%1"
+      ]
+    },
+    {
+      "name": "pane_current_path:not_equals:/srv/project",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_current_path",
+          "op": "not_equals",
+          "value": "/srv/project"
+        }
+      },
+      "matches": [
+        "%2",
+        "%3"
+      ]
+    },
+    {
+      "name": "pane_current_path:starts_with:/s",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_current_path",
+          "op": "starts_with",
+          "value": "/s"
+        }
+      },
+      "matches": [
+        "%1",
+        "%3"
+      ]
+    },
+    {
+      "name": "pane_current_path:ends_with:ct",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_current_path",
+          "op": "ends_with",
+          "value": "ct"
+        }
+      },
+      "matches": [
+        "%1"
+      ]
+    },
+    {
+      "name": "pane_current_path:contains:",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_current_path",
+          "op": "contains",
+          "value": ""
+        }
+      },
+      "matches": [
+        "%1",
+        "%2",
+        "%3"
+      ]
+    },
+    {
+      "name": "pane_current_path:in:['/srv/project', '雪😀\\napi']",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_current_path",
+          "op": "in",
+          "value": [
+            "/srv/project",
+            "雪😀\napi"
+          ]
+        }
+      },
+      "matches": [
+        "%1"
+      ]
+    },
+    {
+      "name": "pane_current_path:in:[]",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_current_path",
+          "op": "in",
+          "value": []
+        }
+      },
+      "matches": []
+    },
+    {
+      "name": "pane_width:equals:120",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_width",
+          "op": "equals",
+          "value": 120
+        }
+      },
+      "matches": [
+        "%1"
+      ]
+    },
+    {
+      "name": "pane_width:not_equals:120",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_width",
+          "op": "not_equals",
+          "value": 120
+        }
+      },
+      "matches": [
+        "%2",
+        "%3"
+      ]
+    },
+    {
+      "name": "pane_width:less_than:120",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_width",
+          "op": "less_than",
+          "value": 120
+        }
+      },
+      "matches": [
+        "%2",
+        "%3"
+      ]
+    },
+    {
+      "name": "pane_width:at_most:120",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_width",
+          "op": "at_most",
+          "value": 120
+        }
+      },
+      "matches": [
+        "%1",
+        "%2",
+        "%3"
+      ]
+    },
+    {
+      "name": "pane_width:greater_than:120",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_width",
+          "op": "greater_than",
+          "value": 120
+        }
+      },
+      "matches": []
+    },
+    {
+      "name": "pane_width:at_least:120",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_width",
+          "op": "at_least",
+          "value": 120
+        }
+      },
+      "matches": [
+        "%1"
+      ]
+    },
+    {
+      "name": "pane_height:equals:48",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_height",
+          "op": "equals",
+          "value": 48
+        }
+      },
+      "matches": [
+        "%1",
+        "%2"
+      ]
+    },
+    {
+      "name": "pane_height:not_equals:48",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_height",
+          "op": "not_equals",
+          "value": 48
+        }
+      },
+      "matches": [
+        "%3"
+      ]
+    },
+    {
+      "name": "pane_height:less_than:48",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_height",
+          "op": "less_than",
+          "value": 48
+        }
+      },
+      "matches": [
+        "%3"
+      ]
+    },
+    {
+      "name": "pane_height:at_most:48",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_height",
+          "op": "at_most",
+          "value": 48
+        }
+      },
+      "matches": [
+        "%1",
+        "%2",
+        "%3"
+      ]
+    },
+    {
+      "name": "pane_height:greater_than:48",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_height",
+          "op": "greater_than",
+          "value": 48
+        }
+      },
+      "matches": []
+    },
+    {
+      "name": "pane_height:at_least:48",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_height",
+          "op": "at_least",
+          "value": 48
+        }
+      },
+      "matches": [
+        "%1",
+        "%2"
+      ]
+    },
+    {
+      "name": "pane_left:equals:0",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_left",
+          "op": "equals",
+          "value": 0
+        }
+      },
+      "matches": [
+        "%1",
+        "%3"
+      ]
+    },
+    {
+      "name": "pane_left:not_equals:0",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_left",
+          "op": "not_equals",
+          "value": 0
+        }
+      },
+      "matches": [
+        "%2"
+      ]
+    },
+    {
+      "name": "pane_left:less_than:0",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_left",
+          "op": "less_than",
+          "value": 0
+        }
+      },
+      "matches": []
+    },
+    {
+      "name": "pane_left:at_most:0",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_left",
+          "op": "at_most",
+          "value": 0
+        }
+      },
+      "matches": [
+        "%1",
+        "%3"
+      ]
+    },
+    {
+      "name": "pane_left:greater_than:0",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_left",
+          "op": "greater_than",
+          "value": 0
+        }
+      },
+      "matches": [
+        "%2"
+      ]
+    },
+    {
+      "name": "pane_left:at_least:0",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_left",
+          "op": "at_least",
+          "value": 0
+        }
+      },
+      "matches": [
+        "%1",
+        "%2",
+        "%3"
+      ]
+    },
+    {
+      "name": "pane_top:equals:0",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_top",
+          "op": "equals",
+          "value": 0
+        }
+      },
+      "matches": [
+        "%1",
+        "%2"
+      ]
+    },
+    {
+      "name": "pane_top:not_equals:0",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_top",
+          "op": "not_equals",
+          "value": 0
+        }
+      },
+      "matches": [
+        "%3"
+      ]
+    },
+    {
+      "name": "pane_top:less_than:0",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_top",
+          "op": "less_than",
+          "value": 0
+        }
+      },
+      "matches": []
+    },
+    {
+      "name": "pane_top:at_most:0",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_top",
+          "op": "at_most",
+          "value": 0
+        }
+      },
+      "matches": [
+        "%1",
+        "%2"
+      ]
+    },
+    {
+      "name": "pane_top:greater_than:0",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_top",
+          "op": "greater_than",
+          "value": 0
+        }
+      },
+      "matches": [
+        "%3"
+      ]
+    },
+    {
+      "name": "pane_top:at_least:0",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_top",
+          "op": "at_least",
+          "value": 0
+        }
+      },
+      "matches": [
+        "%1",
+        "%2",
+        "%3"
+      ]
+    },
+    {
+      "name": "pane_title:contains:😀",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_title",
+          "op": "contains",
+          "value": "😀"
+        }
+      },
+      "matches": [
+        "%3"
+      ]
+    },
+    {
+      "name": "pane_title:contains:\u0000",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "compare",
+          "field": "pane_title",
+          "op": "contains",
+          "value": "\u0000"
+        }
+      },
+      "matches": []
+    },
+    {
+      "name": "empty-and",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "and",
+          "operands": []
+        }
+      },
+      "matches": [
+        "%1",
+        "%2",
+        "%3"
+      ]
+    },
+    {
+      "name": "empty-or",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "or",
+          "operands": []
+        }
+      },
+      "matches": []
+    },
+    {
+      "name": "not-empty-or",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "not",
+          "operand": {
+            "node": "or",
+            "operands": []
+          }
+        }
+      },
+      "matches": [
+        "%1",
+        "%2",
+        "%3"
+      ]
+    },
+    {
+      "name": "nested",
+      "query": {
+        "schema": "libtmux.filter/1",
+        "model": "pane",
+        "expr": {
+          "node": "and",
+          "operands": [
+            {
+              "node": "compare",
+              "field": "pane_current_command",
+              "op": "equals",
+              "value": "nvim"
+            },
+            {
+              "node": "or",
+              "operands": [
+                {
+                  "node": "compare",
+                  "field": "pane_width",
+                  "op": "at_least",
+                  "value": 120
+                },
+                {
+                  "node": "compare",
+                  "field": "pane_title",
+                  "op": "contains",
+                  "value": "雪"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "matches": [
+        "%1",
+        "%3"
+      ]
+    }
+  ]
+}

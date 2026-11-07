@@ -1,7 +1,7 @@
 # Contributing
 
-This repository is a metadata scaffold. Native checks validate package
-definitions; library installation and tmux behavior await implementation.
+This repository implements the pure core first. Client and consumer work has
+separate acceptance gates; a passing core test does not qualify a transport.
 
 Read [AGENTS.md](../AGENTS.md) for change discipline and
 [WRITING.md](WRITING.md) for prose and commit conventions.
@@ -9,8 +9,9 @@ Read [AGENTS.md](../AGENTS.md) for change discipline and
 ## Toolchain
 
 [.tool-versions](../.tool-versions) pins opam. [libtmux.opam](../libtmux.opam)
-pins OCaml and Dune for initial development. These are development choices;
-compiler and platform compatibility remain unverified.
+pins OCaml and Dune for development. The current packages build with this
+compiler; [compatibility evidence](../docs/compatibility.md) records the
+qualified runtime components and remaining gates.
 
 The compiler policy is current stable OCaml only, using 2026 releases. Keep
 the compiler dependency exact and replace it when adopting a newer stable
@@ -46,10 +47,18 @@ leaves the default switch unchanged. Run setup outside validation loops:
 $ mise exec -- opam switch create \
     --deps-only \
     --no-switch \
+    --with-test \
+    --with-doc \
     . ocaml-base-compiler.5.5.2
 ```
 
-## Metadata checks
+Install the development formatter separately from runtime dependencies:
+
+```console
+$ mise exec -- opam install ocamlformat.0.29.0
+```
+
+## Checks
 
 Check the native manifest offline:
 
@@ -62,7 +71,7 @@ outer loop:
 
 ```console
 $ /usr/bin/time -p mise exec -- opam exec -- dune build \
-    -p libtmux
+    @all @install @doc
 ```
 
 Check tracked edits for whitespace errors:
@@ -78,10 +87,45 @@ staged diff when preparing an authorized commit:
 $ git diff --cached --check
 ```
 
-Keep `libtmux.opam` as the source of package metadata. The `allow_empty` package
-setting in `dune-project` permits the metadata scaffold; remove it when the
-first library or executable is added. An empty build is not implementation
-or installed-package evidence.
+Keep `libtmux.opam` as the source of package metadata.
+
+Run the pure unit, property and public compile-failure checks:
+
+```console
+$ /usr/bin/time -p mise exec -- opam exec -- dune runtest
+```
+
+The suite also includes test-only `ppx_expect` diagnostics alongside typed
+Alcotest assertions. See [testing and CI](../docs/testing.md) for failure
+presentation, property cases and cached native builds.
+
+Check generated field descriptors and documentation:
+
+```console
+$ /usr/bin/time -p mise exec -- opam exec -- python3 tools/generate_fields.py --check
+```
+
+Verify installation from an independent temporary consumer in the outer loop:
+
+```console
+$ /usr/bin/time -p mise exec -- opam exec -- python3 test/installed_consumer.py
+```
+
+Check generated versioned option and hook descriptors:
+
+```console
+$ /usr/bin/time -p mise exec -- opam exec -- python3 tools/generate_options.py --check
+```
+
+Check generated format availability and backend convenience APIs:
+
+```console
+$ /usr/bin/time -p mise exec -- opam exec -- python3 tools/generate_formats.py --check
+```
+
+```console
+$ /usr/bin/time -p mise exec -- opam exec -- python3 tools/generate_operations.py --check
+```
 
 ## Validation loops
 
@@ -103,7 +147,26 @@ Fix over-budget loops before adding tests; do not raise the budget.
 Benchmarks are separate. Keep each run under ten minutes and a full sweep
 under one hour; reduce workloads when necessary.
 
-## Future tmux checks
+## Owned tmux fixtures
+
+Build the exact Linux release fixtures outside validation loops:
+
+```console
+$ python3 tools/setup_tmux.py 3.3 3.3a 3.4 3.8 3.2a
+```
+
+Verify fixture cleanup after success, failure and cancellation:
+
+```console
+$ /usr/bin/time -p python3 test/fixture_test.py \
+    scratch/tmux/tmux-3.3/tmux \
+    scratch/tmux/tmux-3.3a/tmux \
+    scratch/tmux/tmux-3.4/tmux \
+    scratch/tmux/tmux-3.8/tmux
+```
+
+The 3.2a binary is retained for unsupported-version checks. Fixture success
+alone does not establish library compatibility on any release.
 
 Every test or probe must use a unique owned socket and temporary directory,
 with a `libtmux-ocaml-` prefix. Clear inherited `TMUX` and `TMUX_PANE` for child

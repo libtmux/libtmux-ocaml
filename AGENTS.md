@@ -1,8 +1,8 @@
 # Agent instructions
 
-This is the OCaml libtmux scaffold. Read [README.md](README.md),
+This is the native OCaml libtmux library. Read [README.md](README.md),
 [dune-project](dune-project), and [libtmux.opam](libtmux.opam) before editing.
-Implementation and architecture work require a separate request.
+Follow the active implementation epic and retain its remaining acceptance gates.
 
 ## Policies
 

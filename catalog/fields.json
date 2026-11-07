@@ -1,0 +1,37 @@
+{
+  "Session": {
+    "id": ["Text", "session_id", "(fun value -> Graph.Session.Id.to_string (Graph.Session.id value))"],
+    "name": ["Text", "session_name"],
+    "attached": ["Int", "session_attached"]
+  },
+  "Window": {
+    "id": ["Text", "window_id", "(fun value -> Graph.Window.Id.to_string (Graph.Window.id value))"],
+    "name": ["Text", "window_name"],
+    "width": ["Int", "window_width"],
+    "height": ["Int", "window_height"],
+    "layout": ["Text", "window_layout"]
+  },
+  "Window_link": {
+    "index": ["Int", "window_index"],
+    "is_current": ["Bool", "window_active"]
+  },
+  "Pane": {
+    "id": ["Text", "pane_id", "(fun value -> Graph.Pane.Id.to_string (Graph.Pane.id value))"],
+    "index": ["Int", "pane_index"],
+    "active": ["Bool", "pane_active"],
+    "dead": ["Bool", "pane_dead"],
+    "title": ["Text", "pane_title"],
+    "current_command": ["Text", "pane_current_command"],
+    "current_path": ["Text", "pane_current_path"],
+    "width": ["Int", "pane_width"],
+    "height": ["Int", "pane_height"],
+    "left": ["Int", "pane_left"],
+    "top": ["Int", "pane_top"]
+  },
+  "Client_observation": {
+    "name": ["Text", "client_name"],
+    "pid": ["Int", "client_pid"],
+    "width": ["Int", "client_width"],
+    "control_mode": ["Bool", "client_control_mode"]
+  }
+}

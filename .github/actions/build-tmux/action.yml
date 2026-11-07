@@ -1,0 +1,44 @@
+name: Build tmux
+description: Validate a cached installed tmux prefix or build its pinned source.
+inputs:
+  ref:
+    description: tmux release, tag, branch or full commit.
+    required: true
+outputs:
+  prefix:
+    description: Validated installation prefix.
+    value: ${{ steps.plan.outputs.prefix }}
+runs:
+  using: composite
+  steps:
+    - name: Install build and runtime dependencies
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install --yes --no-install-recommends \
+          autoconf automake bison build-essential libevent-dev \
+          libncurses-dev libutempter-dev pkg-config
+    - name: Identify source and build environment
+      id: plan
+      shell: bash
+      env:
+        TMUX_REF: ${{ inputs.ref }}
+      run: python3 .github/scripts/tmux_build.py plan "$TMUX_REF"
+    - name: Restore installed prefix
+      id: cache
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ${{ steps.plan.outputs.prefix }}
+        key: ${{ steps.plan.outputs.key }}
+    - name: Validate or rebuild
+      shell: bash
+      env:
+        TMUX_REF: ${{ inputs.ref }}
+        CACHE_HIT: ${{ steps.cache.outputs.cache-hit }}
+      run: python3 .github/scripts/tmux_build.py prepare "$TMUX_REF"
+    - name: Save validated prefix
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ${{ steps.plan.outputs.prefix }}
+        key: ${{ steps.plan.outputs.key }}

@@ -1,0 +1,610 @@
+module Rendered = Libtmux.Captured_text
+(** Blocking native Linux transport. No Eio scheduler is started. *)
+
+module Cancellation : sig
+  type t
+
+  exception Cancelled
+
+  val with_ : (t -> 'a) -> 'a
+  (** Own a cancellation token for the callback's lifetime. Leaving the scope
+      cancels outstanding waiters and releases its descriptors after they
+      finish. An escaped token is cancelled and cannot be reused. *)
+
+  val cancel : t -> unit
+  (** Wake waiters. Safe from another domain or systhread, but not from a signal
+      handler. Repeated calls and calls after scope exit have no effect. *)
+end
+
+module Terminal : sig
+  val attach_current :
+    ?cancel:Cancellation.t ->
+    ?binary:string ->
+    ?read_only:bool ->
+    ?update_environment:bool ->
+    ?stdin:Unix.file_descr ->
+    ?stdout:Unix.file_descr ->
+    ?stderr:Unix.file_descr ->
+    Libtmux.Endpoint.t ->
+    session:Libtmux.Session.Id.t ->
+    (unit, Libtmux.Error.t) result
+  (** Run an interactive terminal client until it exits. Select the exact
+      session ID on the daemon currently listening at [endpoint]; this is
+      explicitly unbound and accepts no captured target. No retry or daemon
+      startup occurs. A successful result proves client exit, not continued
+      attachment. Diagnostics go to [stderr].
+
+      Descriptors default to the application's standard streams and remain
+      caller-owned. [stdin] must be a terminal. Environment updates and
+      read-only mode are disabled by default; inherited [TMUX] and [TMUX_PANE]
+      are removed. Cancellation terminates and reaps this terminal client,
+      leaves the daemon running, then raises [Cancellation.Cancelled]. *)
+end
+
+module Operation : sig
+  type 'a t
+
+  type cleanup_receipt = {
+    cause : Libtmux.Error.t;
+    owned_buffers : string list;
+    created : Libtmux.Created.t list;
+  }
+  (** [created] retains IDs reported before a later hook or completion failure.
+      It does not prove those resources still exist or authorize retry. *)
+
+  type 'a state =
+    | Queued
+    | Not_started
+    | Written
+    | Acknowledged
+    | Finished of ('a, Libtmux.Error.t) result
+    | Outcome_unknown of cleanup_receipt
+
+  val id : 'a t -> string
+
+  val inspect : 'a t -> ('a state, Libtmux.Error.t) result
+  (** No I/O. Results remain inspectable after client closure, on the owning
+      domain. *)
+
+  val cancel : 'a t -> (unit, Libtmux.Error.t) result
+  (** Remove queued work before it is written. Admitted commands retain their
+      owner and are drained by [Client.await]; cancellation does not undo
+      effects. Returns [Busy] while another blocking caller owns the client; use
+      a [Cancellation] token to interrupt that caller. *)
+end
+
+module Subscription : sig
+  type t
+
+  val poll : t -> (Libtmux.Output.event option, Libtmux.Error.t) result
+  (** Remove a queued event without I/O. Owning domain only, including after
+      client closure. [None] means no queued event, not proof of continuity. *)
+
+  val next :
+    ?cancel:Cancellation.t ->
+    ?timeout:float ->
+    t ->
+    (Libtmux.Output.event option, Libtmux.Error.t) result
+  (** Pump all subscription lanes until one event is available. Default deadline
+      is one second. [None] follows a consumed End. A deadline keeps the
+      subscription active; cancellation closes it and raises Cancelled. *)
+
+  val close : t -> (unit, Libtmux.Error.t) result
+  (** Discard pending data and retain End Cancelled. Release an unused lane.
+      Does not stop the daemon. *)
+
+  val wait_for_bytes :
+    ?cancel:Cancellation.t ->
+    ?timeout:float ->
+    t ->
+    text:string ->
+    (Libtmux.Output.cursor, Libtmux.Output.wait_error) result
+  (** Consume future bytes until the nonempty pattern matches, including across
+      Data boundaries. Maximum pattern: 64 KiB. Return the cursor at the match's
+      end within its consumed event. Gaps stop matching; no rendered or earlier
+      output is searched. Timeout leaves the subscription active. *)
+end
+
+module Client : sig
+  type t
+
+  val connect :
+    ?binary:string ->
+    ?timeout:float ->
+    Libtmux.Endpoint.t ->
+    (t, Libtmux.Error.t) result
+  (** Attach to an existing local daemon with at least one session. The caller
+      and daemon must share the PID namespace and filesystem. A local socket
+      pathname alone does not establish these preconditions. [timeout] is the
+      maximum seconds per control exchange, defaulting to one second. Requires
+      Linux pidfd support. The client belongs to the current domain. *)
+
+  val source : t -> Libtmux.Source.t
+  val version : t -> string
+
+  val subscribe :
+    ?session:Libtmux.Session.target ->
+    ?capacity_bytes:int ->
+    ?capacity_events:int ->
+    t ->
+    Libtmux.Pane.t ->
+    (Subscription.t, Libtmux.Error.t) result
+  (** Acquire verified coverage of the pane's observed session/window. Choose
+      the least session ID unless explicitly supplied. Reuse one lane per
+      session. Defaults: 1 MiB and 1024 queued events per subscriber; at most 16
+      subscribers and eight client lanes including commands. Reserve payload
+      against the shared 32 MiB budget before admission.
+
+      Data starts after admission's marker. Layout/membership changes end
+      continuity conservatively. Overflow emits Gap then End, without blocking
+      another subscriber. Blocking delivery advances during Subscription.next.
+      There is no snapshot/history barrier or automatic recovery. *)
+
+  val wait_for_text :
+    ?cancel:Cancellation.t ->
+    ?timeout:float ->
+    ?scratch_dir:string ->
+    t ->
+    Libtmux.Pane.t ->
+    text:string ->
+    (Rendered.t, Libtmux.Error.t) result
+  (** Subscribe, capture the ordinary screen immediately, and recapture after
+      output. Membership/overflow gaps trigger explicit fresh capture and new
+      coverage in the same binding. Maximum pattern: 64 KiB. Success returns a
+      capture that contains the text. Transient text between captures may be
+      missed. Check the deadline between bounded acquisitions; in-flight I/O
+      retains the client's exchange timeout. No capture/stream barrier exists.
+  *)
+
+  val submit :
+    t -> 'a Libtmux.Command.t -> ('a Operation.t, Libtmux.Error.t) result
+  (** Validate and reserve queue capacity without I/O. *)
+
+  val await :
+    ?cancel:Cancellation.t -> 'a Operation.t -> ('a, Libtmux.Error.t) result
+  (** Pump admitted work until this operation is finished. Only one blocking
+      caller may own the client at a time. Cancellation removes queued work or
+      drains admitted work before raising [Cancellation.Cancelled]. The handle
+      retains its outcome. Draining has at most one exchange timeout from
+      detection; local scratch filesystem I/O must also finish. No background
+      scheduler or worker is started. *)
+
+  val run :
+    ?cancel:Cancellation.t ->
+    t ->
+    'a Libtmux.Command.t ->
+    ('a, Libtmux.Error.t) result
+  (** Submit and await. Use the two calls separately to retain an operation
+      handle. *)
+
+  val capture :
+    ?cancel:Cancellation.t -> t -> (Libtmux.Snapshot.t, Libtmux.Error.t) result
+  (** Acquire a complete graph over a recorded interval, with a fixed number of
+      listing commands. Races fail validation. Access to returned values
+      performs no I/O, including after closing the client. *)
+
+  val capture_text :
+    ?cancel:Cancellation.t ->
+    ?scratch_dir:string ->
+    t ->
+    Libtmux.Pane.t ->
+    start:int ->
+    end_:int ->
+    (Rendered.t, Libtmux.Error.t) result
+  (** Capture ordinary rendered screen rows, inclusively, via an owned paste
+      buffer and private file. Reject applicable capture/save hooks. The scratch
+      directory defaults to [/tmp] and must be local storage shared with the
+      daemon. Pending and alternate-screen byte modes are unsupported. This
+      observes an interval and establishes no stream continuity barrier. *)
+
+  (* BEGIN GENERATED OPERATIONS *)
+  val rename_window :
+    ?cancel:Cancellation.t ->
+    t ->
+    Libtmux.Window.target ->
+    name:string ->
+    (unit, Libtmux.Error.t) result
+
+  val rename_session :
+    ?cancel:Cancellation.t ->
+    t ->
+    Libtmux.Session.target ->
+    name:string ->
+    (unit, Libtmux.Error.t) result
+
+  val switch_client_at :
+    ?cancel:Cancellation.t ->
+    ?update_environment:bool ->
+    t ->
+    Libtmux.Client_name.t ->
+    session:Libtmux.Session.target ->
+    (unit, Libtmux.Error.t) result
+  (** Switch the client currently bearing this name to the bound session.
+      Environment updates are disabled by default. This can move either a
+      terminal client or a control client; it does not open a new terminal. *)
+
+  val request_detach_client_at :
+    ?cancel:Cancellation.t ->
+    t ->
+    Libtmux.Client_name.t ->
+    (unit, Libtmux.Error.t) result
+  (** Request detachment of the client currently bearing this name. Success
+      confirms request processing, not peer exit. Detaching the library's own
+      primary lane can lose the response and retire its generation. *)
+
+  val refresh_client_at :
+    ?cancel:Cancellation.t ->
+    ?status_only:bool ->
+    t ->
+    Libtmux.Client_name.t ->
+    (unit, Libtmux.Error.t) result
+  (** Request a redraw; no terminal-rendering completion is implied. *)
+
+  val resize_control_client_at :
+    ?cancel:Cancellation.t ->
+    t ->
+    Libtmux.Client_name.t ->
+    width:int ->
+    height:int ->
+    (unit, Libtmux.Error.t) result
+  (** Set a control client's reported size. tmux rejects terminal clients. *)
+
+  val send_text :
+    ?cancel:Cancellation.t ->
+    t ->
+    Libtmux.Pane.target ->
+    text:string ->
+    (unit, Libtmux.Error.t) result
+  (** Literal bytes, without an implicit Enter. NUL is rejected at admission. *)
+
+  val send_keys :
+    ?cancel:Cancellation.t ->
+    t ->
+    Libtmux.Pane.target ->
+    Libtmux.Key.t list ->
+    (unit, Libtmux.Error.t) result
+
+  val wait_for :
+    ?cancel:Cancellation.t -> t -> string -> (unit, Libtmux.Error.t) result
+  (** Wait on a named tmux semaphore using a dedicated bound lane. *)
+
+  val signal :
+    ?cancel:Cancellation.t -> t -> string -> (unit, Libtmux.Error.t) result
+
+  val capture_environment :
+    ?cancel:Cancellation.t ->
+    ?hidden:bool ->
+    t ->
+    Libtmux.Environment.scope ->
+    (Libtmux.Environment.t, Libtmux.Error.t) result
+  (** Acquire a bounded table through a read-only command process. Its response
+      must identify the bound daemon while the original pidfd remains live.
+      Unsupported external variable names fail decoding; they are not omitted.
+  *)
+
+  val set_environment :
+    ?cancel:Cancellation.t ->
+    ?hidden:bool ->
+    t ->
+    Libtmux.Environment.scope ->
+    name:string ->
+    string ->
+    (unit, Libtmux.Error.t) result
+
+  val unset_environment :
+    ?cancel:Cancellation.t ->
+    t ->
+    Libtmux.Environment.scope ->
+    string ->
+    (unit, Libtmux.Error.t) result
+  (** Remove the local entry, allowing a global value to apply to future panes.
+  *)
+
+  val remove_environment :
+    ?cancel:Cancellation.t ->
+    t ->
+    Libtmux.Environment.scope ->
+    string ->
+    (unit, Libtmux.Error.t) result
+  (** Store a removal marker, excluding the variable from future panes. *)
+
+  val capture_options :
+    ?cancel:Cancellation.t ->
+    ?include_inherited:bool ->
+    t ->
+    Libtmux.Options.scope ->
+    (Libtmux.Options.t, Libtmux.Error.t) result
+  (** Acquire one bounded option table, excluding hooks. The default includes
+      only local entries. Inherited table enumeration includes built-ins;
+      inherited user options require [read_option] with their explicit name.
+      Built-in descriptors are qualified on tmux 3.3, 3.3a, 3.4 and 3.8; other
+      versions return [Unsupported]. *)
+
+  val read_option :
+    ?cancel:Cancellation.t ->
+    ?include_inherited:bool ->
+    t ->
+    Libtmux.Options.scope ->
+    string ->
+    (Libtmux.Options.value option, Libtmux.Error.t) result
+  (** Read one exact name, including user-option inheritance. [None] means no
+      entry under the selected policy. An invalid target remains an error. The
+      default follows inheritance; this does not identify the defining parent
+      scope. *)
+
+  val set_option :
+    ?cancel:Cancellation.t ->
+    ?index:int ->
+    ?append:bool ->
+    t ->
+    Libtmux.Options.scope ->
+    name:string ->
+    Libtmux.Options.scalar ->
+    (unit, Libtmux.Error.t) result
+  (** Validate the scope and scalar kind before admission. Array values require
+      an index, or [append:true]. Without an index, tmux splits appended text
+      using the option's separator and fills the lowest unused indexes. Text is
+      literal; tmux format expansion is disabled. Hooks use a separate
+      operation. *)
+
+  val unset_option :
+    ?cancel:Cancellation.t ->
+    ?index:int ->
+    t ->
+    Libtmux.Options.scope ->
+    string ->
+    (unit, Libtmux.Error.t) result
+  (** Remove a local override or one array element. Global built-ins reset to
+      their tmux defaults; this does not recursively unset child overrides. *)
+
+  val clear_option_array :
+    ?cancel:Cancellation.t ->
+    t ->
+    Libtmux.Options.scope ->
+    string ->
+    (unit, Libtmux.Error.t) result
+  (** Set a local empty array, masking inheritance. *)
+
+  val capture_hooks :
+    ?cancel:Cancellation.t ->
+    t ->
+    Libtmux.Options.scope ->
+    (Libtmux.Options.t, Libtmux.Error.t) result
+  (** Capture locally configured built-in hooks. Command values are tmux's
+      printed representation, retained as data. *)
+
+  val read_hook :
+    ?cancel:Cancellation.t ->
+    ?include_inherited:bool ->
+    t ->
+    Libtmux.Options.scope ->
+    string ->
+    (Libtmux.Options.value option, Libtmux.Error.t) result
+
+  val set_hook :
+    ?cancel:Cancellation.t ->
+    ?index:int ->
+    ?append:bool ->
+    t ->
+    Libtmux.Options.scope ->
+    name:string ->
+    Libtmux.Hook.command list ->
+    (unit, Libtmux.Error.t) result
+  (** Set a hook to a nonempty command list. Without an index, replace the whole
+      hook array, or fill the lowest free index when appending. An explicit
+      [@name] custom hook stores command text as a user option; it requires
+      complete replacement and has no array indexes. [read_hook] returns its
+      [Libtmux.Options.Text] value; bulk hook capture includes built-ins.
+      Commands may cause arbitrary tmux effects when triggered. Hooks that print
+      output are outside the supported control transport contract. *)
+
+  val remove_hook :
+    ?cancel:Cancellation.t ->
+    ?index:int ->
+    t ->
+    Libtmux.Options.scope ->
+    string ->
+    (unit, Libtmux.Error.t) result
+
+  val run_hook :
+    ?cancel:Cancellation.t ->
+    t ->
+    Libtmux.Options.scope ->
+    string ->
+    (unit, Libtmux.Error.t) result
+  (** Run the effective hook in an explicit session, window or pane context. A
+      successful result follows completion of its synchronous command queue.
+      Background work started by a hook has its own lifetime. A later hook
+      failure returns an uncertain outcome; preceding effects remain. Named [@]
+      hooks return [Unsupported] because tmux can hide their parse failures in
+      the server log. Configuration and inspection remain available. *)
+
+  val create_session :
+    ?cancel:Cancellation.t ->
+    ?window_name:string ->
+    ?width:int ->
+    ?height:int ->
+    ?spawn:Libtmux.Spawn.t ->
+    t ->
+    name:string ->
+    unit ->
+    (Libtmux.Created.t, Libtmux.Error.t) result
+  (** Create a detached session on the bound daemon. Name collisions fail. *)
+
+  val create_window :
+    ?cancel:Cancellation.t ->
+    ?index:int ->
+    ?name:string ->
+    ?spawn:Libtmux.Spawn.t ->
+    t ->
+    Libtmux.Session.target ->
+    (Libtmux.Created.t, Libtmux.Error.t) result
+  (** Create detached, rejecting an occupied explicit index. *)
+
+  val split_pane :
+    ?cancel:Cancellation.t ->
+    ?size:Libtmux.Geometry.size ->
+    ?spawn:Libtmux.Spawn.t ->
+    t ->
+    Libtmux.Pane.target ->
+    direction:Libtmux.Geometry.direction ->
+    (Libtmux.Created.t, Libtmux.Error.t) result
+
+  val break_pane :
+    ?cancel:Cancellation.t ->
+    ?name:string ->
+    t ->
+    Libtmux.Pane.target ->
+    session:Libtmux.Session.target ->
+    index:int ->
+    (Libtmux.Created.t, Libtmux.Error.t) result
+
+  val kill_session :
+    ?cancel:Cancellation.t ->
+    t ->
+    Libtmux.Session.target ->
+    (unit, Libtmux.Error.t) result
+
+  val kill_window :
+    ?cancel:Cancellation.t ->
+    t ->
+    Libtmux.Window.target ->
+    (unit, Libtmux.Error.t) result
+
+  val kill_pane :
+    ?cancel:Cancellation.t ->
+    t ->
+    Libtmux.Pane.target ->
+    (unit, Libtmux.Error.t) result
+
+  val select_window_at :
+    ?cancel:Cancellation.t ->
+    t ->
+    Libtmux.Session.target ->
+    index:int ->
+    (unit, Libtmux.Error.t) result
+  (** Operate on the session's current index at execution, not an old link
+      incarnation. *)
+
+  val unlink_window_at :
+    ?cancel:Cancellation.t ->
+    ?allow_kill:bool ->
+    t ->
+    Libtmux.Session.target ->
+    index:int ->
+    (unit, Libtmux.Error.t) result
+  (** Without [allow_kill], tmux rejects removal of the last link to a window.
+  *)
+
+  val link_window :
+    ?cancel:Cancellation.t ->
+    t ->
+    Libtmux.Window.target ->
+    session:Libtmux.Session.target ->
+    index:int ->
+    (unit, Libtmux.Error.t) result
+
+  val move_window_at :
+    ?cancel:Cancellation.t ->
+    t ->
+    Libtmux.Session.target ->
+    from_index:int ->
+    session:Libtmux.Session.target ->
+    index:int ->
+    (unit, Libtmux.Error.t) result
+  (** Move the source session's current link at [from_index]. Destination
+      collisions fail. *)
+
+  val select_pane :
+    ?cancel:Cancellation.t ->
+    t ->
+    Libtmux.Pane.target ->
+    (unit, Libtmux.Error.t) result
+
+  val set_pane_title :
+    ?cancel:Cancellation.t ->
+    t ->
+    Libtmux.Pane.target ->
+    title:string ->
+    (unit, Libtmux.Error.t) result
+
+  val resize_pane :
+    ?cancel:Cancellation.t ->
+    ?width:int ->
+    ?height:int ->
+    t ->
+    Libtmux.Pane.target ->
+    (unit, Libtmux.Error.t) result
+
+  val resize_window :
+    ?cancel:Cancellation.t ->
+    ?width:int ->
+    ?height:int ->
+    t ->
+    Libtmux.Window.target ->
+    (unit, Libtmux.Error.t) result
+
+  val select_layout :
+    ?cancel:Cancellation.t ->
+    t ->
+    Libtmux.Window.target ->
+    Libtmux.Layout.t ->
+    (unit, Libtmux.Error.t) result
+
+  val cycle_layout :
+    ?cancel:Cancellation.t ->
+    t ->
+    Libtmux.Window.target ->
+    [ `Next | `Previous ] ->
+    (unit, Libtmux.Error.t) result
+
+  val move_pane :
+    ?cancel:Cancellation.t ->
+    ?size:Libtmux.Geometry.size ->
+    t ->
+    Libtmux.Pane.target ->
+    beside:Libtmux.Pane.target ->
+    direction:Libtmux.Geometry.direction ->
+    (unit, Libtmux.Error.t) result
+
+  val swap_panes :
+    ?cancel:Cancellation.t ->
+    t ->
+    Libtmux.Pane.target ->
+    Libtmux.Pane.target ->
+    (unit, Libtmux.Error.t) result
+
+  val rotate_panes :
+    ?cancel:Cancellation.t ->
+    t ->
+    Libtmux.Window.target ->
+    [ `Forward | `Backward ] ->
+    (unit, Libtmux.Error.t) result
+
+  val zoom_pane :
+    ?cancel:Cancellation.t ->
+    t ->
+    Libtmux.Pane.target ->
+    (unit, Libtmux.Error.t) result
+  (** Toggle the window's zoom state around this pane. *)
+
+  val respawn_pane :
+    ?cancel:Cancellation.t ->
+    ?kill_running:bool ->
+    t ->
+    Libtmux.Pane.target ->
+    Libtmux.Spawn.t ->
+    (unit, Libtmux.Error.t) result
+
+  val clear_history :
+    ?cancel:Cancellation.t ->
+    t ->
+    Libtmux.Pane.target ->
+    (unit, Libtmux.Error.t) result
+
+  (* END GENERATED OPERATIONS *)
+
+  val close : t -> (unit, Libtmux.Error.t) result
+  (** Release owned processes and descriptors. Never stop the daemon. Idempotent
+      on the owning domain. *)
+end

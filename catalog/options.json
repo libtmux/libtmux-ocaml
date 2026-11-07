@@ -1,0 +1,4009 @@
+{
+  "sources": {
+    "3.3": {
+      "url": "https://github.com/tmux/tmux/blob/3.3/options-table.c",
+      "sha256": "dbf0432e6620735554e798a0aef55c5dd2a1021518261fef4b3f93e60989d2b4"
+    },
+    "3.3a": {
+      "url": "https://github.com/tmux/tmux/blob/3.3a/options-table.c",
+      "sha256": "dbf0432e6620735554e798a0aef55c5dd2a1021518261fef4b3f93e60989d2b4"
+    },
+    "3.4": {
+      "url": "https://github.com/tmux/tmux/blob/3.4/options-table.c",
+      "sha256": "b50f5da4d81dfd26089d35510b96f8f1cf5457d05835d8494feeea0c5cf4e1ea"
+    },
+    "3.8": {
+      "url": "https://github.com/tmux/tmux/blob/3.8/options-table.c",
+      "sha256": "cbf3b034785b30aeee3d67032f99e9d9b173a321e11b19be1a11c9e9914fc866"
+    }
+  },
+  "entries": [
+    {
+      "name": "activity-action",
+      "kind": "Choice",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "after-bind-key",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "after-capture-pane",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "after-copy-mode",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "after-display-message",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "after-display-panes",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "after-kill-pane",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "after-list-buffers",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "after-list-clients",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "after-list-keys",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "after-list-panes",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "after-list-sessions",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "after-list-windows",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "after-load-buffer",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "after-lock-server",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "after-new-session",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "after-new-window",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "after-paste-buffer",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "after-pipe-pane",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "after-queue",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4"
+      ]
+    },
+    {
+      "name": "after-refresh-client",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "after-rename-session",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "after-rename-window",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "after-resize-pane",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "after-resize-window",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "after-save-buffer",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "after-select-layout",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "after-select-pane",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "after-select-window",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "after-send-keys",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "after-set-buffer",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "after-set-environment",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "after-set-hook",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "after-set-option",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "after-show-environment",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "after-show-messages",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "after-show-options",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "after-split-window",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "after-swap-window",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "after-unbind-key",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "aggressive-resize",
+      "kind": "Flag",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "alert-activity",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "alert-bell",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "alert-silence",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "allow-passthrough",
+      "kind": "Flag",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a"
+      ]
+    },
+    {
+      "name": "allow-passthrough",
+      "kind": "Choice",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "allow-rename",
+      "kind": "Flag",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "allow-set-title",
+      "kind": "Flag",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "alternate-screen",
+      "kind": "Flag",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "assume-paste-time",
+      "kind": "Number",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "automatic-rename",
+      "kind": "Flag",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "automatic-rename-format",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "backspace",
+      "kind": "Key",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "base-index",
+      "kind": "Number",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "bell-action",
+      "kind": "Choice",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "buffer-limit",
+      "kind": "Number",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "clear-on-attach",
+      "kind": "Flag",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "client-active",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "client-attached",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "client-closed",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "client-created",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "client-dark-theme",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "client-detached",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "client-focus-in",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "client-focus-out",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "client-light-theme",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "client-resized",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "client-session-changed",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "clock-mode-colour",
+      "kind": "Colour",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4"
+      ]
+    },
+    {
+      "name": "clock-mode-colour",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "clock-mode-style",
+      "kind": "Choice",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "codepoint-widths",
+      "kind": "Text",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": true,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "command-alias",
+      "kind": "Text",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": true,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "command-error",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "copy-command",
+      "kind": "Text",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "copy-mode-current-line-number-style",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "copy-mode-current-line-style",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "copy-mode-current-match-style",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "copy-mode-line-number-style",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "copy-mode-line-numbers",
+      "kind": "Choice",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "copy-mode-mark-style",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "copy-mode-match-style",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "copy-mode-position-format",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "copy-mode-position-style",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "copy-mode-selection-style",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "cursor-colour",
+      "kind": "Colour",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4"
+      ]
+    },
+    {
+      "name": "cursor-colour",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "cursor-style",
+      "kind": "Choice",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "dark-theme-black",
+      "kind": "Text",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "dark-theme-blue",
+      "kind": "Text",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "dark-theme-cyan",
+      "kind": "Text",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "dark-theme-dark-grey",
+      "kind": "Text",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "dark-theme-green",
+      "kind": "Text",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "dark-theme-light-grey",
+      "kind": "Text",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "dark-theme-magenta",
+      "kind": "Text",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "dark-theme-red",
+      "kind": "Text",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "dark-theme-white",
+      "kind": "Text",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "dark-theme-yellow",
+      "kind": "Text",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "default-client-command",
+      "kind": "Commands",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "default-command",
+      "kind": "Text",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "default-shell",
+      "kind": "Text",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "default-size",
+      "kind": "Text",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "default-terminal",
+      "kind": "Text",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "destroy-unattached",
+      "kind": "Flag",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a"
+      ]
+    },
+    {
+      "name": "destroy-unattached",
+      "kind": "Choice",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "detach-on-destroy",
+      "kind": "Choice",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "display-panes-active-colour",
+      "kind": "Colour",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4"
+      ]
+    },
+    {
+      "name": "display-panes-active-colour",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "display-panes-border-style",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "display-panes-colour",
+      "kind": "Colour",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4"
+      ]
+    },
+    {
+      "name": "display-panes-colour",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "display-panes-format",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "display-panes-time",
+      "kind": "Number",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4"
+      ]
+    },
+    {
+      "name": "display-panes-time",
+      "kind": "Number",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "display-time",
+      "kind": "Number",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "editor",
+      "kind": "Text",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "escape-time",
+      "kind": "Number",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "exit-empty",
+      "kind": "Flag",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "exit-unattached",
+      "kind": "Flag",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "extended-keys",
+      "kind": "Choice",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "extended-keys-format",
+      "kind": "Choice",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "fill-character",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "focus-events",
+      "kind": "Flag",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "focus-follows-mouse",
+      "kind": "Flag",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "get-clipboard",
+      "kind": "Choice",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "history-file",
+      "kind": "Text",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "history-limit",
+      "kind": "Number",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "initial-repeat-time",
+      "kind": "Number",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "input-buffer-size",
+      "kind": "Number",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "key-table",
+      "kind": "Text",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "light-theme-black",
+      "kind": "Text",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "light-theme-blue",
+      "kind": "Text",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "light-theme-cyan",
+      "kind": "Text",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "light-theme-dark-grey",
+      "kind": "Text",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "light-theme-green",
+      "kind": "Text",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "light-theme-light-grey",
+      "kind": "Text",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "light-theme-magenta",
+      "kind": "Text",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "light-theme-red",
+      "kind": "Text",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "light-theme-white",
+      "kind": "Text",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "light-theme-yellow",
+      "kind": "Text",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "lock-after-time",
+      "kind": "Number",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "lock-command",
+      "kind": "Text",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "main-pane-height",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "main-pane-width",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "marked-pane-changed",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "menu-border-lines",
+      "kind": "Choice",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "menu-border-style",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "menu-selected-style",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "menu-style",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "message-command-style",
+      "kind": "Text",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "message-format",
+      "kind": "Text",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "message-limit",
+      "kind": "Number",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "message-line",
+      "kind": "Choice",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "message-style",
+      "kind": "Text",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "mode-keys",
+      "kind": "Choice",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "mode-style",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "monitor-activity",
+      "kind": "Flag",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "monitor-bell",
+      "kind": "Flag",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "monitor-silence",
+      "kind": "Number",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "mouse",
+      "kind": "Flag",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "other-pane-height",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "other-pane-width",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "pane-active-border-style",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4"
+      ]
+    },
+    {
+      "name": "pane-active-border-style",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "pane-activity",
+      "kind": "Commands",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "pane-base-index",
+      "kind": "Number",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "pane-bell",
+      "kind": "Commands",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "pane-border-format",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "pane-border-indicators",
+      "kind": "Choice",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "pane-border-lines",
+      "kind": "Choice",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4"
+      ]
+    },
+    {
+      "name": "pane-border-lines",
+      "kind": "Choice",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "pane-border-status",
+      "kind": "Choice",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4"
+      ]
+    },
+    {
+      "name": "pane-border-status",
+      "kind": "Choice",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "pane-border-style",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4"
+      ]
+    },
+    {
+      "name": "pane-border-style",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "pane-colours",
+      "kind": "Colour",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": true,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "pane-command-finished",
+      "kind": "Commands",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "pane-command-started",
+      "kind": "Commands",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "pane-created",
+      "kind": "Commands",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "pane-died",
+      "kind": "Commands",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "pane-exited",
+      "kind": "Commands",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "pane-focus-in",
+      "kind": "Commands",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "pane-focus-out",
+      "kind": "Commands",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "pane-mode-changed",
+      "kind": "Commands",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "pane-mode-entered",
+      "kind": "Commands",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "pane-mode-exited",
+      "kind": "Commands",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "pane-moved",
+      "kind": "Commands",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "pane-prompt-closed",
+      "kind": "Commands",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "pane-prompt-opened",
+      "kind": "Commands",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "pane-resized",
+      "kind": "Commands",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "pane-scrollbars",
+      "kind": "Choice",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "pane-scrollbars-position",
+      "kind": "Choice",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "pane-scrollbars-style",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "pane-scrollbars-timeout",
+      "kind": "Number",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "pane-set-clipboard",
+      "kind": "Commands",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "pane-shell-prompt",
+      "kind": "Commands",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "pane-status-current-style",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "pane-status-style",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "pane-title-changed",
+      "kind": "Commands",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "popup-border-lines",
+      "kind": "Choice",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "popup-border-style",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "popup-style",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "prefix",
+      "kind": "Key",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "prefix-timeout",
+      "kind": "Number",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "prefix2",
+      "kind": "Key",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "prompt-command-cursor-colour",
+      "kind": "Text",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "prompt-command-cursor-style",
+      "kind": "Choice",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "prompt-cursor-colour",
+      "kind": "Text",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "prompt-cursor-style",
+      "kind": "Choice",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "prompt-history-limit",
+      "kind": "Number",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "remain-on-exit",
+      "kind": "Choice",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "remain-on-exit-format",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "renumber-windows",
+      "kind": "Flag",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "repeat-time",
+      "kind": "Number",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "scroll-on-clear",
+      "kind": "Flag",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "session-added-to-group",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "session-closed",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "session-created",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "session-removed-from-group",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "session-renamed",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "session-status-current-style",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "session-status-style",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "session-window-changed",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "set-clipboard",
+      "kind": "Choice",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "set-titles",
+      "kind": "Flag",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "set-titles-string",
+      "kind": "Text",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "silence-action",
+      "kind": "Choice",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "status",
+      "kind": "Choice",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "status-bg",
+      "kind": "Colour",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "status-fg",
+      "kind": "Colour",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "status-format",
+      "kind": "Text",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "status-interval",
+      "kind": "Number",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "status-justify",
+      "kind": "Choice",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "status-keys",
+      "kind": "Choice",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "status-left",
+      "kind": "Text",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "status-left-length",
+      "kind": "Number",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "status-left-style",
+      "kind": "Text",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "status-position",
+      "kind": "Choice",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "status-right",
+      "kind": "Text",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "status-right-length",
+      "kind": "Number",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "status-right-style",
+      "kind": "Text",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "status-style",
+      "kind": "Text",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "switch-mode-match-style",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "synchronize-panes",
+      "kind": "Flag",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "terminal-features",
+      "kind": "Text",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": true,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "terminal-overrides",
+      "kind": "Text",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": true,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "theme",
+      "kind": "Choice",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "tiled-layout-max-columns",
+      "kind": "Number",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "tree-mode-border-style",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "tree-mode-preview-format",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "tree-mode-preview-style",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "tree-mode-selection-style",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "update-environment",
+      "kind": "Text",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "user-keys",
+      "kind": "Text",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": true,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "variation-selector-always-wide",
+      "kind": "Flag",
+      "scopes": [
+        "SERVER"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "visual-activity",
+      "kind": "Choice",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "visual-bell",
+      "kind": "Choice",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "visual-silence",
+      "kind": "Choice",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "window-active-style",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "window-closed",
+      "kind": "Commands",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "window-created",
+      "kind": "Commands",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "window-layout-changed",
+      "kind": "Commands",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "window-linked",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "window-pane-changed",
+      "kind": "Commands",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "window-pane-current-status-format",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "window-pane-status-format",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "window-renamed",
+      "kind": "Commands",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "window-resized",
+      "kind": "Commands",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "window-size",
+      "kind": "Choice",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "window-status-activity-style",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "window-status-bell-style",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "window-status-current-format",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "window-status-current-style",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "window-status-format",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "window-status-last-style",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "window-status-separator",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "window-status-style",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "window-style",
+      "kind": "Text",
+      "scopes": [
+        "WINDOW",
+        "PANE"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "window-unlinked",
+      "kind": "Commands",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "window-unzoomed",
+      "kind": "Commands",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "window-zoomed",
+      "kind": "Commands",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": true,
+      "hook": true,
+      "versions": [
+        "3.8"
+      ]
+    },
+    {
+      "name": "word-separators",
+      "kind": "Text",
+      "scopes": [
+        "SESSION"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "wrap-search",
+      "kind": "Flag",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    },
+    {
+      "name": "xterm-keys",
+      "kind": "Flag",
+      "scopes": [
+        "WINDOW"
+      ],
+      "array": false,
+      "hook": false,
+      "versions": [
+        "3.3",
+        "3.3a",
+        "3.4",
+        "3.8"
+      ]
+    }
+  ]
+}

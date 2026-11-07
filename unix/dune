@@ -1,0 +1,8 @@
+(library
+ (name libtmux_unix)
+ (public_name libtmux-unix)
+ (libraries libtmux unix)
+ (foreign_stubs
+  (language c)
+  (names linux_stubs)
+  (flags :standard -Wall -Wextra -Werror)))

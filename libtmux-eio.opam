@@ -1,0 +1,23 @@
+opam-version: "2.0"
+synopsis: "Concurrent Eio clients for libtmux"
+description: "Native Linux tmux clients with explicit cancellation ownership and immutable snapshots."
+maintainer: "https://github.com/libtmux/libtmux-ocaml/issues"
+authors: "libtmux contributors"
+license: "MIT"
+homepage: "https://github.com/libtmux/libtmux-ocaml"
+bug-reports: "https://github.com/libtmux/libtmux-ocaml/issues"
+dev-repo: "git+https://github.com/libtmux/libtmux-ocaml.git"
+available: os = "linux"
+depends: [
+  "ocaml" {= "5.5.2"}
+  "dune" {= "3.24.2"}
+  "libtmux" {= version}
+  "libtmux-unix" {= version}
+  "eio" {= "1.6"}
+  "eio_main" {with-test & = "1.6"}
+  "alcotest" {with-test & = "1.9.1"}
+  "odoc" {with-doc & = "3.2.2"}
+]
+build: [
+  ["dune" "build" "-p" name "-j" jobs "@install" "@runtest" {with-test} "@doc" {with-doc}]
+]

@@ -1,8 +1,8 @@
 opam-version: "2.0"
-synopsis: "Scaffold for an OCaml interface to tmux"
+synopsis: "Native OCaml values and queries for tmux"
 description: """
-Package metadata for the standalone OCaml libtmux port.
-The library has not been implemented or released.
+Immutable tmux graph observations, typed filter expressions and standard-library
+collection processing. Transport and consumer packages are under development.
 """
 maintainer: "https://github.com/libtmux/libtmux-ocaml/issues"
 authors: "libtmux contributors"
@@ -13,7 +13,12 @@ dev-repo: "git+https://github.com/libtmux/libtmux-ocaml.git"
 depends: [
   "ocaml" {= "5.5.2"}
   "dune" {= "3.24.2"}
+  "alcotest" {with-test & = "1.9.1"}
+  "qcheck-core" {with-test & = "0.91"}
+  "ppx_expect" {with-test & = "v0.17.3"}
+  "ocamlfind" {with-test}
+  "odoc" {with-doc & = "3.2.2"}
 ]
 build: [
-  ["dune" "build" "-p" name "-j" jobs]
+  ["dune" "build" "-p" name "-j" jobs "@install" "@runtest" {with-test} "@doc" {with-doc}]
 ]

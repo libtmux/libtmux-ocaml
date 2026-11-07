@@ -1,0 +1,128 @@
+(test
+ (name core_test)
+ (modules core_test)
+ (libraries libtmux alcotest))
+
+(library
+ (name diagnostics_expect)
+ (modules diagnostics_expect)
+ (libraries libtmux)
+ (inline_tests)
+ (preprocess (pps ppx_expect)))
+
+(library
+ (name model_fixture)
+ (wrapped false)
+ (modules model_fixture)
+ (libraries libtmux))
+
+(test
+ (name model_test)
+ (modules model_test)
+ (libraries libtmux model_fixture alcotest))
+
+(test
+ (name query_test)
+ (modules query_test)
+ (libraries libtmux model_fixture alcotest qcheck-core))
+
+(rule
+ (alias runtest)
+ (deps type_test.py)
+ (action
+  (run python3 %{dep:type_test.py} %{ocamlc} %{lib:libtmux:libtmux.cmi})))
+
+(test
+ (name json_test)
+ (modules json_test)
+ (libraries libtmux libtmux-json model_fixture alcotest))
+
+(executable
+ (name plan_peer)
+ (modules plan_peer)
+ (libraries libtmux model_fixture yojson))
+
+(test
+ (name protocol_test)
+ (modules protocol_test)
+ (libraries libtmux alcotest))
+
+(executable
+ (name codec_peer)
+ (modules codec_peer)
+ (libraries libtmux yojson unix))
+
+(executable
+ (name blocking_peer)
+ (modules blocking_peer)
+ (libraries libtmux libtmux-unix unix))
+
+(executable
+ (name capture_peer)
+ (modules capture_peer)
+ (libraries libtmux libtmux-unix unix))
+
+(executable
+ (name binding_peer)
+ (modules binding_peer)
+ (libraries libtmux libtmux-unix unix))
+
+(executable
+ (name eio_peer)
+ (modules eio_peer)
+ (libraries libtmux libtmux-eio eio_main unix))
+
+(test
+ (name runtime_test)
+ (modules runtime_test)
+ (libraries libtmux libtmux-unix alcotest unix))
+
+(executable
+ (name pid_race_peer)
+ (modules pid_race_peer)
+ (libraries libtmux libtmux-unix unix))
+
+(executable
+ (name capture_cancel_peer)
+ (modules capture_cancel_peer)
+ (libraries libtmux libtmux-eio eio_main unix))
+
+(executable
+ (name blocking_cancel_peer)
+ (modules blocking_cancel_peer)
+ (libraries libtmux libtmux-unix unix))
+
+(executable
+ (name operations_peer)
+ (modules operations_peer)
+ (libraries libtmux libtmux-unix libtmux-eio eio_main unix))
+
+(executable
+ (name environment_peer)
+ (modules environment_peer)
+ (libraries libtmux libtmux-unix libtmux-eio eio_main unix))
+
+(executable
+ (name read_process_peer)
+ (modules read_process_peer)
+ (libraries libtmux libtmux-unix libtmux-eio eio_main unix))
+
+(executable
+ (name options_peer)
+ (modules options_peer)
+ (libraries libtmux libtmux-unix libtmux-eio eio_main unix))
+
+(executable
+ (name client_operations_peer)
+ (modules client_operations_peer)
+ (libraries libtmux libtmux-unix libtmux-eio eio_main unix))
+
+(executable
+ (name terminal_peer)
+ (modules terminal_peer)
+ (libraries libtmux libtmux-unix libtmux-eio eio_main unix))
+
+(executable
+ (name streaming_peer)
+ (modules streaming_peer)
+ (libraries libtmux libtmux-unix libtmux-eio eio_main unix))
