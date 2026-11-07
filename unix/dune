@@ -1,8 +1,12 @@
 (library
  (name libtmux_unix)
  (public_name libtmux-unix)
- (libraries libtmux unix)
+ (libraries libtmux libtmux-workspace unix)
  (foreign_stubs
   (language c)
   (names linux_stubs)
   (flags :standard -Wall -Wextra -Werror)))
+
+(documentation
+ (package libtmux-unix)
+ (mld_files index))

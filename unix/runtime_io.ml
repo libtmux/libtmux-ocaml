@@ -110,13 +110,13 @@ let check io ~deadline =
   io.check ();
   if Linux.now () >= deadline then fail Error.Deadline_exceeded
 
-let endpoint_arguments ~binary endpoint =
+let endpoint_arguments ?(start_server = false) ~binary endpoint =
   let endpoint =
     match Endpoint.kind endpoint with
     | Named_socket name -> [ "-L"; name ]
     | Socket_path path -> [ "-S"; path ]
   in
-  [ binary; "-u"; "-N" ] @ endpoint
+  [ binary; "-u" ] @ (if start_server then [] else [ "-N" ]) @ endpoint
 
 let arguments ~binary endpoint =
   endpoint_arguments ~binary endpoint

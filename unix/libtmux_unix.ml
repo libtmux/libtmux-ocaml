@@ -120,3 +120,162 @@ module Client = struct
           ~next:(fun timeout sub -> Subscription.next ?cancel ~timeout sub)
           ~poll:Subscription.poll ~close:Subscription.close ~timeout pane ~text)
 end
+
+module Workspace = struct
+  module X = Libtmux_workspace.Execution
+  module P = Libtmux_workspace.Plan
+  module R = Workspace_runner
+
+  type t = {
+    journal : X.t;
+    owner : Domain.id;
+    current : Client.t option ref;
+    owned : bool;
+    cancel : Cancellation.t option ref;
+    busy : bool Atomic.t;
+    mutable closed : bool;
+  }
+
+  let owner t =
+    if Domain.self () <> t.owner then Runtime_io.fail Libtmux.Error.Wrong_domain
+
+  let describe cancel (client : Client.t) : R.client =
+    {
+      source = Client.source client;
+      version = Client.version client;
+      capture = (fun () -> Client.capture ?cancel:!cancel client);
+      submit =
+        (fun command ->
+          Result.map
+            (fun operation ->
+              R.
+                {
+                  await = (fun () -> Client.await ?cancel:!cancel operation);
+                  observe = R.observe operation;
+                })
+            (Client.submit client command));
+    }
+
+  let cancel_io token f =
+    match token with
+    | None -> f Runtime_io.blocking
+    | Some token ->
+        Cancellation.borrow token (fun reader ->
+            let check () =
+              if Cancellation.is_cancelled token then
+                raise Cancellation.Cancelled
+            in
+            let base = Runtime_io.blocking in
+            let wait ~read ~write ~deadline =
+              check ();
+              base.wait ~read:(reader :: read) ~write ~deadline;
+              check ()
+            in
+            f { base with check; wait })
+
+  let create ?client ?(binary = "tmux") ?timeout ~owned plan =
+    let current = ref client and cancel = ref None in
+    let protect f =
+      let previous = !cancel in
+      cancel := None;
+      Fun.protect
+        ~finally:(fun () -> cancel := previous)
+        (fun () ->
+          match !current with
+          | None -> Runtime_io.protect f
+          | Some client ->
+              let connection = client.Client.engine.connection in
+              let base = connection.lane.io in
+              let deadline = Linux.now () +. 0.5 in
+              let check () =
+                base.check ();
+                if Linux.now () >= deadline then
+                  Runtime_io.fail Libtmux.Error.Deadline_exceeded
+              in
+              let wait ~read ~write ~deadline:requested =
+                check ();
+                base.wait ~read ~write ~deadline:(min requested deadline)
+              in
+              Fun.protect
+                ~finally:(fun () -> connection.lane.io <- base)
+                (fun () ->
+                  connection.lane.io <- { base with check; wait };
+                  Runtime_io.protect f))
+    in
+    let bootstrap receipt config =
+      Runtime_io.protect (fun () ->
+          let first = Iarray.get (Libtmux_workspace.Config.windows config) 0 in
+          let width, height = Libtmux_workspace.Config.dimensions config in
+          let connection, created =
+            cancel_io !cancel (fun io ->
+                Bootstrap.start receipt ?timeout ~io ~binary
+                  ~endpoint:(P.endpoint plan)
+                  ~name:(Libtmux_workspace.Config.session config)
+                  ~window_name:first.name ~spawn:(List.hd first.panes).spawn
+                  ~width ~height ())
+          in
+          connection.lane.io <- Runtime_io.blocking;
+          let client =
+            Client.
+              {
+                engine = Engine.create connection;
+                streams = Streaming.create ~changed:(fun () -> ()) connection;
+              }
+          in
+          current := Some client;
+          (describe cancel client, created))
+    in
+    let executor =
+      R.create ~client:(Option.map (describe cancel) client) ~bootstrap ~protect
+    in
+    Result.map
+      (fun journal ->
+        {
+          journal;
+          owner = Domain.self ();
+          current;
+          owned;
+          cancel;
+          busy = Atomic.make false;
+          closed = false;
+        })
+      (X.create ~operation_id:(Linux.nonce ()) ~executor plan)
+
+  let submit client plan = create ~client ~owned:false plan
+
+  let submit_bootstrap ?binary ?timeout plan =
+    if Option.is_some (P.source plan) then Error Libtmux.Error.Stale_target
+    else create ?binary ?timeout ~owned:true plan
+
+  let inspect t =
+    Runtime_io.protect (fun () ->
+        owner t;
+        X.inspect t.journal)
+
+  let await ?cancel ?compensate_on_failure t =
+    Runtime_io.protect (fun () ->
+        owner t;
+        if t.closed then Runtime_io.fail Libtmux.Error.Closed;
+        if not (Atomic.compare_and_set t.busy false true) then
+          Runtime_io.fail Libtmux.Error.Busy;
+        Fun.protect
+          ~finally:(fun () ->
+            t.cancel := None;
+            Atomic.set t.busy false)
+          (fun () ->
+            t.cancel := cancel;
+            X.await ?compensate_on_failure t.journal))
+
+  let client t = !(t.current)
+
+  let close t =
+    Runtime_io.protect (fun () ->
+        owner t;
+        if Atomic.get t.busy then Runtime_io.fail Libtmux.Error.Busy;
+        if not t.closed then (
+          t.closed <- true;
+          if t.owned then
+            Option.iter
+              (fun client -> Runtime_io.get (Client.close client))
+              !(t.current)))
+end

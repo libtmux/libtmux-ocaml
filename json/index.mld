@@ -1,0 +1,13 @@
+{0 Validated query and workspace JSON}
+
+{!Libtmux_json} is an optional Yojson boundary. Decoders reject duplicate and
+unknown properties, wrong operand types, invalid UTF-8 and bounded-document
+violations before constructing typed OCaml values.
+
+{!Libtmux_json.Expr} implements the declared scalar pane subset of
+[libtmux.filter/1]. Java regex and relationship documents are unsupported.
+
+{!Libtmux_json.Workspace} decodes [libtmux.workspace/1] without I/O. Explicit
+argv and shell code remain distinct. Relative directories resolve against the
+file directory; decoding never reads the process environment or evaluates
+shell expansion.

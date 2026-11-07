@@ -1,0 +1,17 @@
+{0 Workspace validation, plans and journals}
+
+{!Libtmux_workspace.Config} validates native descriptions without I/O.
+{!Libtmux_workspace.Plan} combines configuration with an explicit observation.
+A missing endpoint is distinct from an empty captured graph. Default collisions
+fail; append requires an explicit new-window policy.
+
+{1 Execute through a backend}
+
+{!Libtmux_workspace.Execution} delegates I/O to an executor. Ordinary callers
+use a backend's Workspace module, retain the handle before awaiting, then
+inspect its immutable journal after cancellation or partial failure.
+
+Plans belong to one connection generation and recheck their captured
+preconditions before mutation. Preview output is advisory. Compensation removes
+only resources proven newly created by that operation, in reverse order.
+Unbound startup hints are not operational targets and cannot authorize cleanup.

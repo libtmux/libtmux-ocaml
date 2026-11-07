@@ -1,0 +1,8 @@
+(library
+ (name libtmux_workspace)
+ (public_name libtmux-workspace)
+ (libraries libtmux))
+
+(documentation
+ (package libtmux-workspace)
+ (mld_files index))

@@ -1,0 +1,22 @@
+{0 Blocking Linux tmux clients}
+
+{!Libtmux_unix.Client} attaches to an explicit existing endpoint and returns
+immutable snapshots. Clients require Linux pidfds, the daemon's PID namespace
+and a shared local scratch filesystem. Closing a client leaves the daemon alive.
+
+{1 Cancellation and retained outcomes}
+
+Retain the handle from {!Libtmux_unix.Client.submit}, await it, then inspect
+{!Libtmux_unix.Operation} after success, failure or cancellation. Scoped
+{!Libtmux_unix.Cancellation} tokens can be signalled from another domain.
+Written requests drain under bounded ownership; cancellation does not undo them.
+
+{1 Output and workspaces}
+
+{!Libtmux_unix.Subscription} separates future bytes from rendered-screen waits.
+Overflow and coverage changes produce explicit gaps. The blocking backend
+advances stream lanes while waiting.
+
+{!Libtmux_unix.Workspace} executes validated ephemeral plans and retains partial
+journals. Compensation removes only proven newly created resources. An existing
+client remains caller-owned; a bootstrap handle owns its new client.

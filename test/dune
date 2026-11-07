@@ -77,6 +77,16 @@
  (modules runtime_test)
  (libraries libtmux libtmux-unix alcotest qcheck-core unix))
 
+(test
+ (name workspace_test)
+ (modules workspace_test)
+ (libraries libtmux libtmux-workspace model_fixture alcotest))
+
+(test
+ (name workspace_json_test)
+ (modules workspace_json_test)
+ (libraries libtmux libtmux-workspace libtmux-json yojson alcotest))
+
 (executable
  (name pid_race_peer)
  (modules pid_race_peer)
@@ -131,3 +141,13 @@
  (name stream_fault_peer)
  (modules stream_fault_peer)
  (libraries libtmux libtmux-unix unix))
+
+(executable
+ (name bootstrap_peer)
+ (modules bootstrap_peer)
+ (libraries libtmux libtmux-unix unix))
+
+(executable
+ (name workspace_peer)
+ (modules workspace_peer)
+ (libraries libtmux libtmux-workspace libtmux-unix unix))

@@ -1,4 +1,4 @@
-(** Pure, bounded interchange for the [libtmux.filter/1] scalar pane subset. *)
+(** Pure, bounded query and workspace JSON interchange. *)
 
 module Decode_error : sig
   type category =
@@ -12,6 +12,22 @@ module Decode_error : sig
   type t = { pointer : string; category : category; message : string }
 
   val pp : Format.formatter -> t -> unit
+end
+
+module Workspace : sig
+  val decode :
+    directory:string ->
+    Yojson.Safe.t ->
+    (Libtmux_workspace.Config.t, Decode_error.t) result
+
+  val of_string :
+    directory:string ->
+    string ->
+    (Libtmux_workspace.Config.t, Decode_error.t) result
+  (** Decode [libtmux.workspace/1] with the query codec's 64 KiB, UTF-8 and
+      32-level JSON bounds. Reject duplicate and unknown properties, invalid
+      argv/shell combinations and configuration errors. [directory] is the
+      absolute document directory; these functions perform no filesystem I/O. *)
 end
 
 module Expr : sig

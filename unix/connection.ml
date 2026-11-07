@@ -98,17 +98,18 @@ let rec event lane ~pidfd ~deadline =
         fail (Error.Disconnected "tmux detached the control client")
     | _ -> event
 
-let rec first_frame lane ~deadline =
+let rec startup_frame lane ~deadline ~command =
   match event lane ~pidfd:None ~deadline with
   | P.Frame frame ->
       if not frame.ok then
-        fail
-          (Error.Command_failed
-             { command = "attach-session"; message = frame.body });
-      if frame.body <> "" then
-        fail (Error.Malformed_data "unexpected attach output")
-  | P.Notification _ -> first_frame lane ~deadline
+        fail (Error.Command_failed { command; message = frame.body });
+      frame.body
+  | P.Notification _ -> startup_frame lane ~deadline ~command
   | P.Diagnostic text -> fail (Error.Malformed_data text)
+
+let first_frame lane ~deadline =
+  if startup_frame lane ~deadline ~command:"attach-session" <> "" then
+    fail (Error.Malformed_data "unexpected attach output")
 
 let raw lane ~pidfd ~deadline ?(acknowledged = fun () -> ())
     ?(replied = fun _ -> ()) ?(notification = fun _ -> ()) name arguments =
@@ -171,14 +172,14 @@ let boolean = function
   | "1" -> true
   | _ -> fail (Error.Malformed_data "expected a tmux Boolean")
 
-let connect ?(timeout = 1.) ~io ~binary endpoint =
+let connect_process ?(timeout = 1.) ~io ~binary ~arguments ~initial endpoint =
   if (not (Float.is_finite timeout)) || timeout <= 0. then
     fail (Error.Invalid_input "timeout must be finite and positive");
   let deadline = Linux.now () +. timeout in
   let lane =
     {
       io;
-      process = io.spawn (Runtime_io.arguments ~binary endpoint);
+      process = io.spawn arguments;
       framer = P.Framer.create ();
       events = Queue.create ();
       stopped = false;
@@ -187,7 +188,7 @@ let connect ?(timeout = 1.) ~io ~binary endpoint =
   in
   let pidfd = ref None in
   try
-    first_frame lane ~deadline;
+    initial lane ~deadline;
     let dialect =
       protocol
         (P.Metadata.detect_print
@@ -243,6 +244,11 @@ let connect ?(timeout = 1.) ~io ~binary endpoint =
     Option.iter Runtime_io.close_fd !pidfd;
     stop lane;
     raise exn
+
+let connect ?timeout ~io ~binary endpoint =
+  connect_process ?timeout ~io ~binary
+    ~arguments:(Runtime_io.arguments ~binary endpoint)
+    ~initial:first_frame endpoint
 
 let request t ?acknowledged ?replied name arguments =
   check t;

@@ -1,3 +1,13 @@
+(** Blocking Linux tmux clients with explicit scoped cancellation.
+
+    Client methods perform I/O unless documented otherwise. Captured
+    observations and retained operation inspection remain local. Clients belong
+    to the connecting domain and close their own resources without stopping the
+    daemon.
+
+    See {!Client} for acquisition and commands, {!Operation} for cancellation
+    outcomes, and {!Subscription} for bounded future output. *)
+
 module Rendered = Libtmux.Captured_text
 (** Blocking native Linux transport. No Eio scheduler is started. *)
 
@@ -16,6 +26,9 @@ module Cancellation : sig
       handler. Repeated calls and calls after scope exit have no effect. *)
 end
 
+(** Interactive attachment using borrowed application streams. This utility
+    addresses the current daemon explicitly and does not reuse captured targets.
+*)
 module Terminal : sig
   val attach_current :
     ?cancel:Cancellation.t ->
@@ -41,6 +54,8 @@ module Terminal : sig
       leaves the daemon running, then raises [Cancellation.Cancelled]. *)
 end
 
+(** A retained admitted command. A cancelled waiter does not erase its eventual
+    success, failure or uncertainty. *)
 module Operation : sig
   type 'a t
 
@@ -73,6 +88,8 @@ module Operation : sig
       a [Cancellation] token to interrupt that caller. *)
 end
 
+(** Bounded future-byte observation with Data/Gap/End and local cursors. Polling
+    is local; waiting and admission belong to the backend. *)
 module Subscription : sig
   type t
 
@@ -105,6 +122,8 @@ module Subscription : sig
       output is searched. Timeout leaves the subscription active. *)
 end
 
+(** An explicit generation-bound connection. Applications retain ownership of
+    the endpoint choice and resource lifetime. *)
 module Client : sig
   type t
 
@@ -120,7 +139,11 @@ module Client : sig
       Linux pidfd support. The client belongs to the current domain. *)
 
   val source : t -> Libtmux.Source.t
+  (** Read the retained endpoint, daemon PID and connection generation without
+      I/O. *)
+
   val version : t -> string
+  (** Read the bound daemon's observed version without I/O. *)
 
   val subscribe :
     ?session:Libtmux.Session.target ->
@@ -607,4 +630,40 @@ module Client : sig
   val close : t -> (unit, Libtmux.Error.t) result
   (** Release owned processes and descriptors. Never stop the daemon. Idempotent
       on the owning domain. *)
+end
+
+module Workspace : sig
+  type t
+
+  val submit :
+    Client.t -> Libtmux_workspace.Plan.t -> (t, Libtmux.Error.t) result
+  (** Allocate a generation-bound execution handle without I/O. The caller owns
+      the supplied client; closing this handle leaves that client open. *)
+
+  val submit_bootstrap :
+    ?binary:string ->
+    ?timeout:float ->
+    Libtmux_workspace.Plan.t ->
+    (t, Libtmux.Error.t) result
+  (** Allocate a handle for a missing-endpoint plan. Awaiting it starts control
+      new-session and binds the same connection. The handle owns its new client;
+      it never acquires ownership of the daemon. *)
+
+  val await :
+    ?cancel:Cancellation.t ->
+    ?compensate_on_failure:bool ->
+    t ->
+    (Libtmux_workspace.Execution.receipt, Libtmux.Error.t) result
+  (** Expected apply failures are retained receipts. Cancellation propagates
+      after recording progress and at most 500 ms of protected compensation. *)
+
+  val inspect :
+    t -> (Libtmux_workspace.Execution.receipt, Libtmux.Error.t) result
+
+  val client : t -> Client.t option
+  (** Borrow the existing or bootstrapped client for explicit recovery. *)
+
+  val close : t -> (unit, Libtmux.Error.t) result
+  (** Release an owned client without stopping its daemon. Active await returns
+      Busy. Completed journals remain readable after close. *)
 end

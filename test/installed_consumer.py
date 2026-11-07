@@ -13,7 +13,7 @@ root = Path(__file__).resolve().parents[1]
 with tempfile.TemporaryDirectory(prefix="libtmux-ocaml-consumer-") as directory:
     temporary = Path(directory)
     prefix = temporary / "installed"
-    packages = ["libtmux", "libtmux-json", "libtmux-unix", "libtmux-eio"]
+    packages = ["libtmux", "libtmux-workspace", "libtmux-json", "libtmux-unix", "libtmux-eio"]
     subprocess.run(["dune", "install", "--prefix", str(prefix), *packages], cwd=root, check=True)
     consumer = temporary / "consumer"
     consumer.mkdir()
@@ -39,6 +39,13 @@ let () =
     | Ok value -> value
     | Error error -> failwith (Format.asprintf "%a" Libtmux_json.Decode_error.pp error) in
   assert (Expr.compile decoded (Iarray.get (Snapshot.panes snapshot) 0));
+  let workspace = match Libtmux_json.Workspace.of_string ~directory:"/srv/project"
+      {|{"schema":"libtmux.workspace/1","session":"project","windows":[{"name":"editor","panes":[{"exec":["nvim"],"cwd":"src"}]}]}|} with
+    | Ok config -> config
+    | Error error -> failwith (Format.asprintf "%a" Libtmux_json.Decode_error.pp error) in
+  assert (Libtmux_workspace.Config.session workspace = "project");
+  let window = Iarray.get (Libtmux_workspace.Config.windows workspace) 0 in
+  assert ((List.hd window.panes).spawn.cwd = Some "/srv/project/src");
   print_endline "installed core/JSON consumer and README examples: PASS"
 ''')
     environment = dict(os.environ, OCAMLPATH=str(prefix / "lib"))
