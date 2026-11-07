@@ -1,9 +1,9 @@
 # Current capabilities and adoption gaps
 
 The immutable model, typed queries, native Linux clients and output observation
-have real-tmux evidence on 3.3, 3.3a, 3.4 and 3.8. The complete workspace/CLI/MCP
-suite and its final adoption review remain unfinished. No package or
-hosted-documentation release has been published.
+have real-tmux evidence on 3.3, 3.3a, 3.4 and 3.8. The installed workspace CLI
+also passes those cells. The MCP service and final suite review remain
+unfinished. No package or hosted-documentation release has been published.
 
 ## What an application can use
 
@@ -23,19 +23,22 @@ input, streaming, rendered waits and client teardown.
 
 | Area | Required evidence before complete-suite adoption |
 | --- | --- |
-| Workspaces | Finish the installed CLI, versioned receipts and recovery checks |
 | MCP | Ship the stdio service, discovery/catalog schemas, bounded targets and operation lookup; run conformance and host tests |
 | Documentation site | Finish public `.cmti` export, shared-site rendering and deployed-link verification |
 | Benchmarks | [Serial capture baselines](benchmarking.md) exist; add concurrency, graph scaling, allocation and stream-latency workloads |
 | Final qualification | Rerun every required component and exact release cell on the final source revision |
 | Package adoption | Obtain an independent caller-task review and resolve material findings |
 
-The workspace model, JSON loader and blocking/Eio executors are implemented.
+The workspace model, JSON loader, blocking/Eio executors and installed CLI are
+implemented. The [workspace guide](workspaces.md) executes the installed command
+through validation, planning, apply, receipt inspection and owned cleanup.
 Live tests cover partial effects, compensation, append isolation, stale plans,
 cancellation journals and bootstrap on fresh and existing daemons. Cleanup
 targets only proven newly created panes; foreign panes moved into a new window
-remain. Those results do not establish an installed CLI or portable receipt
-format.
+remain. Versioned advisory plans and execution receipts preserve errors,
+creation IDs and cleanup outcomes; output documents cannot be replayed as
+operational input. CLI checks also cover malformed input, collisions, missing
+endpoints, interrupted apply, changed documents and stalled or broken stdout.
 
 ## Engineering assessment
 

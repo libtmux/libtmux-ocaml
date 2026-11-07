@@ -27,3 +27,6 @@ Expected output: `Valid workspace "ocaml-project": 2 windows, 3 panes`.
 See the [core README](../README.md) for the graph and query APIs, and
 [current limits](../README.md#packages-and-current-limits) before adopting the
 complete automation suite.
+
+The [workspace guide](../docs/workspaces.md) covers the JSON format, explicit
+endpoints, bootstrap, collision policies, exit codes and partial-failure recovery.

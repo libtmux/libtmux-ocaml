@@ -258,7 +258,8 @@ terminal history or an atomic capture/stream barrier. See
 | `libtmux-workspace` | `Libtmux_workspace` | Validated workspace configuration, plans and execution journals |
 
 The `libtmux-workspace-cli` package installs `tmux-workspace` to validate, preview
-and apply JSON workspaces. See the [workspace package](workspace/README.md).
+and apply JSON workspaces. The [workspace guide](docs/workspaces.md) runs a
+complete configuration through validation, planning, apply and receipt inspection.
 The MCP service is unfinished. There is no runnable MCP server to configure yet. See
 [status and adoption gaps](docs/status.md) before choosing this checkout for a
 complete automation suite. macOS, Windows, remote-daemon binding and Java regex

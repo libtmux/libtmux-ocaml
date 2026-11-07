@@ -1,4 +1,4 @@
-"""Check Markdown examples against the OCaml programs exercised after installation."""
+"""Check source examples and local links in Markdown documentation."""
 import argparse
 from pathlib import Path
 import re
@@ -7,7 +7,7 @@ from urllib.parse import unquote, urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
 MARKER = re.compile(r"^\s*\(\* docs:(begin|end) ([a-z-]+) \*\)\s*$")
-INCLUDE = re.compile(r"<!-- example: ([^\s]+) -->\n\n```ocaml\n(.*?)```", re.DOTALL)
+INCLUDE = re.compile(r"<!-- example: ([^\s]+) -->\n\n```(?:ocaml|json)\n(.*?)```", re.DOTALL)
 LINK = re.compile(r"(?<!!)\[[^\]]+\]\(([^\s)]+)\)")
 
 
@@ -31,8 +31,12 @@ def anchors(path):
 def snippet(reference):
     name, _, region = reference.partition("#")
     path = (ROOT / name).resolve()
-    if not path.is_relative_to(ROOT) or path.suffix != ".ml":
+    if not path.is_relative_to(ROOT) or path.suffix not in {".ml", ".json"}:
         raise ValueError(f"invalid example source: {reference}")
+    if path.suffix == ".json":
+        if region:
+            raise ValueError(f"JSON examples include the whole document: {reference}")
+        return path.read_text().strip() + "\n"
     lines = path.read_text().splitlines(keepends=True)
     selected = []
     active = not region

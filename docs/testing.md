@@ -64,7 +64,8 @@ The APIs and testing styles follow the primary documentation for
 ## Executed documentation
 
 README and guide snippets name regions in the compiled programs under
-`examples/`. The source is authoritative; this check rejects drift:
+`examples/`; JSON includes use the complete shipped configuration. The source
+is authoritative; this check rejects drift:
 
 ```console
 $ python3 tools/docs_snippets.py
@@ -76,6 +77,13 @@ tmux servers. It checks linked-window contexts, typed/native query results,
 created layout geometry, options, pane titles, working directories, literal
 input, future-byte matches, rendered-screen waits and zero remaining clients.
 Owned fixture teardown verifies pane and daemon exit.
+
+Each native CI cell also runs the [workspace guide](workspaces.md) through real
+`opam exec` and an installed `tmux-workspace`. It executes the displayed setup,
+validation, plan, apply and cleanup commands, then checks receipt fields, pane
+directories, layout output, client closure and owned process exit. CLI fault
+tests pin their output pipe capacity so a larger host pipe cannot turn a
+stalled-consumer test into successful buffered delivery.
 
 These are correctness checks and whole-command timings, not throughput
 benchmarks. Do not derive performance comparisons from their durations.

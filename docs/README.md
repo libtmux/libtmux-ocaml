@@ -11,6 +11,7 @@ and filter them locally, then perform an explicit action with a bound target.
 | Create layouts, set options and handle outcomes | [Control and recovery](control.md) | [Build layout](../examples/native_build.ml) |
 | Concurrent literal send and output observation | [Streaming](streaming.md) | [Eio send and observe](../examples/native_watch.ml) |
 | Wait for text already on screen | [Rendered waits](streaming.md) | [Wait](../examples/native_wait.ml) |
+| Validate, preview and apply a JSON workspace | [Workspaces](workspaces.md) | [Project configuration](../examples/workspace/project.json) |
 | Compare measured capture workloads | [Benchmarks](benchmarking.md) | [Capture harness](../bench/capture.py) |
 | Browse modules and signatures | [API documentation](api.md) | Public `.mli` sources |
 

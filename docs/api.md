@@ -9,8 +9,12 @@ and failure behavior. Source examples are compiled against installed libraries.
 | Core | [Libtmux](../lib/libtmux.mli) | `Snapshot`, `Pane`, `Expr`, `Query`, `Operations` |
 | Blocking | [Libtmux_unix](../unix/libtmux_unix.mli) | `Client`, `Operation`, `Subscription`, `Cancellation`, `Workspace` |
 | Concurrent | [Libtmux_eio](../eio/libtmux_eio.mli) | `Client`, `Operation`, `Subscription`, `Workspace` |
-| JSON | [Libtmux_json](../json/libtmux_json.mli) | `Expr`, `Workspace`, `Decode_error` |
+| JSON | [Libtmux_json](../json/libtmux_json.mli) | `Expr`, `Workspace`, `Error`, `Decode_error` |
 | Workspaces | [Libtmux_workspace](../workspace/libtmux_workspace.mli) | `Config`, `Plan`, `Execution` |
+
+The `libtmux-workspace-cli` package installs the `tmux-workspace` executable.
+Its [workspace guide](workspaces.md) covers configuration, exits and recovery;
+it does not expose an additional OCaml library.
 
 Install the development documentation dependency outside validation loops:
 
