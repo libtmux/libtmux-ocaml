@@ -21,8 +21,8 @@ let capture_graph client (initial : Created.t) spawn =
       (Pane.Target.id linked.pane)
     |> Option.get
   in
-  ignore
-    (get (Client.wait_for_text ~timeout:0.5 client pane ~text:"showcase ready"));
+  let text = "showcase ready" in
+  ignore (get (Client.wait_for_text ~timeout:0.5 client pane ~text));
   get
     (Client.link_window client initial.window ~session:linked.session ~index:7);
   get (Client.capture client)
