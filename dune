@@ -25,3 +25,12 @@
  (files
   (glob_files docs/assets/*)
   (docs/branding.md as docs/branding.md)))
+
+(install
+ (package libtmux-workspace)
+ (section doc)
+ (files
+  (glob_files docs/assets/*)
+  (docs/branding.md as docs/branding.md)
+  (workspace/README.md as workspace/README.md)
+  (glob_files workspace/assets/*)))
