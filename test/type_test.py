@@ -21,7 +21,7 @@ with tempfile.TemporaryDirectory(prefix="libtmux-ocaml-types-") as directory:
     path = Path(directory) / "caller.ml"
     for should_compile, source in programs:
         path.write_text(source + "\n")
-        result = subprocess.run([compiler, "-I", str(Path(interface).parent), "-c", str(path)],
+        result = subprocess.run([compiler, "-color", "never", "-I", str(Path(interface).parent), "-c", str(path)],
                                 capture_output=True, text=True)
         if should_compile != (result.returncode == 0):
             raise AssertionError(result.stderr or "invalid program compiled")
