@@ -80,8 +80,8 @@ module Config : sig
   val dimensions : t -> int * int
 end
 
-(** Preview ordered workspace actions against one observed daemon generation.
-    A plan retains collision policy and bound targets; it is not a portable
+(** Preview ordered workspace actions against one observed daemon generation. A
+    plan retains collision policy and bound targets; it is not a portable
     command script. *)
 module Plan : sig
   type server_policy = Create_if_missing | Require_existing_server
