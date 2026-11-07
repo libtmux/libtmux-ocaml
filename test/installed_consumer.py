@@ -74,8 +74,8 @@ let () =
 (executable (name native_wait) (modules native_wait) (libraries libtmux libtmux-eio eio_main))
 (executables (names native_graph native_query native_build) (modules native_graph native_query native_build) (libraries libtmux libtmux-unix))
 (executable (name native_watch) (modules native_watch) (libraries libtmux libtmux-eio eio_main))
-(executable (name configuration_unix) (modules configuration_unix) (libraries libtmux libtmux-unix))
-(executable (name configuration_eio) (modules configuration_eio) (libraries libtmux libtmux-eio eio_main))
+(executable (name configuration_unix) (modules configuration_unix) (libraries libtmux libtmux-workspace libtmux-json libtmux-unix yojson))
+(executable (name configuration_eio) (modules configuration_eio) (libraries libtmux libtmux-workspace libtmux-json libtmux-eio yojson eio_main))
 ''')
     (runtime / "native_capture.ml").write_bytes((root / "examples/native_capture.ml").read_bytes())
     (runtime / "native_wait.ml").write_bytes((root / "examples/native_wait.ml").read_bytes())
@@ -110,6 +110,8 @@ let exercise client =
   assert ((get (W.inspect operation)).status = Libtmux_workspace.Execution.Queued);
   let receipt = get (W.await operation) in
   assert (receipt.status = Libtmux_workspace.Execution.Succeeded);
+  let encoded = Result.get_ok (Libtmux_json.Workspace.encode_receipt receipt) in
+  assert (Yojson.Safe.Util.(member "schema" encoded |> to_string) = "libtmux.workspace-receipt/1");
   get (W.close operation);
   let created = get (C.capture client) |> Snapshot.sessions
     |> Iarray.find_opt (fun session -> Session.name session = "installed-workspace") |> Option.get in

@@ -1,0 +1,20 @@
+{
+  "schema": "libtmux.workspace/1",
+  "session": "ocaml-project",
+  "cwd": ".",
+  "width": 120,
+  "height": 40,
+  "environment": {"PROJECT": "ocaml"},
+  "options": [{"name": "@project", "kind": "text", "value": "ocaml"}],
+  "windows": [
+    {
+      "name": "editor",
+      "layout": "even-horizontal",
+      "panes": [
+        {"exec": ["/bin/cat", "-u"]},
+        {"exec": ["/bin/cat", "-u"], "direction": "right"}
+      ]
+    },
+    {"name": "logs", "panes": [{"exec": ["/bin/cat", "-u"]}]}
+  ]
+}

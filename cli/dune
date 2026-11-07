@@ -1,0 +1,7 @@
+(executable
+ (name main)
+ (public_name tmux-workspace)
+ (package libtmux-workspace-cli)
+ (modules main runtime)
+ (libraries libtmux libtmux-workspace libtmux-json libtmux-eio libtmux-unix
+  yojson eio_main cmdliner unix))

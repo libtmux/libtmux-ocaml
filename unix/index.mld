@@ -18,5 +18,6 @@ Overflow and coverage changes produce explicit gaps. The blocking backend
 advances stream lanes while waiting.
 
 {!Libtmux_unix.Workspace} executes validated ephemeral plans and retains partial
-journals. Compensation removes only proven newly created resources. An existing
-client remains caller-owned; a bootstrap handle owns its new client.
+journals. Compensation targets proven newly created panes and preserves foreign
+resources. Cleanup failures have separate outcomes. An existing client remains
+caller-owned; a bootstrap handle owns its new client, without owning the daemon.

@@ -100,5 +100,6 @@ jobs:
         env:
           TMUX_BINARY: ${{ steps.tmux.outputs.prefix }}/bin/tmux
         run: |
-          opam exec -- dune build test/blocking_peer.exe
+          opam exec -- dune build @all @install
           opam exec -- python3 test/blocking_test.py "$TMUX_BINARY"
+          opam exec -- python3 test/workspace_cli_test.py --unsupported "$TMUX_BINARY"

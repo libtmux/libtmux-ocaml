@@ -687,6 +687,9 @@ module Client : sig
       on the owning domain. *)
 end
 
+(** Apply validated plans with blocking I/O and scoped cancellation tokens.
+    Execution handles retain journals and borrow existing clients; bootstrap
+    handles own their newly bound clients without owning the daemon. *)
 module Workspace : sig
   type t
 

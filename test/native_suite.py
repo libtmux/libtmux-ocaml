@@ -19,6 +19,8 @@ for name in [
     print(f"PASS {name}: {time.monotonic() - started:.3f}s", flush=True)
 subprocess.run([sys.executable, str(root / "test/workspace_test.py"), "--eio", binary],
                cwd=root, check=True, timeout=5)
+subprocess.run([sys.executable, str(root / "test/workspace_cli_test.py"), binary],
+               cwd=root, check=True, timeout=5)
 subprocess.run([sys.executable, str(root / "test/pid_race_test.py")],
                cwd=root, check=True, timeout=5)
 subprocess.run([sys.executable, str(root / "test/tmux_cache_test.py"), binary],
