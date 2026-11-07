@@ -7,3 +7,13 @@
  (name native_wait)
  (modules native_wait)
  (libraries libtmux libtmux-eio eio_main))
+
+(executables
+ (names native_graph native_query native_build)
+ (modules native_graph native_query native_build)
+ (libraries libtmux libtmux-unix))
+
+(executable
+ (name native_watch)
+ (modules native_watch)
+ (libraries libtmux libtmux-eio eio_main))

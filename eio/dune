@@ -2,3 +2,7 @@
  (name libtmux_eio)
  (public_name libtmux-eio)
  (libraries libtmux libtmux-unix eio eio.unix unix))
+
+(documentation
+ (package libtmux-eio)
+ (mld_files index))

@@ -1,3 +1,12 @@
 (library
  (name libtmux)
  (public_name libtmux))
+
+(documentation
+ (package libtmux)
+ (mld_files index))
+
+(mdx
+ (package libtmux)
+ (files index.mld)
+ (libraries libtmux))

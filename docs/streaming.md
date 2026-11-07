@@ -1,6 +1,8 @@
 # Observe output and wait for rendered text
 
-Use [native_wait.ml](../examples/native_wait.ml) to capture exactly one pane and
+Use [native_watch.ml](../examples/native_watch.ml) for a complete concurrent
+literal-send, future-byte match and rendered-screen check. Its application owns
+the Eio scheduler and switch. Use [native_wait.ml](../examples/native_wait.ml) to capture exactly one pane and
 wait until its ordinary screen contains the supplied text. The example imports
 the installed Eio client, owns its switch, uses an explicit socket, closes its
 client and prints the matched pane ID. It requires an existing daemon and one
@@ -48,3 +50,6 @@ all owned lanes and retains terminal events; it leaves the daemon alive.
 
 Neither interface establishes an atomic capture/stream barrier or reconstructs
 terminal history. An immutable snapshot remains a separate captured value.
+
+[First use](getting-started.md) · [Control and recovery](control.md) ·
+[API](api.md) · [Guide](README.md)

@@ -1,6 +1,18 @@
-module Rendered = Libtmux.Captured_text
-(** Concurrent native clients. Applications own the Eio scheduler and switch. *)
+(** Concurrent Linux tmux clients using the application's Eio scheduler.
 
+    Client methods perform I/O unless documented otherwise. Captured
+    observations and retained operation inspection remain local. Clients belong
+    to the connecting domain and close their own resources without stopping the
+    daemon.
+
+    See {!Client} for acquisition and commands, {!Operation} for cancellation
+    outcomes, and {!Subscription} for bounded future output. *)
+
+module Rendered = Libtmux.Captured_text
+
+(** Interactive attachment using borrowed application streams. This utility
+    addresses the current daemon explicitly and does not reuse captured targets.
+*)
 module Terminal : sig
   val attach_current :
     ?binary:string ->
@@ -25,6 +37,8 @@ module Terminal : sig
       client exit. Diagnostics go to [stderr]; borrowed flows stay open. *)
 end
 
+(** A retained admitted command. A cancelled waiter does not erase its eventual
+    success, failure or uncertainty. *)
 module Operation : sig
   type 'a t
 
@@ -60,6 +74,8 @@ module Operation : sig
   *)
 end
 
+(** Bounded future-byte observation with Data/Gap/End and local cursors. Polling
+    is local; waiting and admission belong to the backend. *)
 module Subscription : sig
   type t
 
@@ -87,6 +103,8 @@ module Subscription : sig
       deadline leaves the subscription active; cancellation closes it. *)
 end
 
+(** An explicit generation-bound connection. Applications retain ownership of
+    the endpoint choice and resource lifetime. *)
 module Client : sig
   type t
 
@@ -103,7 +121,11 @@ module Client : sig
       second. All client calls belong to the connecting OCaml domain. *)
 
   val source : t -> Libtmux.Source.t
+  (** Read the retained endpoint, daemon PID and connection generation without
+      I/O. *)
+
   val version : t -> string
+  (** Read the bound daemon's observed version without I/O. *)
 
   val subscribe :
     ?session:Libtmux.Session.target ->
@@ -144,7 +166,13 @@ module Client : sig
       eventual result remains inspectable. *)
 
   val run : t -> 'a Libtmux.Command.t -> ('a, Libtmux.Error.t) result
+  (** Submit and await an explicit command. Retain a separate submitted handle
+      when the outcome must remain inspectable after caller cancellation. *)
+
   val capture : t -> (Libtmux.Snapshot.t, Libtmux.Error.t) result
+  (** Acquire a complete immutable graph over an interval. Conflicting or
+      disappearing entities fail capture; they do not become empty relations.
+      The returned values remain readable after client closure. *)
 
   val capture_text :
     ?scratch_dir:string ->

@@ -7,9 +7,12 @@ import subprocess
 import sys
 import tempfile
 from support.tmux_fixture import TmuxFixture
+from support import readme_walkthrough
 
 
 root = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(root))
+from tools.docs_snippets import snippet
 with tempfile.TemporaryDirectory(prefix="libtmux-ocaml-consumer-") as directory:
     temporary = Path(directory)
     prefix = temporary / "installed"
@@ -20,9 +23,9 @@ with tempfile.TemporaryDirectory(prefix="libtmux-ocaml-consumer-") as directory:
     (consumer / "dune-project").write_text("(lang dune 3.24)\n")
     (consumer / "dune").write_text("(executable (name main) (libraries libtmux libtmux-json))\n")
     (consumer / "model_fixture.ml").write_text((root / "test/model_fixture.ml").read_text())
-    examples = re.findall(r"```ocaml\n(.*?)```", (root / "README.md").read_text(), re.DOTALL)
-    assert len(examples) == 2
-    (consumer / "main.ml").write_text("\n".join(examples) + '''
+    examples = [snippet(f"examples/native_query.ml#{region}")
+                for region in ["native-filter", "typed-filter", "relationship-filter"]]
+    (consumer / "main.ml").write_text("open Libtmux\n" + "\n".join(examples) + '''
 let () =
   let endpoint = Endpoint.named_socket "installed-consumer" in
   assert (Endpoint.equal endpoint (Endpoint.named_socket "installed-consumer"));
@@ -30,9 +33,10 @@ let () =
   assert (Query.exactly_one (List.to_seq [42; 42]) =
           Error (Cardinality.Multiple_matches {at_least = 2}));
   let snapshot = Model_fixture.snapshot () in
-  assert (List.map Pane.Id.to_string (editor_ids snapshot) = ["%1"]);
+  assert (List.map Pane.Id.to_string (roomy_ids snapshot) = ["%1"]);
   assert (List.map Pane.Id.to_string (active_ids snapshot) = ["%1"]);
-  let wire = match Libtmux_json.Expr.to_string Model.pane editors with
+  assert (sessions_with_room snapshot = ["work"; "also-work"]);
+  let wire = match Libtmux_json.Expr.to_string Model.pane roomy_terminals with
     | Ok value -> value
     | Error error -> failwith (Format.asprintf "%a" Libtmux_json.Decode_error.pp error) in
   let decoded = match Libtmux_json.Expr.of_string Model.pane wire with
@@ -49,6 +53,12 @@ let () =
   print_endline "installed core/JSON consumer and README examples: PASS"
 ''')
     environment = dict(os.environ, OCAMLPATH=str(prefix / "lib"))
+    activation = next(block[2:].strip() for block in re.findall(r"```console\n(.*?)```", (root / "README.md").read_text(), re.DOTALL)
+                      if block.startswith('$ eval "$(opam env'))
+    switch = subprocess.check_output(["/bin/sh", "-c", activation + '\nprintf "%s" "$OPAMSWITCH"'],
+                                     cwd=root, env=environment, text=True).strip()
+    assert switch, "README switch activation did not export OPAMSWITCH"
+    environment["OPAMSWITCH"] = switch
     for key in ("DUNE_SOURCEROOT", "DUNE_WORKSPACE"):
         environment.pop(key, None)
     for package in packages:
@@ -62,11 +72,15 @@ let () =
     (runtime / "dune").write_text('''
 (executable (name native_capture) (modules native_capture) (libraries libtmux libtmux-eio eio_main))
 (executable (name native_wait) (modules native_wait) (libraries libtmux libtmux-eio eio_main))
+(executables (names native_graph native_query native_build) (modules native_graph native_query native_build) (libraries libtmux libtmux-unix))
+(executable (name native_watch) (modules native_watch) (libraries libtmux libtmux-eio eio_main))
 (executable (name configuration_unix) (modules configuration_unix) (libraries libtmux libtmux-unix))
 (executable (name configuration_eio) (modules configuration_eio) (libraries libtmux libtmux-eio eio_main))
 ''')
     (runtime / "native_capture.ml").write_bytes((root / "examples/native_capture.ml").read_bytes())
     (runtime / "native_wait.ml").write_bytes((root / "examples/native_wait.ml").read_bytes())
+    for name in ["native_graph", "native_query", "native_build", "native_watch"]:
+        (runtime / f"{name}.ml").write_bytes((root / "examples" / f"{name}.ml").read_bytes())
     common = '''
 let get = function Ok value -> value | Error error -> failwith (Format.asprintf "%a" Error.pp error)
 let exercise client =
@@ -104,6 +118,7 @@ let () = Eio_main.run (fun env -> Eio.Switch.run (fun sw ->
 '''
         (runtime / f"configuration_{backend}.ml").write_text(module + common + connect)
     subprocess.run(["dune", "build", "--root", str(runtime)], cwd=runtime, env=environment, check=True)
+    walkthrough = readme_walkthrough.prepare(root, temporary, environment)
     binaries = sys.argv[1:] or [root / f"scratch/tmux/tmux-{version}/tmux" for version in ["3.3", "3.3a", "3.4", "3.8"]]
     for binary in binaries:
         with TmuxFixture(binary) as fixture:
@@ -123,6 +138,43 @@ let () = Eio_main.run (fun env -> Eio.Switch.run (fun sw ->
                                     cwd=runtime, env=environment, capture_output=True, timeout=1, check=True)
             assert result.stdout == b"%0\n" and result.stderr == b"", result
             assert fixture.command("list-clients").stdout == b""
+            fixture.command("rename-window", "-t", "@0", "editor")
+            fixture.command("resize-window", "-t", "@0", "-x", "160", "-y", "40")
+            fixture.command("new-session", "-d", "-s", "linked", "exec cat")
+            fixture.command("link-window", "-d", "-s", "@0", "-t", "$1:7")
+            fixture.track_panes()
+            def run_example(name, *arguments):
+                return subprocess.run([str(runtime / f"_build/default/{name}.exe"),
+                                       fixture.binary, str(fixture.socket), *arguments],
+                                      cwd=runtime, env=environment, capture_output=True, timeout=1, check=True)
+            result = run_example("native_graph")
+            assert result.stderr == b"", result
+            graph = result.stdout.decode()
+            assert graph.count('window @0 at ') == 2, graph
+            assert 'window @0 at 7 "editor"' in graph, graph
+            assert graph.count('pane %0 active=true 160x40 "cat"') == 2, graph
+            result = run_example("native_query")
+            assert result.stdout == b"active=%0,%1\nroomy=%0,%1\nsessions=fixture,linked\n" and result.stderr == b"", result
+            literal = "ready #{pane_id}; $HOME is literal"
+            result = run_example("native_watch", "%0", literal)
+            assert re.fullmatch(rb"future_match_offset=[1-9][0-9]*\nrendered_pane=%0\n", result.stdout), result
+            assert result.stderr == b"", result
+            assert fixture.command("list-clients").stdout == b""
+            result = run_example("native_build", "project", fixture.directory.name)
+            created = dict(line.split("=", 1) for line in result.stdout.decode().splitlines())
+            assert set(created) == {"session", "editor", "right", "logs"}, created
+            fixture.track_panes()
+            rows = fixture.command("list-windows", "-t", created["session"], "-F", "#{window_name}:#{window_panes}").stdout
+            assert rows == b"editor:2\nlogs:1\n", rows
+            value = fixture.command("show-options", "-t", created["session"], "-v", "@project").stdout
+            assert value == b"project\n", value
+            title = fixture.command("display-message", "-p", "-t", created["right"], "#{pane_title}").stdout
+            assert title == b"build output\n", title
+            paths = fixture.command("list-panes", "-s", "-t", created["session"], "-F", "#{pane_current_path}").stdout.splitlines()
+            assert paths == [fixture.directory.name.encode()] * 3, paths
+            assert fixture.command("list-clients").stdout == b""
+        readme_walkthrough.run(root, walkthrough, binary, environment)
     print(f"installed Eio native capture example: PASS on {len(binaries)} releases")
     print(f"installed Unix/Eio generated conveniences: PASS on {len(binaries)} releases")
     print(f"installed rendered-wait example: PASS on {len(binaries)} releases")
+    print(f"installed graph/query/build/Eio-stream examples: PASS on {len(binaries)} releases")

@@ -1,0 +1,3 @@
+(executable
+ (name capture)
+ (libraries libtmux libtmux-unix libtmux-eio eio_main yojson unix))

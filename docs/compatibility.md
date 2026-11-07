@@ -5,7 +5,8 @@ outside this implementation's scope. The development tools are Dune 3.24.2
 and opam 2.6.1.
 
 The implementation targets Linux and tmux 3.3 or newer. Current evidence covers
-specific components; it does not yet establish complete client compatibility.
+specific components; the complete workspace, CLI and MCP suite still has
+separate acceptance gates.
 
 | Component | 3.3 | 3.3a | 3.4 | 3.8 |
 | --- | --- | --- | --- | --- |
@@ -24,7 +25,11 @@ specific components; it does not yet establish complete client compatibility.
 | Current client names and detach-request semantics | PASS | PASS | PASS | PASS |
 | Interactive attachment, cancellation and child exit | PASS | PASS | PASS | PASS |
 | Versioned format availability and generated APIs | PASS | PASS | PASS | PASS |
-| Complete operations and consumers | UNVERIFIED | UNVERIFIED | UNVERIFIED | UNVERIFIED |
+| Native operation inventory | PASS | PASS | PASS | PASS |
+| Data/Gap/End, stream limits and recovery | PASS | PASS | PASS | PASS |
+| Rendered waits and future-byte matching | PASS | PASS | PASS | PASS |
+| Blocking workspace preconditions and compensation | PASS | PASS | PASS | PASS |
+| Complete workspace CLI and MCP suite | UNVERIFIED | UNVERIFIED | UNVERIFIED | UNVERIFIED |
 
 The blocking client rejects 3.2a. Development tmux 3.8a does not replace the
 published 3.8 cell. PID-acquisition races and malformed replies after writing
@@ -32,7 +37,7 @@ pass deterministic fault checks with real Linux child processes. Cancellation
 at each capture transfer step and unresolved-buffer receipts also pass on
 every release. Ready I/O still checks its deadline; busy pipes cannot bypass
 the timeout. These results qualify the implemented lifecycle contracts, not
-the remaining operations, subscriptions or consumers.
+the unfinished workspace CLI and MCP consumers.
 
 The I/O packages require Linux pidfds, the same PID namespace as the daemon,
 and shared local scratch storage. A socket pathname does not prove those

@@ -1,0 +1,37 @@
+{0 Immutable tmux values and typed queries}
+
+{!Libtmux} is the pure core. Capture through an optional client backend, then
+inspect and filter immutable observations with ordinary OCaml collections.
+
+{1 Read the graph}
+
+Start with {!Libtmux.Snapshot}, {!Libtmux.Session}, {!Libtmux.Window_link},
+{!Libtmux.Window} and {!Libtmux.Pane}. A window link owns session-specific index
+and current state. Captured relationships never perform I/O.
+
+{1 Select before acting}
+
+Use [Seq.filter] for application predicates or {!Libtmux.Expr} for typed,
+inspectable expressions. {!Libtmux.Query.exactly_one} distinguishes absence
+from ambiguity before submitting a mutation.
+
+{[
+# open Libtmux;;
+# let roomy = Expr.Int.ge Pane.Fields.width 80;;
+val roomy : Pane.t Expr.t = <abstr>
+# Query.exactly_one (List.to_seq [42]);;
+- : (int, Cardinality.error) result = Ok 42
+# Query.exactly_one (List.to_seq [42; 42]);;
+- : (int, Cardinality.error) result =
+Error (Cardinality.Multiple_matches {Libtmux.Cardinality.at_least = 2})
+]}
+
+{!Libtmux.Operations} constructs commands. It does not execute them. Optional
+blocking and Eio packages own connections, cancellation and output subscriptions.
+
+{1 Identity and failure}
+
+{!Libtmux.Source} binds IDs to one connection generation. Entity identity differs
+from observation identity; old targets cannot silently retarget a new daemon.
+Expected errors use {!Libtmux.Error}. Snapshots represent an acquisition interval,
+not an atomic server transaction.

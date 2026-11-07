@@ -1,5 +1,21 @@
-(** Pure values and collection operations. This module performs no I/O. *)
+(** Native captured values, typed queries and explicit command descriptions.
 
+    A snapshot owns immutable observations. Entity accessors and query
+    evaluation perform no I/O, preserve captured order and remain usable after
+    client closure. Use [Libtmux_unix.Client] or [Libtmux_eio.Client] to acquire
+    or mutate state.
+
+    {1 Typical flow}
+
+    Capture explicitly, traverse {!Session.window_links} and {!Window.panes},
+    filter with [Seq.filter] or {!Query.matching}, establish cardinality with
+    {!Query.exactly_one}, then submit a command with a bound target.
+
+    The core depends only on the standard library. Its abstract observations are
+    safe to share; live clients and subscriptions belong to their backend. *)
+
+(** An explicit socket description. Constructing an endpoint neither reads the
+    environment nor starts a daemon. *)
 module Endpoint : sig
   type t
   (** An explicit socket description, independent of the environment. *)
@@ -23,6 +39,9 @@ module Endpoint : sig
   val pp : Format.formatter -> t -> unit
 end
 
+(** Expected input, capture, capability and transport failures. Cancellation
+    belongs to the chosen backend and is not converted into an ordinary error.
+*)
 module Error : sig
   type t =
     | Invalid_input of string
@@ -48,6 +67,8 @@ module Error : sig
   val pp : Format.formatter -> t -> unit
 end
 
+(** A random connection-generation identifier. Reconnecting creates a new
+    generation even when the socket and server PID are unchanged. *)
 module Generation : sig
   type t
 
@@ -59,6 +80,8 @@ module Generation : sig
   val equal : t -> t -> bool
 end
 
+(** Endpoint and observed daemon identity for one connection generation.
+    Constructing metadata alone does not establish a live binding. *)
 module Source : sig
   type t
 
@@ -98,6 +121,8 @@ module type ID = sig
   val pp : Format.formatter -> t -> unit
 end
 
+(** Sealed scalar descriptors carrying entity and value types. Descriptors read
+    captured data and provide trusted identities for portable query codecs. *)
 module Field : sig
   type _ kind = Bool : bool kind | Int : int kind | Text : string kind
   type ('entity, 'value) t
@@ -111,6 +136,9 @@ module Field : sig
   *)
 end
 
+(** Typed edges in a captured graph. Many, one and optional relations are
+    distinct; an unacquired relationship is never represented as an empty one.
+*)
 module Relation : sig
   module Many : sig
     type ('parent, 'child) t
@@ -131,6 +159,8 @@ module Relation : sig
   end
 end
 
+(** A captured session and its ordered window-link contexts. A session can
+    contain repeated links to the same global window. *)
 module rec Session : sig
   type t
 
@@ -174,6 +204,8 @@ module rec Session : sig
   (** Distinct windows in first-link order. All accesses are local. *)
 end
 
+(** A global window shared by its session links. Window index and current state
+    belong to a link, while panes and geometry belong to the window. *)
 and Window : sig
   type t
 
@@ -215,6 +247,8 @@ and Window : sig
   val links : t -> Window_link.t Iarray.t
 end
 
+(** One captured session/index/window context. It is not a stable link
+    incarnation across unlinking, movement or reindexing. *)
 and Window_link : sig
   type t
 
@@ -240,6 +274,9 @@ and Window_link : sig
   val same_observation : t -> t -> bool
 end
 
+(** A captured pane with local geometry, process metadata and a window
+    relationship. Use [target] for explicit actions; reading the observation
+    never refreshes it. *)
 and Pane : sig
   type t
 
@@ -330,6 +367,9 @@ and Client_observation : sig
   *)
 end
 
+(** A complete immutable graph captured over an acquisition interval.
+    Collections are replayable immutable arrays. Capturing several tmux commands
+    does not establish an atomic transaction. *)
 module Snapshot : sig
   type t
 
@@ -483,6 +523,8 @@ module Formats : sig
       accessors remain the primary API; lookup does not acquire extra fields. *)
 end
 
+(** Built-in model witnesses and canonical field lookup for typed codecs.
+    Untrusted field names must resolve against the selected model. *)
 module Model : sig
   type 'a t
 
@@ -496,6 +538,9 @@ module Model : sig
   val find_field : 'a t -> string -> 'a Field.packed option
 end
 
+(** Inspectable predicates whose entity and operand types are checked by the
+    compiler. Combine native closures separately with [Seq.filter]. Evaluation
+    follows captured relationships without acquisition or hidden caches. *)
 module Expr : sig
   type 'entity t
 
@@ -584,6 +629,9 @@ module Expr : sig
       custom accessors or closures to an expression. *)
 end
 
+(** Explicit source-filter planning for a new acquisition. A plan separates
+    supported tmux predicates from residual local evaluation; it never changes
+    the I/O-free contract of {!Query.matching}. *)
 module Plan : sig
   type pushdown = Auto | Never | Require_exact
   type t
@@ -609,6 +657,9 @@ module Cardinality : sig
   val pp_error : Format.formatter -> error -> unit
 end
 
+(** Sequence adapters and bounded cardinality checks over captured values.
+    Matching preserves order and duplicates. Expected absence and ambiguity
+    remain ordinary result values. *)
 module Query : sig
   val matching : 'a Expr.t -> 'a Seq.t -> 'a Seq.t
   (** [matching expression] compiles once when the adapter is constructed.
@@ -652,6 +703,8 @@ module Key : sig
     | Control of char
 end
 
+(** A process description with explicit argv or shell semantics, working
+    directory and environment. Describing a process performs no I/O. *)
 module Spawn : sig
   type command =
     | Default
@@ -690,6 +743,8 @@ module Layout : sig
     | Custom of string
 end
 
+(** IDs reported by a successful creation reply. Only the requested kind is
+    newly created; the other fields can describe existing containers. *)
 module Created : sig
   type t = {
     session : Session.target;
@@ -727,6 +782,8 @@ module Environment : sig
       Names must be ASCII identifiers; values preserve non-NUL bytes. *)
 end
 
+(** Version-aware option descriptors and captured scoped values. Sparse array
+    indexes and inherited entries retain their tmux meaning. *)
 module Options : sig
   module Kind : sig
     type t = Text | Number | Flag | Choice | Key | Colour | Commands
@@ -790,6 +847,8 @@ module Hook : sig
       when the hook runs. *)
 end
 
+(** Typed descriptions of explicit acquisition and mutation operations.
+    Construction performs no I/O; a backend validates and admits the command. *)
 module Command : sig
   type mutation =
     | Kill_session of Session.target
@@ -939,6 +998,8 @@ module Command : sig
   (** Read-only inspection for transport adapters. *)
 end
 
+(** Future observed pane bytes, local cursors and explicit continuity loss.
+    Output cursors are unrelated to snapshot times or server-side history. *)
 module Output : sig
   type cursor = { generation : Generation.t; offset : int64 }
   (** [offset] is the number of observed bytes through the end of a Data event.
@@ -974,6 +1035,9 @@ module Output : sig
             absent earlier. *)
 end
 
+(** Construct typed tmux operations for a backend client. Observations are
+    immutable, mutations use explicit targets, and no command retries a mutation
+    against another connection generation. *)
 module Operations : sig
   val capture : unit -> Snapshot.t Command.t
 

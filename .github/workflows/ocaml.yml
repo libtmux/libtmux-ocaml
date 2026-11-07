@@ -36,6 +36,7 @@ jobs:
           opam exec -- dune runtest --force
       - name: Verify format and generated catalogs
         run: |
+          python3 tools/docs_snippets.py
           git ls-files -z -- '*.ml' '*.mli' | xargs -0 opam exec -- ocamlformat --check
           opam exec -- python3 tools/generate_fields.py --check
           opam exec -- python3 tools/generate_options.py --check

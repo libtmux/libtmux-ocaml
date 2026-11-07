@@ -60,3 +60,24 @@ The APIs and testing styles follow the primary documentation for
 [Alcotest](https://github.com/mirage/alcotest/tree/1.9.1),
 [ppx_expect](https://github.com/janestreet/ppx_expect/tree/v0.17.3), and
 [Dune tests](https://dune.readthedocs.io/en/stable/tests.html).
+
+## Executed documentation
+
+README and guide snippets name regions in the compiled programs under
+`examples/`. The source is authoritative; this check rejects drift:
+
+```console
+$ python3 tools/docs_snippets.py
+```
+
+The installed-consumer test installs libraries into a separate prefix, builds
+every shipped example in an independent Dune project and runs it against owned
+tmux servers. It checks linked-window contexts, typed/native query results,
+created layout geometry, options, pane titles, working directories, literal
+input, future-byte matches, rendered-screen waits and zero remaining clients.
+Owned fixture teardown verifies pane and daemon exit.
+
+These are correctness checks and whole-command timings, not throughput
+benchmarks. Do not derive performance comparisons from their durations.
+
+[Guide](README.md) · [API](api.md) · [Compatibility](compatibility.md)

@@ -1,0 +1,21 @@
+{0 Eio tmux clients}
+
+{!Libtmux_eio.Client} uses the application's switch, process manager and
+monotonic clock. The library never starts an Eio scheduler. Live handles belong
+to the connecting domain; immutable captured observations can be shared.
+
+{1 Keep the operation handle}
+
+Submit before awaiting. {!Libtmux_eio.Operation} retains success, failure or
+uncertainty when a waiter is cancelled. Client-owned workers continue draining
+admitted requests. An acknowledgement alone does not establish task completion.
+
+{1 Observe without blocking delivery}
+
+{!Libtmux_eio.Subscription} uses bounded subscriber queues and client-owned
+readers. A stalled consumer cannot block an independent subscriber or command.
+Gaps end continuity; recovery is explicit. Byte cursors do not establish a
+snapshot/history barrier.
+
+Use {!Libtmux_eio.Client.wait_for_text} for a level-triggered rendered-screen
+condition, and {!Libtmux_eio.Subscription.wait_for_bytes} for future raw bytes.

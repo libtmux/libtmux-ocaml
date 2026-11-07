@@ -20,7 +20,7 @@ are outside the project scope.
 
 Dependency and GitHub Actions upgrades are reviewed manually. Do not add
 scheduled Dependabot or Renovate version-update PRs. Keep security alerts
-enabled; automatic security-fix PRs are a separate, currently disabled setting.
+enabled and automatic security-fix PRs disabled.
 GitHub's [supported Dependabot ecosystems][dependabot-ecosystems] do not include
 opam, so this setting does not establish coverage for OCaml dependencies.
 

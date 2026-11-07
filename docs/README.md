@@ -1,0 +1,24 @@
+# Use libtmux from OCaml
+
+Start with an explicit tmux endpoint. Capture immutable observations, inspect
+and filter them locally, then perform an explicit action with a bound target.
+
+| Task | Guide | Executed program |
+| --- | --- | --- |
+| Install and connect | [First use](getting-started.md) | [Capture](../examples/native_capture.ml) |
+| Understand sessions, shared windows and panes | [Object graph](graph.md) | [Inspect graph](../examples/native_graph.ml) |
+| Native predicates, typed queries and cardinality | [Queries](queries.md) | [Query snapshot](../examples/native_query.ml) |
+| Create layouts, set options and handle outcomes | [Control and recovery](control.md) | [Build layout](../examples/native_build.ml) |
+| Concurrent literal send and output observation | [Streaming](streaming.md) | [Eio send and observe](../examples/native_watch.ml) |
+| Wait for text already on screen | [Rendered waits](streaming.md) | [Wait](../examples/native_wait.ml) |
+| Compare measured capture workloads | [Benchmarks](benchmarking.md) | [Capture harness](../bench/capture.py) |
+| Browse modules and signatures | [API documentation](api.md) | Public `.mli` sources |
+
+The field, option and format references are generated from the same catalogs as
+the library: [fields](fields.md), [options](options.md), [formats](formats.md),
+and [operation conveniences](operations.md).
+
+See [compatibility](compatibility.md) for qualified components,
+[testing](testing.md) to reproduce checks, and [status](status.md) for
+remaining adoption requirements. The [README](../README.md) contains a complete
+private-server walkthrough.
