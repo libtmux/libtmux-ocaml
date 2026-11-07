@@ -251,13 +251,13 @@ terminal history or an atomic capture/stream barrier. See
 
 | Dune library | Module | Use |
 | --- | --- | --- |
-| `libtmux` | `Libtmux` | Immutable graph, typed fields/relations, expressions and cardinality |
-| `libtmux-unix` | `Libtmux_unix` | Blocking Linux client and scoped cancellation |
-| `libtmux-eio` | `Libtmux_eio` | Eio client, retained operations and subscriptions |
-| `libtmux-json` | `Libtmux_json` | Bounded query and workspace JSON decoding |
-| `libtmux-workspace` | `Libtmux_workspace` | Validated workspace configuration, plans and execution journals |
+| [libtmux](lib/) | [Libtmux](lib/libtmux.mli) | Immutable graph, typed fields/relations, expressions and cardinality |
+| [libtmux-unix](unix/) | [Libtmux_unix](unix/libtmux_unix.mli) | Blocking Linux client and scoped cancellation |
+| [libtmux-eio](eio/) | [Libtmux_eio](eio/libtmux_eio.mli) | Eio client, retained operations and subscriptions |
+| [libtmux-json](json/) | [Libtmux_json](json/libtmux_json.mli) | Bounded query and workspace JSON decoding |
+| [libtmux-workspace](workspace/) | [Libtmux_workspace](workspace/libtmux_workspace.mli) | Validated workspace configuration, plans and execution journals |
 
-The `libtmux-workspace-cli` package installs `tmux-workspace` to validate, preview
+The [libtmux-workspace-cli](cli/) package installs `tmux-workspace` to validate, preview
 and apply JSON workspaces. The [workspace guide](docs/workspaces.md) runs a
 complete configuration through validation, planning, apply and receipt inspection.
 
