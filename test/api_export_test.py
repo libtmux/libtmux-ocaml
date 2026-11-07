@@ -33,6 +33,7 @@ module Alias = Nested
     for name in ("public", "private"):
         subprocess.run(["ocamlc", "-bin-annot", "-c", name + ".mli"], cwd=project, check=True)
     manifest = {"modules": [{"module": "Public", "package": "fixture", "product": "core",
+                              "submodules": {"Nested": "workspace"},
                               "source": "public.mli", "cmti": "public.cmti"}]}
     path = project / "manifest.json"
     path.write_text(json.dumps(manifest))
@@ -68,6 +69,8 @@ module Alias = Nested
     assert "[Type guide](https://ocaml.org/manual/5.5/typedecl.html)" in run["doc"]["body"]
     assert "inline code" in symbols["Public"]["doc"]["summary"]
     assert run["source"] == {"file": "public.mli", "line": 14}
+    assert symbols["Public"]["product"] == "core"
+    assert run["product"] == "workspace"
     assert run["declarations"][0]["text"].strip() == source.splitlines()[13].strip()
     assert symbols["Public.Nested.state:type.Failed"]["variant"] == "struct"
     assert "Public.Nested.state:type.Failed.message" in symbols

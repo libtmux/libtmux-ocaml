@@ -66,6 +66,10 @@ share a spelling, the type's reference ID ends in `:type`; its native qualified
 name remains unchanged. Compiler libraries, odoc-parser and JSON tooling belong
 to this opt-in development tool, not the core runtime.
 
+The manifest classifies nested workspace APIs separately from their transport
+or codec package. These declarations retain their actual public module and
+package names while appearing in the shared site's workspace reference.
+
 ## Read the effect boundary
 
 `Snapshot.panes`, `Window.panes`, field access and `Expr.compile` read captured

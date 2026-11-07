@@ -91,6 +91,7 @@ type unit_info = {
   name : string;
   package : string;
   product : string;
+  submodules : (string * string) list;
   source : string;
   contents : string;
   tree : signature;
@@ -116,6 +117,15 @@ let symbols = ref []
 let emit unit ~owner ~name ~kind ~loc ~attrs ~raw ?(extra = []) ?documentation
     () =
   let id = if owner = "" then name else owner ^ "." ^ name in
+  let product =
+    unit.submodules
+    |> List.find_map (fun (path, product) ->
+        let prefix = unit.name ^ "." ^ path in
+        if id = prefix || String.starts_with ~prefix:(prefix ^ ".") id then
+          Some product
+        else None)
+    |> Option.value ~default:unit.product
+  in
   let source = location unit loc in
   let docs =
     match documentation with
@@ -137,7 +147,7 @@ let emit unit ~owner ~name ~kind ~loc ~attrs ~raw ?(extra = []) ?documentation
           ("kind", string kind);
           ("modifiers", `List []);
           ("package", string unit.package);
-          ("product", string unit.product);
+          ("product", string product);
           ("apiScope", string "exported");
           ("publicOwner", string unit.name);
           ("source", source);
@@ -502,6 +512,15 @@ let () =
                     intro;
                     package = entry |> member "package" |> to_string;
                     product = entry |> member "product" |> to_string;
+                    submodules =
+                      (match entry |> member "submodules" with
+                        | `Null -> []
+                        | value ->
+                            value |> to_assoc
+                            |> List.map (fun (path, value) ->
+                                (path, to_string value)))
+                      |> List.sort (fun (a, _) (b, _) ->
+                          Int.compare (String.length b) (String.length a));
                   }
               | _ -> failwith "complete interface annotation required")
           | _ ->

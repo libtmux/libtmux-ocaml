@@ -47,9 +47,10 @@ artifact["port"] = "ocaml"
 artifact["repo"] = "https://github.com/libtmux/libtmux-ocaml"
 artifact["revision"] = revision
 artifact["extractor"] = "OCaml 5.5.2 compiler-libs .cmti + odoc-parser 3.2.2"
-artifact["sources"] = [{"product": item["product"], "package": item["package"],
+artifact["sources"] = [{"product": product, "package": item["package"],
                          "repo": artifact["repo"], "revision": revision}
-                        for item in manifest["modules"]]
+                        for item in manifest["modules"]
+                        for product in sorted({item["product"], *item.get("submodules", {}).values()})]
 tool_files = ["tools/api_export.ml", "tools/api_doc.ml", "tools/export_api.py",
               "tools/api_modules.json", "tools/dune"]
 tool_hashes = [{"path": path, "sha256": digest(path)} for path in tool_files]
