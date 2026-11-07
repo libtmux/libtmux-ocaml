@@ -23,17 +23,19 @@ input, streaming, rendered waits and client teardown.
 
 | Area | Required evidence before complete-suite adoption |
 | --- | --- |
-| Workspaces | Finish the Eio adapter, installed CLI, versioned receipts and recovery checks |
+| Workspaces | Finish the installed CLI, versioned receipts and recovery checks |
 | MCP | Ship the stdio service, discovery/catalog schemas, bounded targets and operation lookup; run conformance and host tests |
 | Documentation site | Finish public `.cmti` export, shared-site rendering and deployed-link verification |
 | Benchmarks | [Serial capture baselines](benchmarking.md) exist; add concurrency, graph scaling, allocation and stream-latency workloads |
 | Final qualification | Rerun every required component and exact release cell on the final source revision |
 | Package adoption | Obtain an independent caller-task review and resolve material findings |
 
-The workspace model and JSON loader are implemented. The blocking executor has
-live tests for partial effects, compensation, append isolation, stale plans and
-cancellation journals. Those results do not establish an installed CLI or a
-complete cross-backend workspace product.
+The workspace model, JSON loader and blocking/Eio executors are implemented.
+Live tests cover partial effects, compensation, append isolation, stale plans,
+cancellation journals and bootstrap on fresh and existing daemons. Cleanup
+targets only proven newly created panes; foreign panes moved into a new window
+remain. Those results do not establish an installed CLI or portable receipt
+format.
 
 ## Engineering assessment
 

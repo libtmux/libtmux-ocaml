@@ -556,3 +556,47 @@ module Client : sig
   (** Retire the generation and release owned resources, without stopping tmux.
   *)
 end
+
+(** Apply workspace plans through Eio while retaining journals across caller
+    cancellation. Handles belong to the creating domain; the application owns
+    the scheduler and switch. *)
+module Workspace : sig
+  type t
+
+  val submit :
+    Client.t -> Libtmux_workspace.Plan.t -> (t, Libtmux.Error.t) result
+  (** Allocate a generation-bound handle without I/O. The supplied client is
+      borrowed; closing the handle leaves it open. *)
+
+  val submit_bootstrap :
+    ?binary:string ->
+    ?timeout:float ->
+    sw:Eio.Switch.t ->
+    process_mgr:_ Eio.Process.mgr ->
+    mono_clock:_ Eio.Time.Mono.t ->
+    Libtmux_workspace.Plan.t ->
+    (t, Libtmux.Error.t) result
+  (** Allocate a missing-endpoint execution without I/O. Await starts control
+      new-session and binds that same connection. The handle owns its new client
+      within [sw]; it never owns the daemon. *)
+
+  val await :
+    ?compensate_on_failure:bool ->
+    t ->
+    (Libtmux_workspace.Execution.receipt, Libtmux.Error.t) result
+  (** Apply once. Expected failures return a retained journal. Eio cancellation
+      propagates after progress is recorded and at most 500 ms of protected
+      compensation. Admitted commands can still complete under client ownership;
+      inspect the receipt before attempting manual recovery. *)
+
+  val inspect :
+    t -> (Libtmux_workspace.Execution.receipt, Libtmux.Error.t) result
+  (** Read a journal copy without I/O, including any late retained outcome. *)
+
+  val client : t -> Client.t option
+  (** Borrow the existing or bootstrapped client for explicit recovery. *)
+
+  val close : t -> (unit, Libtmux.Error.t) result
+  (** Close an owned client without stopping its daemon. Active await returns
+      Busy. Closing is idempotent; completed journals remain readable. *)
+end

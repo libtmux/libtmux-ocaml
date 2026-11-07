@@ -147,7 +147,17 @@
  (modules bootstrap_peer)
  (libraries libtmux libtmux-unix unix))
 
+(library
+ (name workspace_scenarios)
+ (modules workspace_scenarios)
+ (libraries libtmux libtmux-workspace))
+
+(executable
+ (name workspace_eio_peer)
+ (modules workspace_eio_peer)
+ (libraries libtmux libtmux-workspace libtmux-eio workspace_scenarios eio_main))
+
 (executable
  (name workspace_peer)
  (modules workspace_peer)
- (libraries libtmux libtmux-workspace libtmux-unix unix))
+ (libraries libtmux libtmux-workspace libtmux-unix workspace_scenarios unix))

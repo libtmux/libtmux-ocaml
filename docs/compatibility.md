@@ -28,7 +28,8 @@ separate acceptance gates.
 | Native operation inventory | PASS | PASS | PASS | PASS |
 | Data/Gap/End, stream limits and recovery | PASS | PASS | PASS | PASS |
 | Rendered waits and future-byte matching | PASS | PASS | PASS | PASS |
-| Blocking workspace preconditions and compensation | PASS | PASS | PASS | PASS |
+| Blocking/Eio workspace preconditions and compensation | PASS | PASS | PASS | PASS |
+| Public workspace bootstrap on fresh/existing daemons | PASS | PASS | PASS | PASS |
 | Complete workspace CLI and MCP suite | UNVERIFIED | UNVERIFIED | UNVERIFIED | UNVERIFIED |
 
 The blocking client rejects 3.2a. Development tmux 3.8a does not replace the

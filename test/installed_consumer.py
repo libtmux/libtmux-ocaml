@@ -95,10 +95,28 @@ let exercise client =
   assert (get (C.read_option client scope "@libtmux-convenience") = None);
   get (C.set_environment client Global ~name:"LIBTMUX_CONVENIENCE" "");
   assert (Environment.lookup (get (C.capture_environment client Global)) "LIBTMUX_CONVENIENCE" = Some (Value ""));
-  get (C.unset_environment client Global "LIBTMUX_CONVENIENCE")
+  get (C.unset_environment client Global "LIBTMUX_CONVENIENCE");
+  let module Config = Libtmux_workspace.Config in
+  let config = match Config.make ~directory:"/tmp" ~session:"installed-workspace"
+      [Config.window ~name:"editor" [Config.pane ~spawn:(Spawn.make (Shell "exec cat")) ()]] with
+    | Ok value -> value
+    | Error error -> failwith (Format.asprintf "%a" Config.pp_error error) in
+  let observed = get (C.capture client) in
+  let plan = match Libtmux_workspace.Plan.make ~endpoint:(Source.endpoint (C.source client))
+      ~version:(C.version client) ~observed:(Some observed) config with
+    | Ok value -> value
+    | Error error -> failwith (Format.asprintf "%a" Libtmux_workspace.Plan.pp_error error) in
+  let operation = get (W.submit client plan) in
+  assert ((get (W.inspect operation)).status = Libtmux_workspace.Execution.Queued);
+  let receipt = get (W.await operation) in
+  assert (receipt.status = Libtmux_workspace.Execution.Succeeded);
+  get (W.close operation);
+  let created = get (C.capture client) |> Snapshot.sessions
+    |> Iarray.find_opt (fun session -> Session.name session = "installed-workspace") |> Option.get in
+  get (C.run client (Operations.kill_session (Session.target created)))
 '''
     for backend in ["unix", "eio"]:
-        module = f"open Libtmux\nmodule C = Libtmux_{backend}.Client\n"
+        module = f"open Libtmux\nmodule C = Libtmux_{backend}.Client\nmodule W = Libtmux_{backend}.Workspace\n"
         connect = '''
 let () =
   let client = get (C.connect ~binary:Sys.argv.(1) (Endpoint.socket_path Sys.argv.(2))) in
@@ -127,10 +145,13 @@ let () = Eio_main.run (fun env -> Eio.Switch.run (fun sw ->
                                     cwd=runtime, env=environment, capture_output=True, timeout=1, check=True)
             assert result.stdout == b"%0\n" and result.stderr == b"", result
             for backend in ["unix", "eio"]:
-                result = subprocess.run([str(runtime / f"_build/default/configuration_{backend}.exe"),
-                                         fixture.binary, str(fixture.socket)],
-                                        cwd=runtime, env=environment, capture_output=True, timeout=1, check=True)
-                assert result.stdout == b"" and result.stderr == b"", result
+                with TmuxFixture(binary) as configuration:
+                    result = subprocess.run([str(runtime / f"_build/default/configuration_{backend}.exe"),
+                                             configuration.binary, str(configuration.socket)],
+                                            cwd=runtime, env=environment, capture_output=True, timeout=1, check=True)
+                    assert result.stdout == b"" and result.stderr == b"", result
+                    assert configuration.command("list-clients").stdout == b""
+                    assert configuration.command("list-panes", "-a", "-F", "#{pane_id}").stdout == b"%0\n"
             assert fixture.command("list-clients").stdout == b""
             fixture.command("send-keys", "-t", "%0", "-l", "present-value")
             result = subprocess.run([str(runtime / "_build/default/native_wait.exe"),

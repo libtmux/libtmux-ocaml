@@ -13,6 +13,7 @@ depends: [
   "dune" {= "3.24.2"}
   "libtmux" {= version}
   "libtmux-unix" {= version}
+  "libtmux-workspace" {= version}
   "eio" {= "1.6"}
   "eio_main" {with-test & = "1.6"}
   "alcotest" {with-test & = "1.9.1"}

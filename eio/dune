@@ -1,7 +1,7 @@
 (library
  (name libtmux_eio)
  (public_name libtmux-eio)
- (libraries libtmux libtmux-unix eio eio.unix unix))
+ (libraries libtmux libtmux-workspace libtmux-unix eio eio.unix unix))
 
 (documentation
  (package libtmux-eio)

@@ -271,6 +271,90 @@ module Client = struct
             (Error.Disconnected "unexpected data on idle primary connection")
     done
 
+  let of_connection ~sw ~mono_clock connection =
+    let changed = Eio.Condition.create () in
+    let t =
+      {
+        engine =
+          Engine.create
+            ~changed:(fun () -> Eio.Condition.broadcast changed)
+            connection;
+        changed;
+        streams =
+          Streaming.create
+            ~changed:(fun () -> Eio.Condition.broadcast changed)
+            connection;
+        pending_streams = Queue.create ();
+        sleep = (fun seconds -> Eio.Time.Mono.sleep mono_clock seconds);
+        contexts = [];
+        closing = false;
+        release = Eio.Switch.null_hook;
+      }
+    in
+    t.streams.make_serial <-
+      (fun () ->
+        let mutex = Eio.Mutex.create () in
+        { Streaming.run = (fun f -> Eio.Mutex.use_rw ~protect:false mutex f) });
+    t.streams.started <-
+      (fun lane ->
+        Queue.add lane t.pending_streams;
+        Eio.Condition.broadcast changed);
+    t.release <- Eio.Switch.on_release_cancellable sw (fun () -> close_exn t);
+    worker ~sw t (fun () ->
+        Eio_unix.await_readable connection.pidfd;
+        close_exn t);
+    worker ~sw t (fun () ->
+        let rec pump () =
+          if not t.closing then (
+            idle_events t;
+            while not (Queue.is_empty t.pending_streams) do
+              let lane = Queue.take t.pending_streams in
+              if not lane.retired then
+                worker ~sw t (fun () ->
+                    let rec read () =
+                      if not lane.retired then (
+                        Streaming.poll_lane lane;
+                        if not lane.retired then (
+                          Eio.Fiber.first
+                            (fun () ->
+                              Eio_unix.await_readable
+                                lane.control.process.output)
+                            (fun () ->
+                              Eio_unix.await_readable lane.control.process.error);
+                          read ()))
+                    in
+                    match protect read with
+                    | Ok () -> ()
+                    | Error error ->
+                        Streaming.retire lane (Output.Transport_error error))
+            done;
+            match Engine.take t.engine with
+            | Some (Engine.Pack op as job) ->
+                (match Command.view op.command with
+                | Wait_for _ -> worker ~sw t (fun () -> Engine.run job)
+                | _ -> Engine.run job);
+                if connection.closed then close_exn t else pump ()
+            | None ->
+                Eio.Fiber.first
+                  (fun () -> Eio.Condition.await_no_mutex changed)
+                  (fun () ->
+                    Eio_unix.await_readable connection.lane.process.output;
+                    let bytes =
+                      Io.read connection.lane.io connection.lane.process
+                        ~pidfd:(Some connection.pidfd)
+                        ~deadline:(Linux.now () +. connection.timeout)
+                    in
+                    let events =
+                      Io.protocol (C.P.Framer.feed connection.lane.framer bytes)
+                    in
+                    List.iter
+                      (fun event -> Queue.add event connection.lane.events)
+                      events);
+                pump ())
+        in
+        match protect pump with Ok () -> () | Error _ -> close_exn t);
+    t
+
   let connect ?(binary = "tmux") ?timeout ~sw ~process_mgr ~mono_clock endpoint
       =
     protect (fun () ->
@@ -279,93 +363,7 @@ module Client = struct
             ~io:(io ~sw ~process_mgr ~mono_clock)
             ~binary endpoint
         in
-        let changed = Eio.Condition.create () in
-        let t =
-          {
-            engine =
-              Engine.create
-                ~changed:(fun () -> Eio.Condition.broadcast changed)
-                connection;
-            changed;
-            streams =
-              Streaming.create
-                ~changed:(fun () -> Eio.Condition.broadcast changed)
-                connection;
-            pending_streams = Queue.create ();
-            sleep = (fun seconds -> Eio.Time.Mono.sleep mono_clock seconds);
-            contexts = [];
-            closing = false;
-            release = Eio.Switch.null_hook;
-          }
-        in
-        t.streams.make_serial <-
-          (fun () ->
-            let mutex = Eio.Mutex.create () in
-            {
-              Streaming.run = (fun f -> Eio.Mutex.use_rw ~protect:false mutex f);
-            });
-        t.streams.started <-
-          (fun lane ->
-            Queue.add lane t.pending_streams;
-            Eio.Condition.broadcast changed);
-        t.release <-
-          Eio.Switch.on_release_cancellable sw (fun () -> close_exn t);
-        worker ~sw t (fun () ->
-            Eio_unix.await_readable connection.pidfd;
-            close_exn t);
-        worker ~sw t (fun () ->
-            let rec pump () =
-              if not t.closing then (
-                idle_events t;
-                while not (Queue.is_empty t.pending_streams) do
-                  let lane = Queue.take t.pending_streams in
-                  if not lane.retired then
-                    worker ~sw t (fun () ->
-                        let rec read () =
-                          if not lane.retired then (
-                            Streaming.poll_lane lane;
-                            if not lane.retired then (
-                              Eio.Fiber.first
-                                (fun () ->
-                                  Eio_unix.await_readable
-                                    lane.control.process.output)
-                                (fun () ->
-                                  Eio_unix.await_readable
-                                    lane.control.process.error);
-                              read ()))
-                        in
-                        match protect read with
-                        | Ok () -> ()
-                        | Error error ->
-                            Streaming.retire lane (Output.Transport_error error))
-                done;
-                match Engine.take t.engine with
-                | Some (Engine.Pack op as job) ->
-                    (match Command.view op.command with
-                    | Wait_for _ -> worker ~sw t (fun () -> Engine.run job)
-                    | _ -> Engine.run job);
-                    if connection.closed then close_exn t else pump ()
-                | None ->
-                    Eio.Fiber.first
-                      (fun () -> Eio.Condition.await_no_mutex changed)
-                      (fun () ->
-                        Eio_unix.await_readable connection.lane.process.output;
-                        let bytes =
-                          Io.read connection.lane.io connection.lane.process
-                            ~pidfd:(Some connection.pidfd)
-                            ~deadline:(Linux.now () +. connection.timeout)
-                        in
-                        let events =
-                          Io.protocol
-                            (C.P.Framer.feed connection.lane.framer bytes)
-                        in
-                        List.iter
-                          (fun event -> Queue.add event connection.lane.events)
-                          events);
-                    pump ())
-            in
-            match protect pump with Ok () -> () | Error _ -> close_exn t);
-        t)
+        of_connection ~sw ~mono_clock connection)
 
   let submit t command =
     protect (fun () ->
@@ -420,4 +418,129 @@ module Client = struct
           ~subscribe:(subscribe t)
           ~next:(fun timeout sub -> Subscription.next ~timeout sub)
           ~poll:Subscription.poll ~close:Subscription.close ~timeout pane ~text)
+end
+
+module Workspace = struct
+  module X = Libtmux_workspace.Execution
+  module P = Libtmux_workspace.Plan
+  module R = Libtmux_unix__Workspace_runner
+
+  type t = {
+    journal : X.t;
+    owner : Domain.id;
+    current : Client.t option ref;
+    owned : bool;
+    mutable busy : bool;
+    mutable closed : bool;
+  }
+
+  let owner t = if Domain.self () <> t.owner then Io.fail Error.Wrong_domain
+
+  let describe (client : Client.t) : R.client =
+    {
+      source = Client.source client;
+      version = Client.version client;
+      capture = (fun () -> Client.capture client);
+      submit =
+        (fun command ->
+          Result.map
+            (fun operation ->
+              R.
+                {
+                  await = (fun () -> Client.await operation);
+                  observe = R.observe operation.Operation.inner;
+                })
+            (Client.submit client command));
+    }
+
+  let create ?client ~owned ~bootstrap ~sleep plan =
+    let current = ref client in
+    let protect_cleanup f =
+      Eio.Cancel.protect (fun () ->
+          Eio.Fiber.first
+            (fun () -> protect f)
+            (fun () ->
+              sleep 0.5;
+              Error Error.Deadline_exceeded))
+    in
+    let bootstrap receipt config =
+      Result.map
+        (fun (client, created) ->
+          current := Some client;
+          (describe client, created))
+        (bootstrap receipt config)
+    in
+    let executor =
+      R.create
+        ~client:(Option.map describe client)
+        ~bootstrap ~protect:protect_cleanup
+    in
+    Result.map
+      (fun journal ->
+        {
+          journal;
+          owner = Domain.self ();
+          current;
+          owned;
+          busy = false;
+          closed = false;
+        })
+      (X.create ~operation_id:(Linux.nonce ()) ~executor plan)
+
+  let submit client plan =
+    create ~client ~owned:false ~sleep:client.Client.sleep
+      ~bootstrap:(fun _ _ -> Error Error.Stale_target)
+      plan
+
+  let submit_bootstrap ?(binary = "tmux") ?timeout ~sw ~process_mgr ~mono_clock
+      plan =
+    if Option.is_some (P.source plan) then Error Error.Stale_target
+    else
+      let bootstrap receipt config =
+        protect (fun () ->
+            let first =
+              Iarray.get (Libtmux_workspace.Config.windows config) 0
+            in
+            let width, height = Libtmux_workspace.Config.dimensions config in
+            let connection, created =
+              Libtmux_unix__Bootstrap.start receipt ?timeout
+                ~io:(io ~sw ~process_mgr ~mono_clock)
+                ~binary ~endpoint:(P.endpoint plan)
+                ~name:(Libtmux_workspace.Config.session config)
+                ~window_name:first.name ~spawn:(List.hd first.panes).spawn
+                ~width ~height ()
+            in
+            (Client.of_connection ~sw ~mono_clock connection, created))
+      in
+      create ~owned:true ~bootstrap
+        ~sleep:(fun duration -> Eio.Time.Mono.sleep mono_clock duration)
+        plan
+
+  let inspect t =
+    protect (fun () ->
+        owner t;
+        X.inspect t.journal)
+
+  let await ?compensate_on_failure t =
+    protect (fun () ->
+        owner t;
+        if t.closed then Io.fail Error.Closed;
+        if t.busy then Io.fail Error.Busy;
+        t.busy <- true;
+        Fun.protect
+          ~finally:(fun () -> t.busy <- false)
+          (fun () -> X.await ?compensate_on_failure t.journal))
+
+  let client t = !(t.current)
+
+  let close t =
+    protect (fun () ->
+        owner t;
+        if t.busy then Io.fail Error.Busy;
+        if not t.closed then (
+          if t.owned then
+            Option.iter
+              (fun client -> Io.get (Client.close client))
+              !(t.current);
+          t.closed <- true))
 end

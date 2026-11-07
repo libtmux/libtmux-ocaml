@@ -19,3 +19,11 @@ snapshot/history barrier.
 
 Use {!Libtmux_eio.Client.wait_for_text} for a level-triggered rendered-screen
 condition, and {!Libtmux_eio.Subscription.wait_for_bytes} for future raw bytes.
+
+{1 Retain workspace progress}
+
+{!Libtmux_eio.Workspace.submit} borrows an existing client;
+{!Libtmux_eio.Workspace.submit_bootstrap} owns a newly bound client within the
+application's switch. Await applies the plan once. Cancellation retains its
+journal and bounds protected compensation; closing the handle never stops the
+daemon. Inspect uncertain steps before deciding on manual recovery.

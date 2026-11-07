@@ -17,10 +17,17 @@ if libc.prctl(36, 1, 0, 0, 0) != 0:
     raise OSError(ctypes.get_errno(), "PR_SET_CHILD_SUBREAPER")
 
 
-def exercise(binary, socket, environment, fresh):
+def exercise(binary, socket, environment, fresh, public_backend=None):
     daemon = None
     pidfds = []
-    process = subprocess.Popen([str(peer), binary, str(socket)], env=environment,
+    arguments = [str(peer), binary, str(socket)]
+    expected = b"PASS bound startup, collision, retained cancellation, healthy daemon\nCLOSED\n"
+    if public_backend is not None:
+        public_peer = root / f"_build/default/test/workspace{public_backend}_peer.exe"
+        version = subprocess.check_output([binary, "-V"], env=environment).decode().strip().removeprefix("tmux ")
+        arguments = [str(public_peer), binary, str(socket), "--bootstrap", version]
+        expected = b"PASS public bootstrap, collision, closed-client journal, healthy daemon\nCLOSED\n"
+    process = subprocess.Popen(arguments, env=environment,
                                stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     try:
         with selectors.DefaultSelector() as ready:
@@ -38,9 +45,9 @@ def exercise(binary, socket, environment, fresh):
         process.stdin.flush()
         stdout, stderr = process.communicate(timeout=1)
         assert process.returncode == 0, (stdout, stderr)
-        assert stdout == b"PASS bound startup, collision, retained cancellation, healthy daemon\nCLOSED\n"
+        assert stdout == expected, stdout
         assert not stderr, stderr
-        # The cancelled startup deliberately leaves its proven creation in the journal.
+        # Retain owned creations until PID-checked harness teardown.
         result = subprocess.run([binary, "-S", str(socket), "list-panes", "-a", "-F", "#{pane_pid}"],
                                 env=environment, capture_output=True, check=True, timeout=1)
         for pane in result.stdout.splitlines():
@@ -93,3 +100,16 @@ for binary in sys.argv[1:]:
         environment = {key:value for key,value in os.environ.items() if key not in {"TMUX", "TMUX_PANE"}}
         exercise(str(wrapper), directory / "server", environment, True)
     print(f"PASS {Path(binary).parent.name}: fresh/existing bootstrap, collision, cancelled startup receipt, teardown")
+    for public_backend in ["", "_eio"]:
+        with TmuxFixture(actual) as fixture:
+            try:
+                exercise(actual, fixture.socket, fixture.environment, False, public_backend)
+            finally:
+                fixture.track_panes()
+        with tempfile.TemporaryDirectory(prefix="libtmux-ocaml-public-bootstrap-") as directory:
+            directory = Path(directory)
+            wrapper = directory / "tmux"
+            wrapper.write_text(f"#!/bin/sh\nexec {shlex.quote(actual)} -f /dev/null \"$@\"\n")
+            wrapper.chmod(0o700)
+            exercise(str(wrapper), directory / "server", environment, True, public_backend)
+        print(f"PASS {Path(binary).parent.name}: public {'Eio' if public_backend else 'Unix'} fresh/existing bootstrap, collision and retained journal")

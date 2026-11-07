@@ -5,8 +5,9 @@ import subprocess
 import sys
 from support.tmux_fixture import TmuxFixture
 
-peer = Path(__file__).resolve().parents[1] / "_build/default/test/workspace_peer.exe"
-for binary in sys.argv[1:]:
+peer_name = "workspace_eio_peer" if "--eio" in sys.argv else "workspace_peer"
+peer = Path(__file__).resolve().parents[1] / f"_build/default/test/{peer_name}.exe"
+for binary in [arg for arg in sys.argv[1:] if arg != "--eio"]:
     with TmuxFixture(binary) as fixture:
         process = subprocess.Popen([str(peer), fixture.binary, str(fixture.socket)],
                                    env=fixture.environment, stdin=subprocess.PIPE,
@@ -74,4 +75,4 @@ for binary in sys.argv[1:]:
                 stream.close()
             fixture.track_panes()
         assert fixture.command("list-clients").stdout == b""
-        print(f"PASS {Path(binary).parent.name}: public Unix workspace executor, compensation and cancellation journal")
+        print(f"PASS {Path(binary).parent.name}: {peer_name}: workspace executor, compensation and cancellation journal")
