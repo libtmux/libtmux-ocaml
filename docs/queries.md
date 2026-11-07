@@ -80,10 +80,13 @@ subset of `libtmux.filter/1`. It rejects duplicate/unknown keys, wrong operand
 types, invalid UTF-8, oversized/deep documents and Java regex. Native closures
 stay in `Seq.filter`; they have no portable wire identity.
 
-`Libtmux.Plan.make` describes source-side acquisition separately from local
-matching. Inspect `source_filter` and residual evaluation, and use
-`Require_exact` when falling back locally would be unacceptable. Conjunctions,
-disjunctions, negation and relationships require different lowering rules;
-local sequence processing never issues a tmux query implicitly.
+`Libtmux.Plan.panes` compiles a source filter and retains the residual expression
+without I/O. Inspect `source_filter` and use `Require_exact` to reject unsupported
+lowering. Current client capture operations acquire the complete graph; they do
+not execute these plans. The planner is a separate seam for acquisition adapters.
+Conjunctions, disjunctions, negation and relationships require different lowering
+rules; local sequence processing never issues a tmux query implicitly.
+
+The [native reference](../lib/index.mld) executes a pure planning example with MDX.
 
 [Field reference](fields.md) · [API](api.md) · [Guide](README.md)

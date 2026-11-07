@@ -29,6 +29,22 @@ Error (Cardinality.Multiple_matches {Libtmux.Cardinality.at_least = 2})
 {!Libtmux.Operations} constructs commands. It does not execute them. Optional
 blocking and Eio packages own connections, cancellation and output subscriptions.
 
+{1 Inspect a source-filter plan}
+
+{!Libtmux.Plan.panes} plans without I/O. Backend capture operations still acquire
+the complete graph; an acquisition adapter must consume a plan explicitly.
+
+{[
+# let planned =
+    match Plan.panes ~pushdown:Require_exact
+            (Expr.Bool.is_true Pane.Fields.active) with
+    | Ok plan -> plan
+    | Error error -> failwith (Format.asprintf "%a" Error.pp error);;
+val planned : Plan.t = <abstr>
+# Option.is_some (Plan.source_filter planned);;
+- : bool = true
+]}
+
 {1 Identity and failure}
 
 {!Libtmux.Source} binds IDs to one connection generation. Entity identity differs

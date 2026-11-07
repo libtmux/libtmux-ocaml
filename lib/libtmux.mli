@@ -639,7 +639,8 @@ end
 
 (** Explicit source-filter planning for a new acquisition. A plan separates
     supported tmux predicates from residual local evaluation; it never changes
-    the I/O-free contract of {!Query.matching}. *)
+    the I/O-free contract of {!Query.matching}. Backend capture operations
+    acquire a complete graph and do not consume these plans. *)
 module Plan : sig
   type pushdown = Auto | Never | Require_exact
   type t
