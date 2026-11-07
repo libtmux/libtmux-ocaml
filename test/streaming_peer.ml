@@ -10,11 +10,12 @@ type subscription = {
   close : unit -> unit;
   wait : string -> (Output.cursor, Output.wait_error) result;
   cancel_wait : unit -> unit;
+  timeout : unit -> unit;
 }
 
 type runner = {
   run : 'a. 'a Command.t -> 'a;
-  subscribe : int -> Pane.t -> subscription;
+  subscribe : ?capacity_events:int -> int -> Pane.t -> subscription;
   close : unit -> unit;
   line : unit -> string;
   rendered : Pane.t -> string -> (Captured_text.t, Error.t) result;
@@ -61,6 +62,7 @@ let exercise runner =
   let first = runner.subscribe 4096 pane in
   let slow = runner.subscribe 16 pane in
   let second = runner.subscribe 4096 pane in
+  let event_limited = runner.subscribe ~capacity_events:1 4096 pane in
   assert (Iarray.length (Snapshot.clients (capture ())) = 2);
   print_endline "READY";
   let expected = String.init 256 Char.chr ^ "DONE" in
@@ -73,6 +75,17 @@ let exercise runner =
   | _ -> failwith "stalled subscriber did not report byte loss");
   assert (slow.next () = Some (Output.End Overflow));
   assert (first.poll () = None);
+  print_endline "EVENT_LIMIT";
+  assert (Iarray.length (Snapshot.clients (capture ())) = 2);
+  ignore (read_bytes first "recovered");
+  ignore (read_bytes second "recovered");
+  (match event_limited.next () with
+  | Some
+      (Output.Gap { reason = Overflow; after = None; lost_bytes = Some lost })
+    ->
+      assert (lost > 0 && lost <= 269)
+  | _ -> failwith "event-count limit did not report loss independently of bytes");
+  assert (event_limited.next () = Some (Output.End Overflow));
   second.close ();
   print_endline "CHANGE";
   gap first Output.Membership_changed;
@@ -87,6 +100,7 @@ let exercise runner =
       assert (Generation.equal cursor.generation after.generation);
       assert (cursor.offset = 23L)
   | Error _ -> failwith "future-byte match failed");
+  recovered.timeout ();
   print_endline "RENDER";
   let present = get (runner.rendered fresh "present-value") in
   assert (String.starts_with ~prefix:"present-value" present.bytes);
@@ -137,6 +151,16 @@ let exercise runner =
   in
   runner.reject_lane (pane_of (List.nth created 7));
   assert (Iarray.length (Snapshot.clients (capture ())) = 8);
+  runner.run
+    (Operations.send_text (List.nth created 0).pane ~text:"left-session");
+  runner.run
+    (Operations.send_text (List.nth created 1).pane ~text:"right-session");
+  ignore (read_bytes (List.nth covered 0) "left-session");
+  ignore (read_bytes (List.nth covered 1) "right-session");
+  List.iteri
+    (fun index (sub : subscription) ->
+      if index > 1 then assert (sub.poll () = None))
+    covered;
   print_endline "LANE_CAPACITY";
   assert (runner.line () = "CHECKED");
   List.iter (fun (sub : subscription) -> sub.close ()) covered;
@@ -163,13 +187,26 @@ let () =
           {
             run = (fun command -> get (C.run client command));
             subscribe =
-              (fun capacity_bytes pane ->
-                let sub = get (C.subscribe ~capacity_bytes client pane) in
+              (fun ?capacity_events capacity_bytes pane ->
+                let sub =
+                  get (C.subscribe ?capacity_events ~capacity_bytes client pane)
+                in
                 {
                   next = (fun () -> get (S.next ~timeout:0.5 sub));
                   poll = (fun () -> get (S.poll sub));
                   close = (fun () -> get (S.close sub));
                   wait = (fun text -> S.wait_for_bytes ~timeout:0.5 sub ~text);
+                  timeout =
+                    (fun () ->
+                      match
+                        S.wait_for_bytes ~timeout:0.01 sub
+                          ~text:"absent-byte-pattern"
+                      with
+                      | Error (Output.Failure Error.Deadline_exceeded) -> ()
+                      | _ ->
+                          failwith
+                            "future-byte deadline did not remain \
+                             distinguishable");
                   cancel_wait =
                     (fun () ->
                       Libtmux_unix.Cancellation.with_ (fun cancel ->
@@ -229,9 +266,11 @@ let () =
                   {
                     run = (fun command -> get (C.run client command));
                     subscribe =
-                      (fun capacity_bytes pane ->
+                      (fun ?capacity_events capacity_bytes pane ->
                         let sub =
-                          get (C.subscribe ~capacity_bytes client pane)
+                          get
+                            (C.subscribe ?capacity_events ~capacity_bytes client
+                               pane)
                         in
                         {
                           next = (fun () -> get (S.next ~timeout:0.5 sub));
@@ -240,6 +279,19 @@ let () =
                           wait =
                             (fun text ->
                               S.wait_for_bytes ~timeout:0.5 sub ~text);
+                          timeout =
+                            (fun () ->
+                              match
+                                S.wait_for_bytes ~timeout:0.01 sub
+                                  ~text:"absent-byte-pattern"
+                              with
+                              | Error (Output.Failure Error.Deadline_exceeded)
+                                ->
+                                  ()
+                              | _ ->
+                                  failwith
+                                    "future-byte deadline did not remain \
+                                     distinguishable");
                           cancel_wait =
                             (fun () ->
                               let context, resolve = Eio.Promise.create () in

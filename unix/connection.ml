@@ -86,7 +86,9 @@ let rec event lane ~pidfd ~deadline =
   if lane.stopped then fail Error.Closed;
   if Queue.is_empty lane.events then (
     let bytes = Runtime_io.read lane.io lane.process ~pidfd ~deadline in
-    let events = protocol (P.Framer.feed lane.framer bytes) in
+    let events =
+      protocol ~limit:lane.framer.max_frame (P.Framer.feed lane.framer bytes)
+    in
     List.iter (fun event -> Queue.add event lane.events) events;
     event lane ~pidfd ~deadline)
   else

@@ -36,12 +36,14 @@ for binary in sys.argv[1:]:
             try:
                 with selectors.DefaultSelector() as ready:
                     ready.register(process.stdout, selectors.EVENT_READ)
-                    for expected in [b"READY\n", b"CHANGE\n", b"RECOVER\n", b"FUTURE\n", b"RENDER\n", b"DETACH\n", b"RECOVER_AGAIN\n", b"CAPACITY\n", b"CANCEL_READY\n", b"LANE_CAPACITY\n"]:
+                    for expected in [b"READY\n", b"EVENT_LIMIT\n", b"CHANGE\n", b"RECOVER\n", b"FUTURE\n", b"RENDER\n", b"DETACH\n", b"RECOVER_AGAIN\n", b"CAPACITY\n", b"CANCEL_READY\n", b"LANE_CAPACITY\n"]:
                         assert ready.select(1), "streaming peer did not progress"
                         line = process.stdout.readline()
                         assert line == expected, (line, process.stderr.read())
                         if expected == b"READY\n":
                             os.write(control, b"A")
+                        elif expected == b"EVENT_LIMIT\n":
+                            os.write(control, b"B")
                         elif expected == b"CHANGE\n":
                             fixture.command("split-window", "-d", "-t", "%0", "exec cat")
                             fixture.track_panes()

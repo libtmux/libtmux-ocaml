@@ -65,7 +65,7 @@
 (executable
  (name binding_peer)
  (modules binding_peer)
- (libraries libtmux libtmux-unix unix))
+ (libraries libtmux libtmux-unix libtmux-eio eio_main unix))
 
 (executable
  (name eio_peer)
@@ -126,3 +126,8 @@
  (name streaming_peer)
  (modules streaming_peer)
  (libraries libtmux libtmux-unix libtmux-eio eio_main unix))
+
+(executable
+ (name stream_fault_peer)
+ (modules stream_fault_peer)
+ (libraries libtmux libtmux-unix unix))

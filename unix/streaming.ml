@@ -134,7 +134,12 @@ let notification lane text =
   let name, rest = split text in
   let id, body = split rest in
   if name = "%output" then
-    let pane = get (Pane.Id.of_string id) in
+    let pane =
+      match Pane.Id.of_string id with
+      | Ok pane -> pane
+      | Error _ ->
+          fail (Error.Malformed_data "invalid pane ID in stream output")
+    in
     let bytes = protocol (P.Output.decode body) in
     List.iter
       (fun sub -> if Pane.Id.equal sub.pane pane then push sub bytes)
@@ -191,10 +196,12 @@ let poll_lane lane =
                   in
                   let count = read lane.control.process.output in
                   if count = 0 then (
-                    ignore (protocol (P.Framer.finish lane.control.framer));
+                    ignore
+                      (protocol ~limit:lane.control.framer.max_frame
+                         (P.Framer.finish lane.control.framer));
                     fail (Error.Disconnected "stream client exited"))
                   else if count > 0 then
-                    protocol
+                    protocol ~limit:lane.control.framer.max_frame
                       (P.Framer.feed lane.control.framer
                          (Bytes.sub_string chunk 0 count))
                     |> List.iter (fun event ->

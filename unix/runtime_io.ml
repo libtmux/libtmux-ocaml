@@ -5,11 +5,11 @@ exception Failure of Error.t
 let fail error = raise (Failure error)
 let get = function Ok value -> value | Error error -> fail error
 
-let protocol = function
+let protocol ?(limit = 4 * 1024 * 1024) = function
   | Ok value -> value
   | Error (Libtmux__Protocol.Malformed text) -> fail (Error.Malformed_data text)
   | Error (Libtmux__Protocol.Limit text) ->
-      fail (Error.Capacity { resource = text; limit = 4 * 1024 * 1024 })
+      fail (Error.Capacity { resource = text; limit })
 
 let protect f =
   try Ok (f ()) with
