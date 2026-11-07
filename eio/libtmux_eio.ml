@@ -419,5 +419,5 @@ module Client = struct
               ~end_:(Pane.height pane - 1))
           ~subscribe:(subscribe t)
           ~next:(fun timeout sub -> Subscription.next ~timeout sub)
-          ~close:Subscription.close ~timeout pane ~text)
+          ~poll:Subscription.poll ~close:Subscription.close ~timeout pane ~text)
 end

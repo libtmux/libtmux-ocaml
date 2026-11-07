@@ -214,6 +214,45 @@ let incremental_bytes () =
        QCheck2.Gen.(triple string_small string_small bool)
        property)
 
+let coalesced_observation () =
+  let generation = Io.get (Generation.of_string (String.make 64 'a')) in
+  let data offset =
+    Output.Data { cursor = { generation; offset }; bytes = "x" }
+  in
+  let pp formatter = function
+    | Output.Data { cursor; bytes } ->
+        Format.fprintf formatter "Data(%Ld,%S)" cursor.offset bytes
+    | Gap { reason; _ } ->
+        Format.fprintf formatter "Gap(%a)" Output.reason_pp reason
+    | End reason -> Format.fprintf formatter "End(%a)" Output.reason_pp reason
+  in
+  let event_type = Alcotest.testable pp ( = ) in
+  let pending = Queue.create () in
+  List.iter (fun event -> Queue.add event pending) [ data 2L; data 3L ];
+  let event =
+    Libtmux_unix__Observation_wait.coalesce
+      ~poll:(fun () -> Queue.take_opt pending)
+      (Some (data 1L))
+  in
+  Alcotest.(check (option event_type))
+    "one recapture covers queued data"
+    (Some (data 3L))
+    event;
+  let gap =
+    Output.Gap { after = None; lost_bytes = None; reason = Membership_changed }
+  in
+  List.iter
+    (fun event -> Queue.add event pending)
+    [ gap; End Membership_changed ];
+  let event =
+    Libtmux_unix__Observation_wait.coalesce
+      ~poll:(fun () -> Queue.take_opt pending)
+      (Some (data 4L))
+  in
+  Alcotest.(check (option event_type))
+    "coverage loss precedes recapture" (Some gap) event;
+  Alcotest.(check int) "terminal event retained" 1 (Queue.length pending)
+
 let () =
   Alcotest.run "native resources"
     [
@@ -231,5 +270,7 @@ let () =
           Alcotest.test_case "option records and limits" `Quick option_records;
           Alcotest.test_case "incremental byte matching" `Quick
             incremental_bytes;
+          Alcotest.test_case "coalesced observation invalidation" `Quick
+            coalesced_observation;
         ] );
     ]

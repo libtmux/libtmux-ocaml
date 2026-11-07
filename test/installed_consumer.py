@@ -54,10 +54,12 @@ let () =
     (runtime / "dune-project").write_text("(lang dune 3.24)\n")
     (runtime / "dune").write_text('''
 (executable (name native_capture) (modules native_capture) (libraries libtmux libtmux-eio eio_main))
+(executable (name native_wait) (modules native_wait) (libraries libtmux libtmux-eio eio_main))
 (executable (name configuration_unix) (modules configuration_unix) (libraries libtmux libtmux-unix))
 (executable (name configuration_eio) (modules configuration_eio) (libraries libtmux libtmux-eio eio_main))
 ''')
     (runtime / "native_capture.ml").write_bytes((root / "examples/native_capture.ml").read_bytes())
+    (runtime / "native_wait.ml").write_bytes((root / "examples/native_wait.ml").read_bytes())
     common = '''
 let get = function Ok value -> value | Error error -> failwith (Format.asprintf "%a" Error.pp error)
 let exercise client =
@@ -108,5 +110,12 @@ let () = Eio_main.run (fun env -> Eio.Switch.run (fun sw ->
                                         cwd=runtime, env=environment, capture_output=True, timeout=1, check=True)
                 assert result.stdout == b"" and result.stderr == b"", result
             assert fixture.command("list-clients").stdout == b""
+            fixture.command("send-keys", "-t", "%0", "-l", "present-value")
+            result = subprocess.run([str(runtime / "_build/default/native_wait.exe"),
+                                     fixture.binary, str(fixture.socket), "present-value"],
+                                    cwd=runtime, env=environment, capture_output=True, timeout=1, check=True)
+            assert result.stdout == b"%0\n" and result.stderr == b"", result
+            assert fixture.command("list-clients").stdout == b""
     print(f"installed Eio native capture example: PASS on {len(binaries)} releases")
     print(f"installed Unix/Eio generated conveniences: PASS on {len(binaries)} releases")
+    print(f"installed rendered-wait example: PASS on {len(binaries)} releases")

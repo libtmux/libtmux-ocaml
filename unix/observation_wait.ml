@@ -1,8 +1,14 @@
 open Libtmux
 open Runtime_io
 
-let rendered ~connection ~capture ~capture_text ~subscribe ~next ~close ~timeout
-    pane ~text =
+let rec coalesce ~poll event =
+  match event with
+  | Some (Output.Data _) -> (
+      match poll () with None -> event | next -> coalesce ~poll next)
+  | Some (Gap _ | End _) | None -> event
+
+let rendered ~connection ~capture ~capture_text ~subscribe ~next ~poll ~close
+    ~timeout pane ~text =
   Connection.owner connection;
   Connection.target connection (Pane.source pane);
   Byte_pattern.validate text;
@@ -42,7 +48,11 @@ let rendered ~connection ~capture ~capture_text ~subscribe ~next ~close ~timeout
             if Byte_pattern.contains pattern text.Captured_text.bytes then text
             else
               let sub = Option.get !active in
-              match get (next (deadline -. Linux.now ()) sub) with
+              match
+                coalesce
+                  ~poll:(fun () -> get (poll sub))
+                  (get (next (deadline -. Linux.now ()) sub))
+              with
               | Some (Output.Data _) ->
                   current := fresh ();
                   observe ()
