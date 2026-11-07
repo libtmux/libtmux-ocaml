@@ -187,12 +187,13 @@ with tempfile.TemporaryDirectory(prefix="libtmux-ocaml-cli-install-") as install
                 process.stdout.close()
                 process.stderr.close()
                 fixture.track_panes()
+            # Pin capacity: a non-reading pipe can otherwise accept the whole response.
             large = config("cli-output-fault")
             large["windows"][0]["panes"][0]["startup"] = ["x"] * 256
             write(large)
             process = subprocess.Popen([str(cli), "plan", "--json", "--socket", str(fixture.socket),
                                         "--tmux", str(wrapper), str(document)], env=environment, cwd=directory,
-                                       stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                                       stdout=subprocess.PIPE, stderr=subprocess.PIPE, pipesize=4096)
             try:
                 status = process.wait(timeout=1)
                 if status != 6:
@@ -207,7 +208,8 @@ with tempfile.TemporaryDirectory(prefix="libtmux-ocaml-cli-install-") as install
                 process.stderr.close()
             process = subprocess.Popen([str(cli), "plan", "--json", "--socket", str(fixture.socket),
                                         "--tmux", str(wrapper), str(document)], env=environment, cwd=directory,
-                                       stdout=subprocess.PIPE, stderr=subprocess.PIPE, start_new_session=True)
+                                       stdout=subprocess.PIPE, stderr=subprocess.PIPE, pipesize=4096,
+                                       start_new_session=True)
             try:
                 with selectors.DefaultSelector() as ready:
                     ready.register(process.stdout, selectors.EVENT_READ)
