@@ -7,6 +7,7 @@ and filter them locally, then perform an explicit action with a bound target.
 | --- | --- | --- |
 | Install and connect | [First use](getting-started.md) | [Capture](../examples/native_capture.ml) |
 | Choose libraries and optional runtimes | [Packages](packages.md) | [Authored manifests](../libtmux.opam) |
+| Run one self-contained capability program | [Standalone examples](showcases.md) | [Executed inventory](../examples/showcase.json) |
 | Understand sessions, shared windows and panes | [Object graph](graph.md) | [Inspect graph](../examples/native_graph.ml) |
 | Native predicates, typed queries and cardinality | [Queries](queries.md) | [Query snapshot](../examples/native_query.ml) |
 | Create layouts, set options and handle outcomes | [Control and recovery](control.md) | [Build layout](../examples/native_build.ml) |

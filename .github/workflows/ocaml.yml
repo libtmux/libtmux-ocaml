@@ -77,6 +77,12 @@ jobs:
           opam exec -- dune build @all @install
           opam exec -- python3 test/native_suite.py "$TMUX_BINARY"
           opam exec -- python3 test/installed_consumer.py "$TMUX_BINARY"
+      - name: Execute installed documentation and standalone programs
+        env:
+          TMUX_BINARY: ${{ steps.tmux.outputs.prefix }}/bin/tmux
+        run: |
+          opam exec -- python3 test/workspace_docs_test.py "$TMUX_BINARY"
+          opam exec -- python3 test/showcase_test.py "$TMUX_BINARY"
       - name: Retain failed build diagnostics
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

@@ -1,0 +1,137 @@
+{
+  "schema": "libtmux.showcase/1",
+  "tmux_floor": "3.3",
+  "ci": {
+    "workflow": ".github/workflows/ocaml.yml",
+    "job": "native",
+    "runner": "test/showcase_test.py"
+  },
+  "examples": [
+    {
+      "capability": "graph",
+      "title": "Navigate the typed object graph",
+      "file": "examples/showcase_graph.ml",
+      "whole_file": true,
+      "command": [
+        "opam",
+        "exec",
+        "--",
+        "dune",
+        "exec",
+        "examples/showcase_graph.exe",
+        "--",
+        "tmux"
+      ],
+      "expected_stdout_line": "graph: 2 sessions, 2 windows, 3 links, 2 panes",
+      "success_exit_code": 0
+    },
+    {
+      "capability": "watch",
+      "title": "Observe future output with Eio",
+      "file": "examples/showcase_watch.ml",
+      "whole_file": true,
+      "command": [
+        "opam",
+        "exec",
+        "--",
+        "dune",
+        "exec",
+        "examples/showcase_watch.exe",
+        "--",
+        "tmux"
+      ],
+      "expected_stdout_line": "observed: changed",
+      "success_exit_code": 0
+    },
+    {
+      "capability": "send-keys",
+      "title": "Send literal input and keys",
+      "file": "examples/showcase_send_keys.ml",
+      "whole_file": true,
+      "command": [
+        "opam",
+        "exec",
+        "--",
+        "dune",
+        "exec",
+        "examples/showcase_send_keys.exe",
+        "--",
+        "tmux"
+      ],
+      "expected_stdout_line": "sent: literal: $HOME; #{pane_id}",
+      "success_exit_code": 0
+    },
+    {
+      "capability": "rename-window",
+      "title": "Rename a window",
+      "file": "examples/showcase_rename_window.ml",
+      "whole_file": true,
+      "command": [
+        "opam",
+        "exec",
+        "--",
+        "dune",
+        "exec",
+        "examples/showcase_rename_window.exe",
+        "--",
+        "tmux"
+      ],
+      "expected_stdout_line": "renamed: editor-main",
+      "success_exit_code": 0
+    },
+    {
+      "capability": "create-window",
+      "title": "Create a window",
+      "file": "examples/showcase_create_window.ml",
+      "whole_file": true,
+      "command": [
+        "opam",
+        "exec",
+        "--",
+        "dune",
+        "exec",
+        "examples/showcase_create_window.exe",
+        "--",
+        "tmux"
+      ],
+      "expected_stdout_line": "created: logs",
+      "success_exit_code": 0
+    },
+    {
+      "capability": "move-window",
+      "title": "Move a window between sessions",
+      "file": "examples/showcase_move_window.ml",
+      "whole_file": true,
+      "command": [
+        "opam",
+        "exec",
+        "--",
+        "dune",
+        "exec",
+        "examples/showcase_move_window.exe",
+        "--",
+        "tmux"
+      ],
+      "expected_stdout_line": "moved: build at 7",
+      "success_exit_code": 0
+    },
+    {
+      "capability": "layout",
+      "title": "Apply a layout",
+      "file": "examples/showcase_layout.ml",
+      "whole_file": true,
+      "command": [
+        "opam",
+        "exec",
+        "--",
+        "dune",
+        "exec",
+        "examples/showcase_layout.exe",
+        "--",
+        "tmux"
+      ],
+      "expected_stdout_line": "layout: 3 horizontal panes",
+      "success_exit_code": 0
+    }
+  ]
+}

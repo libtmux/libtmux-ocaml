@@ -78,6 +78,13 @@ created layout geometry, options, pane titles, working directories, literal
 input, future-byte matches, rendered-screen waits and zero remaining clients.
 Owned fixture teardown verifies pane and daemon exit.
 
+The [standalone capability programs](showcases.md) include their own private
+server setup. CI copies their whole source files into an independent Dune
+project and executes the recorded `opam exec -- dune exec` commands against
+installed packages. Exact outcome lines and owned process/directory teardown
+are checked. The [inventory](../examples/showcase.json) records each source and
+command with its native workflow/job and tmux floor.
+
 Each native CI cell also runs the [workspace guide](workspaces.md) through real
 `opam exec` and an installed `tmux-workspace`. It executes the displayed setup,
 validation, plan, apply and cleanup commands, then checks receipt fields, pane

@@ -2,8 +2,8 @@
 
     Client methods perform I/O unless documented otherwise. Captured
     observations and retained operation inspection remain local. Clients belong
-    to the connecting domain and close their own resources without stopping the
-    daemon.
+    to the connecting domain. Closure releases their owned resources; tmux
+    applies its configured daemon lifetime.
 
     See {!Client} for acquisition and commands, {!Operation} for cancellation
     outcomes, and {!Subscription} for bounded future output. *)
@@ -553,8 +553,9 @@ module Client : sig
   (* END GENERATED OPERATIONS *)
 
   val close : t -> (unit, Libtmux.Error.t) result
-  (** Retire the generation and release owned resources, without stopping tmux.
-  *)
+  (** Retire the generation and close owned control clients and descriptors.
+      tmux's [exit-unattached] and [exit-empty] policies can end the daemon
+      after its clients or sessions disappear. *)
 end
 
 (** Apply workspace plans through Eio while retaining journals across caller
@@ -594,9 +595,10 @@ module Workspace : sig
   (** Read a journal copy without I/O, including any late retained outcome. *)
 
   val client : t -> Client.t option
-  (** Borrow the existing or bootstrapped client for explicit recovery. *)
+  (** Borrow the existing or bootstrapped client for subsequent actions or
+      recovery. Closing this handle also closes an owned client. *)
 
   val close : t -> (unit, Libtmux.Error.t) result
-  (** Close an owned client without stopping its daemon. Active await returns
+  (** Release an owned client through {!Client.close}. Active await returns
       Busy. Closing is idempotent; completed journals remain readable. *)
 end

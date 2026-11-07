@@ -17,7 +17,7 @@ Drive tmux from OCaml: create sessions and panes, capture an immutable graph,
 query it locally, and observe output through Eio or a blocking client.
 
 [Guide](docs/README.md) · [API](docs/api.md) ·
-[Examples](examples) · [Compatibility](docs/compatibility.md) ·
+[Examples](docs/showcases.md) · [Compatibility](docs/compatibility.md) ·
 [CI](https://github.com/libtmux/libtmux-ocaml/actions/workflows/ocaml.yml)
 
 Targets **OCaml 5.5.2 on Linux**. Native checks cover tmux 3.3, 3.3a, 3.4 and
