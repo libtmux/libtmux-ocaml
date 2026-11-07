@@ -5,8 +5,7 @@ outside this implementation's scope. The development tools are Dune 3.24.2
 and opam 2.6.1.
 
 The implementation targets Linux and tmux 3.3 or newer. Current evidence covers
-specific components; the complete suite and MCP service still have
-separate acceptance gates.
+specific components; final suite qualification has a separate acceptance gate.
 
 | Component | 3.3 | 3.3a | 3.4 | 3.8 |
 | --- | --- | --- | --- | --- |
@@ -32,7 +31,7 @@ separate acceptance gates.
 | Public workspace bootstrap on fresh/existing daemons | PASS | PASS | PASS | PASS |
 | Installed workspace CLI, receipts, interruption and output faults | PASS | PASS | PASS | PASS |
 | Literal workspace guide and owned teardown | PASS | PASS | PASS | PASS |
-| Complete MCP service and final suite qualification | UNVERIFIED | UNVERIFIED | UNVERIFIED | UNVERIFIED |
+| Final suite qualification | UNVERIFIED | UNVERIFIED | UNVERIFIED | UNVERIFIED |
 
 The blocking client and workspace CLI reject 3.2a. Development tmux 3.8a does
 not replace the published 3.8 cell. PID-acquisition races and malformed replies after writing
@@ -40,7 +39,7 @@ pass deterministic fault checks with real Linux child processes. Cancellation
 at each capture transfer step and unresolved-buffer receipts also pass on
 every release. Ready I/O still checks its deadline; busy pipes cannot bypass
 the timeout. These results qualify the implemented lifecycle contracts, not
-the unfinished MCP consumer or the final suite qualification.
+the final suite qualification. MCP integration is outside this port's scope.
 
 The I/O packages require Linux pidfds, the same PID namespace as the daemon,
 and shared local scratch storage. A socket pathname does not prove those

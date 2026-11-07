@@ -260,10 +260,13 @@ terminal history or an atomic capture/stream barrier. See
 The `libtmux-workspace-cli` package installs `tmux-workspace` to validate, preview
 and apply JSON workspaces. The [workspace guide](docs/workspaces.md) runs a
 complete configuration through validation, planning, apply and receipt inspection.
-The MCP service is unfinished. There is no runnable MCP server to configure yet. See
-[status and adoption gaps](docs/status.md) before choosing this checkout for a
-complete automation suite. macOS, Windows, remote-daemon binding and Java regex
-evaluation are outside the current support contract.
+
+The core and pure workspace library use the OCaml standard library. JSON and Eio
+stay in optional packages; [package boundaries](docs/packages.md) lists their
+dependencies. MCP integration is outside this port's scope. See
+[status and adoption gaps](docs/status.md) for remaining qualification work.
+macOS, Windows, remote-daemon binding and Java regex evaluation are outside the
+current support contract.
 
 [API documentation](docs/api.md) comes from the public `.mli` files using odoc.
 The [testing guide](docs/testing.md) explains typed Alcotest assertions,

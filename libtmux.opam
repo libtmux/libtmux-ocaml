@@ -2,7 +2,8 @@ opam-version: "2.0"
 synopsis: "Native OCaml values and queries for tmux"
 description: """
 Immutable tmux graph observations, typed filter expressions and standard-library
-collection processing. Transport and consumer packages are under development.
+collection processing without third-party runtime dependencies. Optional
+packages provide native transports, JSON codecs and workspace execution.
 """
 maintainer: "https://github.com/libtmux/libtmux-ocaml/issues"
 authors: "libtmux contributors"

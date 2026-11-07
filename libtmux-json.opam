@@ -1,6 +1,6 @@
 opam-version: "2.0"
-synopsis: "Validated JSON queries for libtmux"
-description: "Bounded, typed decoding of the shared libtmux pane filter schema."
+synopsis: "Validated JSON queries and workspaces for libtmux"
+description: "Bounded query and workspace decoding, with versioned advisory plans and execution receipts."
 maintainer: "https://github.com/libtmux/libtmux-ocaml/issues"
 authors: "libtmux contributors"
 license: "MIT"

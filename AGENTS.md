@@ -28,6 +28,12 @@ Each guide owns its subject. `CLAUDE.md` is a relative symlink to this file.
   backports, compatibility shims, or older-compiler test matrices unless
   explicitly requested.
 - Keep `libtmux.opam` authored directly; it is not generated from Dune.
+- Prefer the OCaml standard library. Keep the core and pure workspace library
+  free of third-party runtime dependencies. Put JSON, concurrency and command-line
+  dependencies in their optional packages; keep internal package versions aligned.
+- MCP integration is outside this port's scope. Do not add an MCP server, SDK,
+  vendored implementation or MCP-specific dependencies. Exclude MCP from adoption
+  scores and completion gates; assess the native APIs and workspace CLI instead.
 - Add tests only for critical behavior. Avoid tests that repeat implementation.
   Confirm that a regression test fails for the original defect before relying
   on its passing result.
