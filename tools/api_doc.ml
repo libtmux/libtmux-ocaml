@@ -12,8 +12,9 @@ let rec inline elements =
       | `Styled (style, content) ->
           let mark = if style = `Bold then "**" else "*" in
           mark ^ inline content ^ mark
-      | `Reference (_, target, []) -> "`" ^ target.value ^ "`"
-      | `Reference (_, _, content) -> inline content
+      | `Reference (_, target, []) -> "{!" ^ target.value ^ "}"
+      | `Reference (_, target, content) ->
+          "{{!" ^ target.value ^ "}" ^ inline content ^ "}"
       | `Link (url, content) ->
           "["
           ^ (if content = [] then url else inline content)

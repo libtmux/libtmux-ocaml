@@ -1,5 +1,8 @@
-(** Workspace validation and planning are pure. Execution delegates I/O to an
-    explicit executor. *)
+(** {!Config} validates workspace descriptions and {!Plan} previews their
+    actions without I/O. {!Execution} delegates effects to an explicit executor
+    and retains a recovery journal. See the
+    {{:https://github.com/libtmux/libtmux-ocaml/blob/master/docs/workspaces.md}workspace
+     guide} for JSON loading, preview, apply and receipt inspection. *)
 
 (** Validate native workspace values without contacting tmux or reading the
     filesystem. Relative directories resolve against the document directory;
@@ -51,7 +54,7 @@ module Config : sig
     name:string ->
     pane list ->
     window
-  (** Builders are unchecked descriptions; [make] validates the whole document.
+  (** Builders are unchecked descriptions; {!make} validates the whole document.
   *)
 
   val make :

@@ -18,7 +18,9 @@ module Nested : sig
   type alias = t
   (** Perform the operation with {!t}.
 
-      Preserve the result. *)
+      Preserve the result. {!type-state}, {!val-state},
+      {{!type-state}the state type} and [state].
+      {{:https://ocaml.org/manual/5.5/typedecl.html}Type guide}. *)
   val run : ?limit:int -> name:string -> t -> (alias, string) result
   type state = Ready | Failed of { message : string }
   val state : unit -> state
@@ -57,11 +59,16 @@ module Alias = Nested
     assert all("default" not in param for param in signature["params"])
     assert signature["returns"] == "(alias, string) result"
     assert signature["raw"].startswith("val run : ?limit:int -> name:string ->")
-    assert run["doc"]["summary"] == "Perform the operation with `t`."
+    assert run["doc"]["summary"] == "Perform the operation with {!t}."
     assert "Preserve the result." in run["doc"]["body"]
+    assert "{!type-state}" in run["doc"]["body"]
+    assert "{!val-state}" in run["doc"]["body"]
+    assert "{{!type-state}the state type}" in run["doc"]["body"]
+    assert "`state`" in run["doc"]["body"]
+    assert "[Type guide](https://ocaml.org/manual/5.5/typedecl.html)" in run["doc"]["body"]
     assert "inline code" in symbols["Public"]["doc"]["summary"]
-    assert run["source"] == {"file": "public.mli", "line": 12}
-    assert run["declarations"][0]["text"].strip() == source.splitlines()[11].strip()
+    assert run["source"] == {"file": "public.mli", "line": 14}
+    assert run["declarations"][0]["text"].strip() == source.splitlines()[13].strip()
     assert symbols["Public.Nested.state:type.Failed"]["variant"] == "struct"
     assert "Public.Nested.state:type.Failed.message" in symbols
     assert symbols["Public.Nested.state"]["kind"] == "function"

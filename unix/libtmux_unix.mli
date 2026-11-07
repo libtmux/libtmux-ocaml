@@ -1,12 +1,14 @@
 (** Blocking Linux tmux clients with explicit scoped cancellation.
 
     Client methods perform I/O unless documented otherwise. Captured
-    observations and retained operation inspection remain local. Clients belong
-    to the connecting domain. Closure releases their owned resources; tmux
-    applies its configured daemon lifetime.
+    {!Libtmux.Snapshot} observations and retained {!Operation.inspect} remain
+    local. Clients belong to the connecting domain. Closure releases their owned
+    resources; tmux applies its configured daemon lifetime.
 
     See {!Client} for acquisition and commands, {!Operation} for cancellation
-    outcomes, and {!Subscription} for bounded future output. *)
+    outcomes, and {!Subscription} for bounded future output. The
+    {{:https://github.com/libtmux/libtmux-ocaml/blob/master/docs/control.md}control
+     guide} explains binding, completion and recovery. *)
 
 module Rendered = Libtmux.Captured_text
 (** Blocking native Linux transport. No Eio scheduler is started. *)
@@ -83,9 +85,9 @@ module Operation : sig
 
   val cancel : 'a t -> (unit, Libtmux.Error.t) result
   (** Remove queued work before it is written. Admitted commands retain their
-      owner and are drained by [Client.await]; cancellation does not undo
+      owner and are drained by {!Client.await}; cancellation does not undo
       effects. Returns [Busy] while another blocking caller owns the client; use
-      a [Cancellation] token to interrupt that caller. *)
+      a {!Cancellation.t} token to interrupt that caller. *)
 end
 
 (** Bounded future-byte observation with Data/Gap/End and local cursors. Polling
@@ -720,8 +722,9 @@ module Workspace : sig
     t -> (Libtmux_workspace.Execution.receipt, Libtmux.Error.t) result
 
   val client : t -> Client.t option
-  (** Borrow the existing or bootstrapped client for subsequent actions or
-      recovery. Closing this handle also closes an owned client. *)
+  (** Borrow the existing or bootstrapped {!Client.t} without I/O for subsequent
+      actions or recovery. {!close} releases a client owned by this workspace
+      execution handle. *)
 
   val close : t -> (unit, Libtmux.Error.t) result
   (** Release an owned client through {!Client.close}. Active await returns

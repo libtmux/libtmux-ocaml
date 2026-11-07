@@ -1,6 +1,6 @@
 (** Native captured values, typed queries and explicit command descriptions.
 
-    A snapshot owns immutable observations. Entity accessors and query
+    A {!Snapshot.t} owns immutable observations. Entity accessors and query
     evaluation perform no I/O, preserve captured order and remain usable after
     client closure. Use [Libtmux_unix.Client] or [Libtmux_eio.Client] to acquire
     or mutate state.
@@ -12,10 +12,17 @@
     {!Query.exactly_one}, then submit a command with a bound target.
 
     The core depends only on the standard library. Its abstract observations are
-    safe to share; live clients and subscriptions belong to their backend. *)
+    safe to share; live clients and subscriptions belong to their backend.
+
+    See the
+    {{:https://github.com/libtmux/libtmux-ocaml/blob/master/docs/graph.md}graph
+     guide} for window links and the
+    {{:https://github.com/libtmux/libtmux-ocaml/blob/master/docs/queries.md}query
+     guide} for native predicates and typed expressions. *)
 
 (** An explicit socket description. Constructing an endpoint neither reads the
-    environment nor starts a daemon. *)
+    environment nor starts a daemon. {!Source.t} adds the observed daemon and
+    connection generation. *)
 module Endpoint : sig
   type t
   (** An explicit socket description, independent of the environment. *)
@@ -122,7 +129,8 @@ module type ID = sig
 end
 
 (** Sealed scalar descriptors carrying entity and value types. Descriptors read
-    captured data and provide trusted identities for portable query codecs. *)
+    captured data and provide trusted identities for {!Expr} values. Use
+    {!Relation} for graph edges. *)
 module Field : sig
   type _ kind = Bool : bool kind | Int : int kind | Text : string kind
   type ('entity, 'value) t
@@ -275,8 +283,8 @@ and Window_link : sig
 end
 
 (** A captured pane with local geometry, process metadata and a window
-    relationship. Use [target] for explicit actions; reading the observation
-    never refreshes it. *)
+    relationship. Use {!Pane.val-target} for explicit actions; reading the
+    observation never refreshes it. *)
 and Pane : sig
   type t
 
@@ -438,11 +446,11 @@ module Snapshot : sig
     (t, Error.t) result
   (** Validate and materialize a complete captured graph without I/O. Equal
       duplicate global rows collapse in first-occurrence order; conflicting rows
-      and dangling references return [Capture_raced]. Links at different indexes
-      remain distinct, including within one session. At most 10,000 input rows
-      are admitted. Each session needs one current link and each window one
-      active pane. Capture spans an interval, not an atomic instant. Input
-      strings are bytes; no Unicode normalization is performed. *)
+      and dangling references return {!Error.Capture_raced}. Links at different
+      indexes remain distinct, including within one session. At most 10,000
+      input rows are admitted. Each session needs one current link and each
+      window one active pane. Capture spans an interval, not an atomic instant.
+      Input strings are bytes; no Unicode normalization is performed. *)
 
   val id : t -> Id.t
   val source : t -> Source.t

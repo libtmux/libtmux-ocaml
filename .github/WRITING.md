@@ -56,6 +56,14 @@ odoc comments. The first sentence states a caller-visible result and stands on
 its own. Use `[code]` for code and `{!Identifier}` for resolvable API links;
 verify links and module introductions in the rendered reference.
 
+Link the first meaningful mention of a related public type or operation. Use
+odoc's typed references when a type and value share a name, and retain custom
+link labels. Keep code literals distinct from references. Link module
+introductions to their owning guides with odoc URL links. Cross-package
+references must resolve with the documented build inputs; an optional backend
+must not become a core runtime dependency to make a documentation link work.
+Check both native odoc and shared-site HTML, including their destination anchors.
+
 State whether an operation performs I/O, what a result means, and relevant
 defaults, bounds, ordering, multiplicity, ownership and failure behavior.
 Describe cancellation and admission separately from completion. Use MDX for

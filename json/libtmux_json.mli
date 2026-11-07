@@ -1,4 +1,12 @@
-(** Pure, bounded query and workspace JSON interchange. *)
+(** Pure, bounded query and workspace JSON interchange.
+
+    {!Expr} validates portable queries and {!Workspace} decodes configurations
+    and encodes plans and receipts. Both return {!Decode_error.t} on invalid
+    data. See the
+    {{:https://github.com/libtmux/libtmux-ocaml/blob/master/docs/queries.md}query
+     guide} and
+    {{:https://github.com/libtmux/libtmux-ocaml/blob/master/docs/workspaces.md}workspace
+     guide} for complete programs. *)
 
 module Decode_error : sig
   type category =

@@ -1,12 +1,15 @@
 (** Concurrent Linux tmux clients using the application's Eio scheduler.
 
     Client methods perform I/O unless documented otherwise. Captured
-    observations and retained operation inspection remain local. Clients belong
-    to the connecting domain. Closure releases their owned resources; tmux
-    applies its configured daemon lifetime.
+    {!Libtmux.Snapshot} observations and retained {!Operation.inspect} remain
+    local. Clients belong to the connecting domain. Closure releases their owned
+    resources; tmux applies its configured daemon lifetime.
 
     See {!Client} for acquisition and commands, {!Operation} for cancellation
-    outcomes, and {!Subscription} for bounded future output. *)
+    outcomes, and {!Subscription} for bounded future output. The
+    {{:https://github.com/libtmux/libtmux-ocaml/blob/master/docs/streaming.md}streaming
+     guide} demonstrates application-owned switches, cancellation and continuity
+    gaps. *)
 
 module Rendered = Libtmux.Captured_text
 
@@ -595,8 +598,9 @@ module Workspace : sig
   (** Read a journal copy without I/O, including any late retained outcome. *)
 
   val client : t -> Client.t option
-  (** Borrow the existing or bootstrapped client for subsequent actions or
-      recovery. Closing this handle also closes an owned client. *)
+  (** Borrow the existing or bootstrapped {!Client.t} without I/O for subsequent
+      actions or recovery. {!close} releases a client owned by this workspace
+      execution handle. *)
 
   val close : t -> (unit, Libtmux.Error.t) result
   (** Release an owned client through {!Client.close}. Active await returns
