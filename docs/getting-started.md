@@ -28,8 +28,8 @@ point instead:
  (libraries libtmux libtmux-eio eio_main))
 ```
 
-Create `dune-project` with `(lang dune 3.24)`, put the
-[graph program](../examples/native_graph.ml) in `main.ml`, and build from that
+Create `dune-project` with `(lang dune 3.24)`, save the
+[graph program](../examples/native_graph.ml) as `main.ml`, and build from that
 project. The installed-example check does this outside the repository with a
 separate install prefix; it does not depend on source-tree library resolution.
 

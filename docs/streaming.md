@@ -35,7 +35,7 @@ The defaults are 1 MiB and 1024 queued events per subscriber, at most 16 active
 subscribers, and eight total client lanes including command/wait lanes. Reuse
 one verified lane per covered session. Admission reserves bytes against the
 shared 32 MiB budget. A full queue produces Gap then End rather than blocking
-another subscriber or an independent command. Unknown loss uses `None`.
+another subscriber or an independent command. Unknown loss has no byte count.
 
 Coverage uses an observed session/window context and revalidates it during
 admission. Layout or membership changes end continuity conservatively. Detaching

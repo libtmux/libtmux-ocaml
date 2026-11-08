@@ -6,7 +6,8 @@ Dune. The pure runtime library uses the standard library; the PPX is a test-only
 dependency.
 
 The [cardinality tests](../test/core_test.ml) compare typed results using an
-`Alcotest.testable` with `Cardinality.pp_error`. A failure displays the expected
+[`Alcotest.testable`](https://mirage.github.io/alcotest/alcotest/Alcotest/index.html#type-testable)
+with `Cardinality.pp_error`. A failure displays the expected
 and actual values, including the error variant's meaning. Comparing a Boolean
 expression would only report `true` versus `false`. Keep testable printers small
 and show the values needed to understand the failure.

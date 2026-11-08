@@ -99,7 +99,8 @@ $ opam exec -- tmux-workspace apply \
     > "$LIBTMUX_WORKSPACE_DIR/receipt.json"
 ```
 
-The receipt uses `libtmux.workspace-receipt/1`. On success, `status` is
+The receipt uses [`libtmux.workspace-receipt/1`](../json/libtmux_json.mli).
+On success, `status` is
 `succeeded`; `failed`, `uncertain` and `skipped` are empty. Each creation records
 the IDs returned by tmux. Check the resulting windows independently:
 

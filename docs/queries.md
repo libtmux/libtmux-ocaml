@@ -76,9 +76,9 @@ lock tmux; a target can disappear between observation and action. The
 ## Decode portable query data explicitly
 
 `Libtmux_json.Expr.of_string Model.pane` validates the shared scalar pane
-subset of `libtmux.filter/1`. It rejects duplicate/unknown keys, wrong operand
-types, invalid UTF-8, oversized/deep documents and Java regex. Native closures
-stay in `Seq.filter`; they have no portable wire identity.
+subset of [`libtmux.filter/1`](../json/index.mld). It rejects duplicate/unknown
+keys, wrong operand types, invalid UTF-8, oversized/deep documents and Java
+regex. Native closures stay in `Seq.filter`; they have no portable wire identity.
 
 `Libtmux.Plan.panes` compiles a source filter and retains the residual expression
 without I/O. Inspect `source_filter` and use `Require_exact` to reject unsupported

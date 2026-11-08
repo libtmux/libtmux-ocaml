@@ -10,7 +10,7 @@ not a borrowed server socket. Their setup uses the public workspace API; the
 task uses the client API. The Eio example starts its scheduler after setup and
 subscribes before sending the bytes it observes.
 
-For a separate project, copy a program as `main.ml` and use these Dune libraries:
+For a separate project, save a program as `main.ml` and use these Dune libraries:
 
 ```dune
 (executable
