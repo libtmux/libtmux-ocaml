@@ -33,6 +33,11 @@
  (modules native_recovery)
  (libraries libtmux libtmux-eio eio_main))
 
+(executable
+ (name native_stream_recovery)
+ (modules native_stream_recovery)
+ (libraries libtmux libtmux-eio eio_main))
+
 (executables
  (names showcase_create_window showcase_rename_window showcase_move_window
   showcase_layout showcase_send_keys showcase_graph)

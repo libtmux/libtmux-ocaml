@@ -103,12 +103,13 @@ let () =
 (executables (names native_graph native_query native_build) (modules native_graph native_query native_build) (libraries libtmux libtmux-unix))
 (executable (name native_watch) (modules native_watch) (libraries libtmux libtmux-eio eio_main))
 (executable (name native_recovery) (modules native_recovery) (libraries libtmux libtmux-eio eio_main))
+(executable (name native_stream_recovery) (modules native_stream_recovery) (libraries libtmux libtmux-eio eio_main))
 (executable (name configuration_unix) (modules configuration_unix) (libraries libtmux libtmux-workspace libtmux-json libtmux-unix yojson))
 (executable (name configuration_eio) (modules configuration_eio) (libraries libtmux libtmux-workspace libtmux-json libtmux-eio yojson eio_main))
 ''')
     (runtime / "native_capture.ml").write_bytes((root / "examples/native_capture.ml").read_bytes())
     (runtime / "native_wait.ml").write_bytes((root / "examples/native_wait.ml").read_bytes())
-    for name in ["native_graph", "native_query", "native_build", "native_watch", "native_recovery"]:
+    for name in ["native_graph", "native_query", "native_build", "native_watch", "native_recovery", "native_stream_recovery"]:
         (runtime / f"{name}.ml").write_bytes((root / "examples" / f"{name}.ml").read_bytes())
     common = '''
 let get = function Ok value -> value | Error error -> failwith (Format.asprintf "%a" Error.pp error)
@@ -222,6 +223,12 @@ let () = Eio_main.run (fun env -> Eio.Switch.run (fun sw ->
             assert result.stderr == b"", result
             assert fixture.command("list-clients").stdout == b""
             assert fixture.command("list-panes", "-a", "-F", "#{pane_id}:#{window_id}:#{window_name}").stdout == before_recovery
+            result = run_example("native_stream_recovery", "$0")
+            assert result.stdout == (b"gap=membership-changed; history=unavailable\n"
+                                     b"coverage=fresh; cursor-generation=new; future=after-gap\n"), result
+            assert result.stderr == b"", result
+            assert fixture.command("list-clients").stdout == b""
+            assert fixture.command("list-panes", "-a", "-F", "#{pane_id}:#{window_id}:#{window_name}").stdout == before_recovery
             result = run_example("native_build", "project", fixture.directory.name)
             created = dict(line.split("=", 1) for line in result.stdout.decode().splitlines())
             assert set(created) == {"session", "editor", "right", "logs"}, created
@@ -237,8 +244,10 @@ let () = Eio_main.run (fun env -> Eio.Switch.run (fun sw ->
             assert fixture.command("list-clients").stdout == b""
         readme_walkthrough.run(root, walkthrough, binary, environment)
         readme_walkthrough.run(root, walkthrough, binary, environment, "docs/recovery.md")
+        readme_walkthrough.run(root, walkthrough, binary, environment, "docs/streaming.md")
     print(f"installed Eio native capture example: PASS on {len(binaries)} releases")
     print(f"installed Unix/Eio generated conveniences: PASS on {len(binaries)} releases")
     print(f"installed rendered-wait example: PASS on {len(binaries)} releases")
     print(f"installed graph/query/build/Eio-stream examples: PASS on {len(binaries)} releases")
     print(f"installed cancellation/recovery example and preserved panes: PASS on {len(binaries)} releases")
+    print(f"installed gap/recovery example and new cursor generation: PASS on {len(binaries)} releases")

@@ -65,5 +65,92 @@ that subscription; it does not cancel an already admitted command.
 Neither interface establishes an atomic capture/stream barrier or reconstructs
 terminal history. An immutable snapshot remains a separate captured value.
 
+## Recover after a gap
+
+Close the ended subscription, capture the graph again, and establish fresh
+coverage for the observed pane. This recovers future observation. Bytes lost
+before the new subscription are still unavailable; a screen capture cannot
+reconstruct their history.
+
+The [complete recovery program](../examples/native_stream_recovery.ml) creates
+a window running `cat`, observes a reply, then splits the window to trigger a
+membership gap. It handles that gap, removes the extra pane and closes the old
+subscription. It captures the original pane again, subscribes, and observes
+new input with a different cursor generation:
+
+<!-- example: examples/native_stream_recovery.ml#recover-coverage -->
+
+```ocaml
+let recover_coverage client id (previous : Output.cursor) =
+  let fresh = capture_pane client id in
+  let after =
+    with_subscription client fresh (fun subscription ->
+        echo client fresh subscription "after-gap")
+  in
+  if Generation.equal previous.generation after.generation then
+    failwith "new subscription reused the old cursor generation";
+  print_endline "coverage=fresh; cursor-generation=new; future=after-gap"
+```
+
+The source contains the imports, scheduler, cleanup and matching helpers.
+`capture_pane` fails if the pane disappeared. `with_subscription` admits coverage
+before `echo` sends input and awaits its reply concurrently. The
+example never reconnects, reuses an old cursor or retries an uncertain mutation.
+It removes only panes whose creation returned successfully, leaving any foreign
+panes untouched. Primary exceptions survive secondary cleanup failures.
+
+Creation here uses convenience calls. Cancellation before one returns can leave
+a creation whose ID the caller never received. For creation outcomes that must
+survive waiter cancellation, retain `Client.submit`'s handle before `Client.await`,
+as shown in [operation recovery](recovery.md). An uncertain outcome does not
+authorize a retry or deletion of an unproven resource.
+
+After [installing from source](getting-started.md), run this walkthrough from
+the clone. Create a private seed session:
+
+```console
+$ export LIBTMUX_STREAM_RECOVERY_DIR="$(mktemp -d -t libtmux-ocaml-stream-recovery.XXXXXX)"
+```
+
+```console
+$ env -u TMUX -u TMUX_PANE tmux \
+    -S "$LIBTMUX_STREAM_RECOVERY_DIR/server" \
+    -f /dev/null \
+    new-session \
+    -d \
+    -s stream-demo \
+    -- "exec cat"
+```
+
+Run the program against the seed session's literal `$0` ID:
+
+```console
+$ opam exec -- dune exec examples/native_stream_recovery.exe -- \
+    tmux "$LIBTMUX_STREAM_RECOVERY_DIR/server" '$0'
+```
+
+Expected output is `gap=membership-changed; history=unavailable`, followed by
+`coverage=fresh; cursor-generation=new; future=after-gap`. The seed session
+remains, with no additional panes or clients. Remove that session and directory:
+
+```console
+$ env -u TMUX -u TMUX_PANE tmux \
+    -S "$LIBTMUX_STREAM_RECOVERY_DIR/server" \
+    kill-session \
+    -t '=stream-demo'
+```
+
+```console
+$ rm -f -- "$LIBTMUX_STREAM_RECOVERY_DIR/server"
+```
+
+```console
+$ rmdir "$LIBTMUX_STREAM_RECOVERY_DIR"
+```
+
+This exercise uses a stable private daemon and a deliberate layout change.
+Transport loss, repeated membership changes or a missing pane can prevent fresh
+coverage. Preserve those failures and choose the next action explicitly.
+
 [First use](getting-started.md) · [Control and recovery](control.md) ·
 [API](api.md) · [Guide](README.md)
