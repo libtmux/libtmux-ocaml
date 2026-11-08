@@ -573,12 +573,12 @@ module Client : sig
   val close : t -> (unit, Libtmux.Error.t) result
   (** Retire the generation and close owned control clients and descriptors.
       Concurrent calls await the same teardown result. Later calls retain a
-      teardown failure instead of treating the closed flag as success.
-      Each helper gets 200 ms of TERM grace, followed by KILL if needed and
-      reaping. Other fibers can run during that wait. The grace is per helper;
-      it does not bound scheduling, filesystem or uninterruptible kernel work.
-      No signal targets the daemon. tmux's [exit-unattached] and [exit-empty]
-      policies can end the daemon after its clients or sessions disappear. *)
+      teardown failure instead of treating the closed flag as success. Each
+      helper gets 200 ms of TERM grace, followed by KILL if needed and reaping.
+      Other fibers can run during that wait. The grace is per helper; it does
+      not bound scheduling, filesystem or uninterruptible kernel work. No signal
+      targets the daemon. tmux's [exit-unattached] and [exit-empty] policies can
+      end the daemon after its clients or sessions disappear. *)
 end
 
 (** Apply workspace plans through Eio while retaining journals across caller
