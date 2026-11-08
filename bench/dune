@@ -7,3 +7,8 @@
  (name concurrency)
  (modules concurrency)
  (libraries libtmux libtmux-eio eio_main mtime yojson))
+
+(executable
+ (name mixed)
+ (modules mixed)
+ (libraries libtmux libtmux-eio eio_main mtime yojson unix))

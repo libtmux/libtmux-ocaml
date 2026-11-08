@@ -1,0 +1,837 @@
+{
+  "schema": "libtmux.mixed-benchmark-index/1",
+  "scope": "Current workload evidence and retained historical failures; not all-release qualification. Raw receipts use libtmux.mixed-benchmark/1 inside deterministic gzip archives.",
+  "records": [
+    {
+      "status": "PASS",
+      "measured_at_utc": "2026-11-08T03:27:50.019650+00:00",
+      "head": "823dad3cb63e34ff12060c2be70998d7498e4f5b",
+      "versions": {
+        "ocaml": "5.5.2",
+        "dune": "3.24.2",
+        "python": "Python 3.14.6",
+        "tmux": "tmux 3.3",
+        "dependencies": "eio      1.6\neio_main 1.6\nmtime    2.2.0\nyojson   3.0.0"
+      },
+      "source_before": {
+        "behavior_sha256": "d592af5908e9465397f7c82a6868bc3703ff25938283dfac21f6704c895290c3",
+        "files_sha256": {
+          "bench/mixed.ml": "a9ecf4e0b0f293437a882ac2956fa7bde2e2fd7e5046da6670f1f6fad101a122",
+          "bench/mixed.py": "7250d65ea4abcddbbf6dabb4286862fcd64100da71f1361aedca7dfef715d179",
+          "bench/dune": "0e222d21725f5b743f1d84de6e0a17292a12e80f5eeeec0e49377ed540fcaf88",
+          "dune-project": "8c6ddd4215a03d62d426fb4e6c2896538712bd8464843b9758683301c5ad4584",
+          ".tool-versions": "f4514280cc69e9d87466f685385ef5c67a43af92efb3550eceaa25bbd0e087e3",
+          "test/support/tmux_fixture.py": "970b2c3652f492ffb7a97d98da45654069eeb8f099045d38081904e317a1efcf"
+        },
+        "executable_sha256": "6c1e2596e46aa3c173083861219084a1dd8cf04d51a8d6c34b1a17b1caec5cf0"
+      },
+      "workload": {
+        "rounds": 3,
+        "workers": 8,
+        "frames_per_lane": 4,
+        "payload_bytes": 256,
+        "stream_lanes": 7,
+        "subscribers_at_admission": 16,
+        "commands_per_wave": 64,
+        "queued_cancellations_per_wave": 8,
+        "controller_clients": 1,
+        "load_clients": 1
+      },
+      "route": "set-option via retained control connection; verification read_option via temporary subprocess",
+      "tmux_binary_sha256": "49972aac9c6389688632650a86bc60d220250f7660b3ccd6107f2e96b4790a11",
+      "whole_command_seconds": 7.2058766090049176,
+      "source_stable": true,
+      "raw": {
+        "path": "mixed-3.3-current-20261108.json.gz",
+        "sha256": "a7452342b4c42a8c244c4e4f2b15c6186b4a34eefcfc45b109fb41c55877f791",
+        "uncompressed_sha256": "a5ef375cdd8a7486affe45428fe6e7657a4234f9a3bbdfb61bd408ebd9b5783f"
+      },
+      "observations": {
+        "progress": 486,
+        "commands": 192,
+        "streams": 84,
+        "verified_options": 192,
+        "resource_samples": 486,
+        "sample_maxima": {
+          "attached_clients": 10,
+          "harness": {
+            "process_count": 1,
+            "rss_bytes": 32878592,
+            "fd_count": 65,
+            "incomplete_samples": 0
+          },
+          "benchmark": {
+            "process_count": 1,
+            "rss_bytes": 10633216,
+            "fd_count": 52,
+            "incomplete_samples": 0
+          },
+          "daemon": {
+            "process_count": 1,
+            "rss_bytes": 5873664,
+            "fd_count": 44,
+            "incomplete_samples": 0
+          },
+          "benchmark_children": {
+            "process_count": 10,
+            "rss_bytes": 39825408,
+            "fd_count": 60,
+            "incomplete_samples": 5
+          },
+          "daemon_children": {
+            "process_count": 9,
+            "rss_bytes": 69894144,
+            "fd_count": 45,
+            "incomplete_samples": 3
+          }
+        },
+        "command_progress_events": 192,
+        "stream_progress_events": 84
+      },
+      "summary": {
+        "overlapping_progress_observations": 27,
+        "per_worker": [
+          {
+            "worker": 0,
+            "observations": 24,
+            "successful": 21,
+            "cancelled_before_write": 3,
+            "first_observed_seconds": 0.112523167,
+            "last_observed_seconds": 2.133487288,
+            "median_observation_latency_seconds": 0.263381097,
+            "max_observation_latency_seconds": 0.607256933
+          },
+          {
+            "worker": 1,
+            "observations": 24,
+            "successful": 21,
+            "cancelled_before_write": 3,
+            "first_observed_seconds": 0.11256958,
+            "last_observed_seconds": 2.139485113,
+            "median_observation_latency_seconds": 0.28666944149999996,
+            "max_observation_latency_seconds": 0.613251159
+          },
+          {
+            "worker": 2,
+            "observations": 24,
+            "successful": 21,
+            "cancelled_before_write": 3,
+            "first_observed_seconds": 0.112572003,
+            "last_observed_seconds": 2.144312861,
+            "median_observation_latency_seconds": 0.30913769,
+            "max_observation_latency_seconds": 0.618075211
+          },
+          {
+            "worker": 3,
+            "observations": 24,
+            "successful": 21,
+            "cancelled_before_write": 3,
+            "first_observed_seconds": 0.112572702,
+            "last_observed_seconds": 2.150574129,
+            "median_observation_latency_seconds": 0.32665264299999996,
+            "max_observation_latency_seconds": 0.624333729
+          },
+          {
+            "worker": 4,
+            "observations": 24,
+            "successful": 21,
+            "cancelled_before_write": 3,
+            "first_observed_seconds": 0.112574115,
+            "last_observed_seconds": 2.159418975,
+            "median_observation_latency_seconds": 0.3398071535,
+            "max_observation_latency_seconds": 0.633175182
+          },
+          {
+            "worker": 5,
+            "observations": 24,
+            "successful": 21,
+            "cancelled_before_write": 3,
+            "first_observed_seconds": 0.112575517,
+            "last_observed_seconds": 2.166812036,
+            "median_observation_latency_seconds": 0.34616048850000003,
+            "max_observation_latency_seconds": 0.640565051
+          },
+          {
+            "worker": 6,
+            "observations": 24,
+            "successful": 21,
+            "cancelled_before_write": 3,
+            "first_observed_seconds": 0.11257701,
+            "last_observed_seconds": 2.175297097,
+            "median_observation_latency_seconds": 0.35289789299999996,
+            "max_observation_latency_seconds": 0.649047045
+          },
+          {
+            "worker": 7,
+            "observations": 24,
+            "successful": 21,
+            "cancelled_before_write": 3,
+            "first_observed_seconds": 0.112579427,
+            "last_observed_seconds": 2.192278841,
+            "median_observation_latency_seconds": 0.3596608455,
+            "max_observation_latency_seconds": 0.666025391
+          }
+        ],
+        "worker_last_observation_spread_seconds": 0.05879155299999983,
+        "command_observation_latency_seconds": {
+          "min": 0.000218387,
+          "median": 0.31894360499999996,
+          "max": 0.666025391
+        }
+      },
+      "cleanup": {
+        "errors": [],
+        "remaining_direct_children": [],
+        "fixture_directory_removed": true,
+        "forced_cleanup_count": 0
+      },
+      "collector_scope": "current"
+    },
+    {
+      "status": "FAIL",
+      "measured_at_utc": "2026-11-08T01:57:00.869506+00:00",
+      "head": "9a7502b089cd06227cd3e79f3276f59f62bc6a79",
+      "versions": {
+        "ocaml": "5.5.2",
+        "dune": "3.24.2",
+        "python": "Python 3.14.6",
+        "tmux": "tmux 3.3",
+        "dependencies": "eio      1.6\neio_main 1.6\nmtime    2.2.0\nyojson   3.0.0"
+      },
+      "source_before": {
+        "behavior_sha256": "b8bac56e876ef9528c1b7ec59fc9c133cb906de6f55234317e0ccdbc1711b223",
+        "files_sha256": {
+          "bench/mixed.ml": "3ac0bc29827fdf3c5d64b2f6a8d5e8a7ee076fda9d8c8314ee59134e1ae8630d",
+          "bench/mixed.py": "7a6e4265e33a157baa1df4255df615d18abfa2ebc2be36c4ea0936b5bb8dd527",
+          "bench/dune": "a7f5a69b26dce925a13dc9e75e05ccc7aa77af5a323e17a908e2e249e6010556",
+          "dune-project": "8c6ddd4215a03d62d426fb4e6c2896538712bd8464843b9758683301c5ad4584",
+          ".tool-versions": "f4514280cc69e9d87466f685385ef5c67a43af92efb3550eceaa25bbd0e087e3",
+          "test/support/tmux_fixture.py": "970b2c3652f492ffb7a97d98da45654069eeb8f099045d38081904e317a1efcf"
+        },
+        "executable_sha256": "2c880662311bd705bab20f86ad732499a351fe05415f14d7cf9fc9842f6af51c"
+      },
+      "workload": {
+        "rounds": 3,
+        "workers": 8,
+        "frames_per_lane": 4,
+        "payload_bytes": 256,
+        "stream_lanes": 7,
+        "subscribers_at_admission": 16,
+        "commands_per_wave": 64,
+        "queued_cancellations_per_wave": 8,
+        "controller_clients": 1,
+        "load_clients": 1
+      },
+      "route": "set-option via retained control connection; verification read_option via temporary subprocess",
+      "tmux_binary_sha256": "49972aac9c6389688632650a86bc60d220250f7660b3ccd6107f2e96b4790a11",
+      "whole_command_seconds": 0.9210988120030379,
+      "source_stable": true,
+      "raw": {
+        "path": "mixed-3.3-qualified-20261108.json.gz",
+        "sha256": "c863ea9cc7f183f39e0eb5cf430537552c24f77ce69034a6683bff025efd13b8",
+        "uncompressed_sha256": "2a79f4b8e4f21d3c2855f650ad83ec4bd2843f604130562a3fa82742c64050d1"
+      },
+      "observations": {
+        "progress": 101,
+        "commands": null,
+        "streams": null,
+        "verified_options": 0,
+        "resource_samples": 100,
+        "sample_maxima": {
+          "attached_clients": 9,
+          "harness": {
+            "process_count": 1,
+            "rss_bytes": 27344896,
+            "fd_count": 50
+          },
+          "benchmark": {
+            "process_count": 1,
+            "rss_bytes": 9453568,
+            "fd_count": 51
+          },
+          "daemon": {
+            "process_count": 1,
+            "rss_bytes": 5668864,
+            "fd_count": 42
+          },
+          "benchmark_children": {
+            "process_count": 10,
+            "rss_bytes": 36052992,
+            "fd_count": 54
+          },
+          "daemon_children": {
+            "process_count": 9,
+            "rss_bytes": 69607424,
+            "fd_count": 45
+          }
+        },
+        "command_progress_events": 66,
+        "stream_progress_events": 28
+      },
+      "error": "CalledProcessError: Command '['<repo>/scratch/tmux/tmux-3.3/tmux', '-S', '<fixture>/server', 'list-clients', '-F', '#{client_pid}|#{client_control_mode}|#{session_id}']' returned non-zero exit status 1.",
+      "cleanup": {
+        "errors": [],
+        "remaining_direct_children": [],
+        "fixture_directory_removed": true,
+        "forced_cleanup_count": null
+      },
+      "collector_scope": "historical"
+    },
+    {
+      "status": "PASS",
+      "measured_at_utc": "2026-11-08T03:27:57.528043+00:00",
+      "head": "823dad3cb63e34ff12060c2be70998d7498e4f5b",
+      "versions": {
+        "ocaml": "5.5.2",
+        "dune": "3.24.2",
+        "python": "Python 3.14.6",
+        "tmux": "tmux 3.3a",
+        "dependencies": "eio      1.6\neio_main 1.6\nmtime    2.2.0\nyojson   3.0.0"
+      },
+      "source_before": {
+        "behavior_sha256": "d592af5908e9465397f7c82a6868bc3703ff25938283dfac21f6704c895290c3",
+        "files_sha256": {
+          "bench/mixed.ml": "a9ecf4e0b0f293437a882ac2956fa7bde2e2fd7e5046da6670f1f6fad101a122",
+          "bench/mixed.py": "7250d65ea4abcddbbf6dabb4286862fcd64100da71f1361aedca7dfef715d179",
+          "bench/dune": "0e222d21725f5b743f1d84de6e0a17292a12e80f5eeeec0e49377ed540fcaf88",
+          "dune-project": "8c6ddd4215a03d62d426fb4e6c2896538712bd8464843b9758683301c5ad4584",
+          ".tool-versions": "f4514280cc69e9d87466f685385ef5c67a43af92efb3550eceaa25bbd0e087e3",
+          "test/support/tmux_fixture.py": "970b2c3652f492ffb7a97d98da45654069eeb8f099045d38081904e317a1efcf"
+        },
+        "executable_sha256": "6c1e2596e46aa3c173083861219084a1dd8cf04d51a8d6c34b1a17b1caec5cf0"
+      },
+      "workload": {
+        "rounds": 3,
+        "workers": 8,
+        "frames_per_lane": 4,
+        "payload_bytes": 256,
+        "stream_lanes": 7,
+        "subscribers_at_admission": 16,
+        "commands_per_wave": 64,
+        "queued_cancellations_per_wave": 8,
+        "controller_clients": 1,
+        "load_clients": 1
+      },
+      "route": "set-option via retained control connection; verification read_option via temporary subprocess",
+      "tmux_binary_sha256": "6afd01583b60a3296d43d4417b160b6153105413443ce608f4b6cfba8b18ae52",
+      "whole_command_seconds": 5.187389288999839,
+      "source_stable": true,
+      "raw": {
+        "path": "mixed-3.3a-current-20261108.json.gz",
+        "sha256": "3fe3e98913e8544a088c73bd3e60fdaf3501798a57567ae42b917fa1029fd685",
+        "uncompressed_sha256": "0b906d33b77759e77a8ba1e0bb33c8250129ef650888e47520e78c52b622fc15"
+      },
+      "observations": {
+        "progress": 486,
+        "commands": 192,
+        "streams": 84,
+        "verified_options": 192,
+        "resource_samples": 486,
+        "sample_maxima": {
+          "attached_clients": 10,
+          "harness": {
+            "process_count": 1,
+            "rss_bytes": 32661504,
+            "fd_count": 65,
+            "incomplete_samples": 0
+          },
+          "benchmark": {
+            "process_count": 1,
+            "rss_bytes": 10280960,
+            "fd_count": 51,
+            "incomplete_samples": 0
+          },
+          "daemon": {
+            "process_count": 1,
+            "rss_bytes": 5955584,
+            "fd_count": 45,
+            "incomplete_samples": 0
+          },
+          "benchmark_children": {
+            "process_count": 10,
+            "rss_bytes": 40206336,
+            "fd_count": 60,
+            "incomplete_samples": 6
+          },
+          "daemon_children": {
+            "process_count": 9,
+            "rss_bytes": 69697536,
+            "fd_count": 45,
+            "incomplete_samples": 2
+          }
+        },
+        "command_progress_events": 192,
+        "stream_progress_events": 84
+      },
+      "summary": {
+        "overlapping_progress_observations": 27,
+        "per_worker": [
+          {
+            "worker": 0,
+            "observations": 24,
+            "successful": 21,
+            "cancelled_before_write": 3,
+            "first_observed_seconds": 0.123691193,
+            "last_observed_seconds": 2.448494173,
+            "median_observation_latency_seconds": 0.300057902,
+            "max_observation_latency_seconds": 0.733853216
+          },
+          {
+            "worker": 1,
+            "observations": 24,
+            "successful": 21,
+            "cancelled_before_write": 3,
+            "first_observed_seconds": 0.123785751,
+            "last_observed_seconds": 2.46913308,
+            "median_observation_latency_seconds": 0.33065052699999997,
+            "max_observation_latency_seconds": 0.754488871
+          },
+          {
+            "worker": 2,
+            "observations": 24,
+            "successful": 21,
+            "cancelled_before_write": 3,
+            "first_observed_seconds": 0.123789526,
+            "last_observed_seconds": 2.480107852,
+            "median_observation_latency_seconds": 0.3464137035,
+            "max_observation_latency_seconds": 0.76546019
+          },
+          {
+            "worker": 3,
+            "observations": 24,
+            "successful": 21,
+            "cancelled_before_write": 3,
+            "first_observed_seconds": 0.123802392,
+            "last_observed_seconds": 2.485727614,
+            "median_observation_latency_seconds": 0.370657106,
+            "max_observation_latency_seconds": 0.771077153
+          },
+          {
+            "worker": 4,
+            "observations": 24,
+            "successful": 21,
+            "cancelled_before_write": 3,
+            "first_observed_seconds": 0.123809483,
+            "last_observed_seconds": 2.491112264,
+            "median_observation_latency_seconds": 0.3842351435,
+            "max_observation_latency_seconds": 0.776458577
+          },
+          {
+            "worker": 5,
+            "observations": 24,
+            "successful": 21,
+            "cancelled_before_write": 3,
+            "first_observed_seconds": 0.123811416,
+            "last_observed_seconds": 2.495739834,
+            "median_observation_latency_seconds": 0.38906533249999997,
+            "max_observation_latency_seconds": 0.781082365
+          },
+          {
+            "worker": 6,
+            "observations": 24,
+            "successful": 21,
+            "cancelled_before_write": 3,
+            "first_observed_seconds": 0.123817576,
+            "last_observed_seconds": 2.501926841,
+            "median_observation_latency_seconds": 0.394674239,
+            "max_observation_latency_seconds": 0.787267157
+          },
+          {
+            "worker": 7,
+            "observations": 24,
+            "successful": 21,
+            "cancelled_before_write": 3,
+            "first_observed_seconds": 0.123826359,
+            "last_observed_seconds": 2.507204467,
+            "median_observation_latency_seconds": 0.4067684665,
+            "max_observation_latency_seconds": 0.792541585
+          }
+        ],
+        "worker_last_observation_spread_seconds": 0.058710294000000385,
+        "command_observation_latency_seconds": {
+          "min": 0.000199131,
+          "median": 0.37382441499999997,
+          "max": 0.792541585
+        }
+      },
+      "cleanup": {
+        "errors": [],
+        "remaining_direct_children": [],
+        "fixture_directory_removed": true,
+        "forced_cleanup_count": 0
+      },
+      "collector_scope": "current"
+    },
+    {
+      "status": "FAIL",
+      "measured_at_utc": "2026-11-08T01:59:35.032559+00:00",
+      "head": "9a7502b089cd06227cd3e79f3276f59f62bc6a79",
+      "versions": {
+        "ocaml": "5.5.2",
+        "dune": "3.24.2",
+        "python": "Python 3.14.6",
+        "tmux": "tmux 3.4",
+        "dependencies": "eio      1.6\neio_main 1.6\nmtime    2.2.0\nyojson   3.0.0"
+      },
+      "source_before": {
+        "behavior_sha256": "b4050dbb10d132f6c9d38250e58468074397f71ce06a7cec1b05959cdc61dbc5",
+        "files_sha256": {
+          "bench/mixed.ml": "69a546d7872deb2587f37e8ca2ea1af5208d4dc0c3f660c62ec3e6ffb5673c0e",
+          "bench/mixed.py": "aaf08fc2a4979a85acba438e676e7cf6fa8b0b32a36d627fe000d597b00d3a00",
+          "bench/dune": "a7f5a69b26dce925a13dc9e75e05ccc7aa77af5a323e17a908e2e249e6010556",
+          "dune-project": "8c6ddd4215a03d62d426fb4e6c2896538712bd8464843b9758683301c5ad4584",
+          ".tool-versions": "f4514280cc69e9d87466f685385ef5c67a43af92efb3550eceaa25bbd0e087e3",
+          "test/support/tmux_fixture.py": "970b2c3652f492ffb7a97d98da45654069eeb8f099045d38081904e317a1efcf"
+        },
+        "executable_sha256": "e3a2bfd7cef684014cb985d0d0b3c3f19e4af1180f11c5c81923029fd5149550"
+      },
+      "workload": {
+        "rounds": 3,
+        "workers": 8,
+        "frames_per_lane": 4,
+        "payload_bytes": 256,
+        "stream_lanes": 7,
+        "subscribers_at_admission": 16,
+        "commands_per_wave": 64,
+        "queued_cancellations_per_wave": 8,
+        "controller_clients": 1,
+        "load_clients": 1
+      },
+      "route": "set-option via retained control connection; verification read_option via temporary subprocess",
+      "tmux_binary_sha256": "dcd637c5ce9e9ddf77f1e0529901221727424e6c9aa8a8368c2217c78293c8df",
+      "whole_command_seconds": 1.5130968039957224,
+      "source_stable": true,
+      "raw": {
+        "path": "mixed-3.4-qualified-20261108.json.gz",
+        "sha256": "2b67309bb7561230ba4b04b34692e93fa9a7b63aa3c9a6dc9a4b26780d5c3ef8",
+        "uncompressed_sha256": "f49e16a8d2026528285c87cff41e5b50456b15d6e00f7672485332c0a77f26d4"
+      },
+      "observations": {
+        "progress": 198,
+        "commands": null,
+        "streams": null,
+        "verified_options": 0,
+        "resource_samples": 197,
+        "sample_maxima": {
+          "attached_clients": 9,
+          "harness": {
+            "process_count": 1,
+            "rss_bytes": 28729344,
+            "fd_count": 60
+          },
+          "benchmark": {
+            "process_count": 1,
+            "rss_bytes": 9785344,
+            "fd_count": 47
+          },
+          "daemon": {
+            "process_count": 1,
+            "rss_bytes": 6270976,
+            "fd_count": 44
+          },
+          "benchmark_children": {
+            "process_count": 10,
+            "rss_bytes": 36323328,
+            "fd_count": 54
+          },
+          "daemon_children": {
+            "process_count": 9,
+            "rss_bytes": 70656000,
+            "fd_count": 45
+          }
+        },
+        "command_progress_events": 130,
+        "stream_progress_events": 56
+      },
+      "error": "CalledProcessError: Command '['<repo>/scratch/tmux/tmux-3.4/tmux', '-S', '<fixture>/server', 'list-clients', '-F', '#{client_pid}|#{client_control_mode}|#{session_id}']' returned non-zero exit status 1.",
+      "cleanup": {
+        "errors": [],
+        "remaining_direct_children": [],
+        "fixture_directory_removed": true,
+        "forced_cleanup_count": null
+      },
+      "collector_scope": "historical"
+    },
+    {
+      "status": "PASS",
+      "measured_at_utc": "2026-11-08T03:23:26.605180+00:00",
+      "head": "823dad3cb63e34ff12060c2be70998d7498e4f5b",
+      "versions": {
+        "ocaml": "5.5.2",
+        "dune": "3.24.2",
+        "python": "Python 3.14.6",
+        "tmux": "tmux 3.8",
+        "dependencies": "eio      1.6\neio_main 1.6\nmtime    2.2.0\nyojson   3.0.0"
+      },
+      "source_before": {
+        "behavior_sha256": "d592af5908e9465397f7c82a6868bc3703ff25938283dfac21f6704c895290c3",
+        "files_sha256": {
+          "bench/mixed.ml": "a9ecf4e0b0f293437a882ac2956fa7bde2e2fd7e5046da6670f1f6fad101a122",
+          "bench/mixed.py": "7250d65ea4abcddbbf6dabb4286862fcd64100da71f1361aedca7dfef715d179",
+          "bench/dune": "0e222d21725f5b743f1d84de6e0a17292a12e80f5eeeec0e49377ed540fcaf88",
+          "dune-project": "8c6ddd4215a03d62d426fb4e6c2896538712bd8464843b9758683301c5ad4584",
+          ".tool-versions": "f4514280cc69e9d87466f685385ef5c67a43af92efb3550eceaa25bbd0e087e3",
+          "test/support/tmux_fixture.py": "970b2c3652f492ffb7a97d98da45654069eeb8f099045d38081904e317a1efcf"
+        },
+        "executable_sha256": "6c1e2596e46aa3c173083861219084a1dd8cf04d51a8d6c34b1a17b1caec5cf0"
+      },
+      "workload": {
+        "rounds": 3,
+        "workers": 8,
+        "frames_per_lane": 4,
+        "payload_bytes": 256,
+        "stream_lanes": 7,
+        "subscribers_at_admission": 16,
+        "commands_per_wave": 64,
+        "queued_cancellations_per_wave": 8,
+        "controller_clients": 1,
+        "load_clients": 1
+      },
+      "route": "set-option via retained control connection; verification read_option via temporary subprocess",
+      "tmux_binary_sha256": "8d26a03aea063272363af174dfe9f6847fc831d9da53b4688da26f3fd24a2ab8",
+      "whole_command_seconds": 4.0177467219982645,
+      "source_stable": true,
+      "raw": {
+        "path": "mixed-3.8-current-20261108.json.gz",
+        "sha256": "d0632dce6eb782310bb8aad14944e61f1b0a6b61692d280ff7449f857c48caf9",
+        "uncompressed_sha256": "c057d17d9e986982dfec063639e6dccf287b64600d0f6fc6ddf91a0528517a1f"
+      },
+      "observations": {
+        "progress": 486,
+        "commands": 192,
+        "streams": 84,
+        "verified_options": 192,
+        "resource_samples": 486,
+        "sample_maxima": {
+          "attached_clients": 10,
+          "harness": {
+            "process_count": 1,
+            "rss_bytes": 32964608,
+            "fd_count": 65,
+            "incomplete_samples": 0
+          },
+          "benchmark": {
+            "process_count": 1,
+            "rss_bytes": 10338304,
+            "fd_count": 52,
+            "incomplete_samples": 0
+          },
+          "daemon": {
+            "process_count": 1,
+            "rss_bytes": 5677056,
+            "fd_count": 45,
+            "incomplete_samples": 0
+          },
+          "benchmark_children": {
+            "process_count": 10,
+            "rss_bytes": 42307584,
+            "fd_count": 60,
+            "incomplete_samples": 5
+          },
+          "daemon_children": {
+            "process_count": 9,
+            "rss_bytes": 70332416,
+            "fd_count": 45,
+            "incomplete_samples": 2
+          }
+        },
+        "command_progress_events": 192,
+        "stream_progress_events": 84
+      },
+      "summary": {
+        "overlapping_progress_observations": 27,
+        "per_worker": [
+          {
+            "worker": 0,
+            "observations": 24,
+            "successful": 21,
+            "cancelled_before_write": 3,
+            "first_observed_seconds": 0.089226742,
+            "last_observed_seconds": 1.509080602,
+            "median_observation_latency_seconds": 0.183924453,
+            "max_observation_latency_seconds": 0.423580258
+          },
+          {
+            "worker": 1,
+            "observations": 24,
+            "successful": 21,
+            "cancelled_before_write": 3,
+            "first_observed_seconds": 0.089806418,
+            "last_observed_seconds": 1.513771988,
+            "median_observation_latency_seconds": 0.1993668165,
+            "max_observation_latency_seconds": 0.428269036
+          },
+          {
+            "worker": 2,
+            "observations": 24,
+            "successful": 21,
+            "cancelled_before_write": 3,
+            "first_observed_seconds": 0.089808581,
+            "last_observed_seconds": 1.518731714,
+            "median_observation_latency_seconds": 0.21599536600000002,
+            "max_observation_latency_seconds": 0.433225559
+          },
+          {
+            "worker": 3,
+            "observations": 24,
+            "successful": 21,
+            "cancelled_before_write": 3,
+            "first_observed_seconds": 0.089810064,
+            "last_observed_seconds": 1.524550896,
+            "median_observation_latency_seconds": 0.228095314,
+            "max_observation_latency_seconds": 0.439041125
+          },
+          {
+            "worker": 4,
+            "observations": 24,
+            "successful": 21,
+            "cancelled_before_write": 3,
+            "first_observed_seconds": 0.089810752,
+            "last_observed_seconds": 1.530652915,
+            "median_observation_latency_seconds": 0.23754941,
+            "max_observation_latency_seconds": 0.445140323
+          },
+          {
+            "worker": 5,
+            "observations": 24,
+            "successful": 21,
+            "cancelled_before_write": 3,
+            "first_observed_seconds": 0.089812143,
+            "last_observed_seconds": 1.54076494,
+            "median_observation_latency_seconds": 0.24285220600000001,
+            "max_observation_latency_seconds": 0.455248928
+          },
+          {
+            "worker": 6,
+            "observations": 24,
+            "successful": 21,
+            "cancelled_before_write": 3,
+            "first_observed_seconds": 0.089814609,
+            "last_observed_seconds": 1.546550669,
+            "median_observation_latency_seconds": 0.2473199505,
+            "max_observation_latency_seconds": 0.461031286
+          },
+          {
+            "worker": 7,
+            "observations": 24,
+            "successful": 21,
+            "cancelled_before_write": 3,
+            "first_observed_seconds": 0.089815956,
+            "last_observed_seconds": 1.55156122,
+            "median_observation_latency_seconds": 0.25243375,
+            "max_observation_latency_seconds": 0.466038914
+          }
+        ],
+        "worker_last_observation_spread_seconds": 0.042480617999999915,
+        "command_observation_latency_seconds": {
+          "min": 0.000203745,
+          "median": 0.220259746,
+          "max": 0.466038914
+        }
+      },
+      "cleanup": {
+        "errors": [],
+        "remaining_direct_children": [],
+        "fixture_directory_removed": true,
+        "forced_cleanup_count": 0
+      },
+      "collector_scope": "current"
+    },
+    {
+      "status": "EXPECTED_FAILURE",
+      "measured_at_utc": "2026-11-08T03:23:30.894716+00:00",
+      "head": "823dad3cb63e34ff12060c2be70998d7498e4f5b",
+      "versions": {
+        "ocaml": "5.5.2",
+        "dune": "3.24.2",
+        "python": "Python 3.14.6",
+        "tmux": "tmux 3.8",
+        "dependencies": "eio      1.6\neio_main 1.6\nmtime    2.2.0\nyojson   3.0.0"
+      },
+      "source_before": {
+        "behavior_sha256": "d592af5908e9465397f7c82a6868bc3703ff25938283dfac21f6704c895290c3",
+        "files_sha256": {
+          "bench/mixed.ml": "a9ecf4e0b0f293437a882ac2956fa7bde2e2fd7e5046da6670f1f6fad101a122",
+          "bench/mixed.py": "7250d65ea4abcddbbf6dabb4286862fcd64100da71f1361aedca7dfef715d179",
+          "bench/dune": "0e222d21725f5b743f1d84de6e0a17292a12e80f5eeeec0e49377ed540fcaf88",
+          "dune-project": "8c6ddd4215a03d62d426fb4e6c2896538712bd8464843b9758683301c5ad4584",
+          ".tool-versions": "f4514280cc69e9d87466f685385ef5c67a43af92efb3550eceaa25bbd0e087e3",
+          "test/support/tmux_fixture.py": "970b2c3652f492ffb7a97d98da45654069eeb8f099045d38081904e317a1efcf"
+        },
+        "executable_sha256": "6c1e2596e46aa3c173083861219084a1dd8cf04d51a8d6c34b1a17b1caec5cf0"
+      },
+      "workload": {
+        "rounds": 1,
+        "workers": 8,
+        "frames_per_lane": 2,
+        "payload_bytes": 256,
+        "stream_lanes": 7,
+        "subscribers_at_admission": 16,
+        "commands_per_wave": 64,
+        "queued_cancellations_per_wave": 8,
+        "controller_clients": 1,
+        "load_clients": 1
+      },
+      "route": "set-option via retained control connection; verification read_option via temporary subprocess",
+      "tmux_binary_sha256": "8d26a03aea063272363af174dfe9f6847fc831d9da53b4688da26f3fd24a2ab8",
+      "whole_command_seconds": 0.7720781690004515,
+      "source_stable": true,
+      "raw": {
+        "path": "mixed-3.8-current-interrupted-20261108.json.gz",
+        "sha256": "cc82e5b8291916c12c943dc79a07278ba42ba231c3ff61afde32e6db6984dde9",
+        "uncompressed_sha256": "c7d1d639ea126b1fe56e7e12376b9d15eaee079fa3c805d7d3f6026d6abf4b97"
+      },
+      "observations": {
+        "progress": 22,
+        "commands": null,
+        "streams": null,
+        "verified_options": 0,
+        "resource_samples": 22,
+        "sample_maxima": {
+          "attached_clients": 9,
+          "harness": {
+            "process_count": 1,
+            "rss_bytes": 28053504,
+            "fd_count": 42,
+            "incomplete_samples": 0
+          },
+          "benchmark": {
+            "process_count": 1,
+            "rss_bytes": 9125888,
+            "fd_count": 52,
+            "incomplete_samples": 0
+          },
+          "daemon": {
+            "process_count": 1,
+            "rss_bytes": 5652480,
+            "fd_count": 42,
+            "incomplete_samples": 0
+          },
+          "benchmark_children": {
+            "process_count": 10,
+            "rss_bytes": 37752832,
+            "fd_count": 54,
+            "incomplete_samples": 1
+          },
+          "daemon_children": {
+            "process_count": 9,
+            "rss_bytes": 69763072,
+            "fd_count": 45,
+            "incomplete_samples": 0
+          }
+        },
+        "command_progress_events": 11,
+        "stream_progress_events": 7
+      },
+      "error": "InjectedFailure: intentional benchmark interruption with a live churn pane",
+      "failure_kind": "workload_or_observer_failure",
+      "cleanup": {
+        "errors": [],
+        "remaining_direct_children": [],
+        "fixture_directory_removed": true,
+        "forced_cleanup_count": 0
+      },
+      "collector_scope": "current"
+    }
+  ]
+}

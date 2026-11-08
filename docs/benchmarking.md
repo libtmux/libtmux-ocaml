@@ -112,6 +112,117 @@ Higher concurrency increases queueing on the retained connection. These
 measurements come from a shared host running other work; compare raw sample
 ranges and load before choosing a workload or drawing performance conclusions.
 
+## Mixed commands, stream pressure and membership changes
+
+The [mixed-load benchmark](../bench/mixed.py) overlaps retained command
+submissions, seven fast stream readers, seven deliberately stalled readers,
+membership changes and cancellation. Its default runs three waves with eight
+command workers and four attributed output frames per stream lane. It adds no
+work to the unit-test loops.
+
+Build the executable separately:
+
+```console
+$ opam exec -- dune build bench/mixed.exe
+```
+
+Run the bounded workload against one owned release fixture:
+
+```console
+$ opam exec -- python3 bench/mixed.py scratch/tmux/tmux-3.8/tmux \
+    --output scratch/mixed-baseline.json
+```
+
+Each wave submits 64 commands without yielding and requires the 65th to reject
+with the declared admission limit. Eight queued operations are cancelled before
+writing; their handles retain `Not_started`. Sixteen subscribers occupy seven
+shared session lanes. Together with the load connection's primary lane this
+reaches its eight-lane limit; a separate controller connection sends output and
+changes membership. The seventeenth subscriber and an additional session lane
+must reject with their specific capacity errors. These expected rejections are
+recorded separately from correctness failures.
+
+Commands set unique user-option names and values. The receipt retains operation
+IDs, worker IDs, submission indexes and the actual order in which awaiters
+observe results. It verifies every resulting option value, including absence
+for cancelled operations. Ordinary mutations use the retained control lane;
+`read_option` verification runs afterward through its temporary subprocess route
+and has a separate phase duration. Each verified option emits its operation ID,
+completed count and read duration before the observer handshake. The validation
+phase includes those handshakes; individual read durations exclude them.
+The observer acknowledgements and resource queries add measured overhead, so
+these are instrumented workload timings.
+
+Fast streams must deliver exact ordered bytes with continuous generation and
+byte offsets. Tiny unconsumed queues must report `Gap Overflow`, then `End`.
+Splitting and removing a temporary pane changes a watched window's membership;
+affected readers must report `Gap Membership_changed`, then `End`. Explicit
+readmission uses a fresh observation and generation. Unchanged lanes continue independently; the receipt requires observed stream
+progress while commands remain pending in each wave. Each wave also cancels an active observer after
+its retained wait reaches `Acknowledged`, releases the wait through the
+controller, and checks the eventual result before and after client closure.
+
+Native event callbacks synchronously sample owned Linux process trees before
+yielding to telemetry, retaining their occurrence-time pending-command counts.
+Progress handshakes separately sample process trees and attached tmux clients,
+including while the churn pane is alive. Emission timestamps and counts stay
+separate from event occurrence; queued telemetry cannot manufacture overlap. Raw records distinguish
+the Python harness, OCaml process, daemon, command-client children and pane
+children. RSS/FD/process/client maxima are maxima of these observations;
+per-process RSS high-water marks come from the kernel. They do not establish
+continuous aggregate resource peaks. The controller contributes a primary client
+and, during its retained wait, an auxiliary client in addition to the load
+connection's eight clients. The sampler's own retained pidfds affect its FD count.
+
+Per-worker receipts report completed quotas, cancellation counts, latency samples
+and first/last observation times. They characterize this bounded workload rather
+than proving scheduler fairness, a service-level objective or general capacity.
+The 1 MiB queued-byte and 32 MiB payload limits are recorded source constraints;
+this workload pressures admission counts, subscriber counts and lane counts,
+not those byte maxima. No automatic retries or timeout increases hide a failure.
+
+Exercise teardown after interruption with a new output file:
+
+```console
+$ opam exec -- python3 bench/mixed.py scratch/tmux/tmux-3.8/tmux \
+    --rounds 1 \
+    --frames 2 \
+    --inject-failure \
+    --output scratch/mixed-interrupted.json
+```
+
+`EXPECTED_FAILURE` means the harness intentionally interrupted the native
+process while a temporary pane was alive. It still requires owned daemon,
+pane and command-client exit, reaping, zero remaining children and removal of
+the private fixture directory. Unexpected errors or failed cleanup produce
+`FAIL`; an interruption is not a successful workload measurement.
+
+The [summary](../bench/results/mixed-20261108.json) records each outcome and
+source identity. The linked gzip archives contain the complete JSON receipts;
+the summary includes their compressed and uncompressed SHA-256 digests.
+
+Raw results retain exact source and executable hashes, fixture-helper hash,
+versions, command arguments, workload bounds, host load, resource observations
+and cleanup receipts. Keep failed receipts beside passing measurements when
+assessing a release. Current collector qualification is **PARTIAL** across the supported releases:
+
+| tmux | Mixed workload disposition | Raw evidence |
+| --- | --- | --- |
+| 3.3 | Current workload passed; an earlier observer-command failure remains unattributed. | [Current](../bench/results/mixed-3.3-current-20261108.json.gz), [earlier failure](../bench/results/mixed-3.3-qualified-20261108.json.gz) |
+| 3.3a | Current workload passed. | [Current](../bench/results/mixed-3.3a-current-20261108.json.gz) |
+| 3.4 | Reproduced daemon SIGSEGV: a null control state is dereferenced while notifying control clients of a detach. | [Failure](../bench/results/mixed-3.4-qualified-20261108.json.gz), [core analysis](../bench/results/mixed-3.4-crash-analysis-20261108.json) |
+| 3.8 | Current default workload and intentional interruption cleanup passed. | [Default](../bench/results/mixed-3.8-current-20261108.json.gz), [interruption](../bench/results/mixed-3.8-current-interrupted-20261108.json.gz) |
+
+Earlier records predate collector corrections; use their recorded source hashes.
+A later passing sample does not resolve an unexplained failure. These outcomes
+qualify this mixed benchmark separately from the existing native runtime tests.
+
+The three 3.4 cores identify the same upstream write path. A later
+[tmux correction](https://github.com/tmux/tmux/commit/93169e2e6231853c61c33432bceebf4ffc91015b)
+guards null control state; that guard is present in the exact 3.8 source.
+The precise triggering sequence remains unproved. The required 3.3 floor stays
+in place, and the 3.4 mixed workload remains a failed qualification.
+
 Benchmarks are a separate tier. Correctness gates and test-loop timings are
 listed in [testing](testing.md), not used as throughput measurements. Keep a
 single benchmark run under ten minutes and a complete sweep under one hour.

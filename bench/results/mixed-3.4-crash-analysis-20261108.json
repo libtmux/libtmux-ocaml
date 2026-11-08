@@ -1,0 +1,66 @@
+{
+  "schema": "libtmux.mixed-crash-analysis/1",
+  "status": "FAIL",
+  "classification": "upstream_null_control_state_dereference",
+  "tmux": "3.4",
+  "tmux_binary_sha256": "dcd637c5ce9e9ddf77f1e0529901221727424e6c9aa8a8368c2217c78293c8df",
+  "workload_source_sha256": {
+    "bench/mixed.ml": "69a546d7872deb2587f37e8ca2ea1af5208d4dc0c3f660c62ec3e6ffb5673c0e",
+    "bench/mixed.py": "aaf08fc2a4979a85acba438e676e7cf6fa8b0b32a36d627fe000d597b00d3a00",
+    "bench/dune": "a7f5a69b26dce925a13dc9e75e05ccc7aa77af5a323e17a908e2e249e6010556",
+    "dune-project": "8c6ddd4215a03d62d426fb4e6c2896538712bd8464843b9758683301c5ad4584",
+    ".tool-versions": "f4514280cc69e9d87466f685385ef5c67a43af92efb3550eceaa25bbd0e087e3",
+    "test/support/tmux_fixture.py": "970b2c3652f492ffb7a97d98da45654069eeb8f099045d38081904e317a1efcf"
+  },
+  "cores": [
+    {
+      "replay_attempt": 6,
+      "core_bytes": 2629632,
+      "core_sha256": "d458736dfa46a943c4e13bb6ddb00ae6ab0de1741459ea2ddcf5178f483eedde",
+      "fault_symbol": "control_write+163",
+      "control_state": null
+    },
+    {
+      "replay_attempt": 7,
+      "core_bytes": 2232320,
+      "core_sha256": "5e0c1c3c2f86f84fa80cc69ca10852d18d9b7c7107fa6407754f452efc6df86f",
+      "fault_symbol": "control_write+163",
+      "control_state": null
+    },
+    {
+      "replay_attempt": 19,
+      "core_bytes": 2924544,
+      "core_sha256": "c62727067584a16e688d744af7d7183dcb54374ce8d49fca178c0a2d115ccdde",
+      "fault_symbol": "control_write+163",
+      "control_state": null
+    }
+  ],
+  "stack": [
+    "control_write",
+    "control_notify_client_detached",
+    "notify_callback",
+    "cmdq_next",
+    "server_loop",
+    "proc_loop",
+    "server_start",
+    "client_main",
+    "main"
+  ],
+  "fault": {
+    "instruction": "cmpq $0x0,0x20(%rbp)",
+    "state_load": "mov 0x20(%r12),%rbp",
+    "register_rbp": 0,
+    "interpretation": "c->control_state is null when control_write dereferences cs->all_blocks"
+  },
+  "diagnostic_changes": [
+    "64 MiB soft core limit on the owned daemon only",
+    "owned private working directory; unchanged kernel core settings"
+  ],
+  "upstream_guard": "https://github.com/tmux/tmux/commit/93169e2e6231853c61c33432bceebf4ffc91015b",
+  "limitations": [
+    "The original tmux 3.3 observer failure remains unattributed",
+    "The exact triggering sequence is not established; equivalence to the issue 5570 trigger is not claimed",
+    "This is failure diagnosis, not passing compatibility or throughput evidence",
+    "Core files and machine-specific backtraces are retained privately; only digests and reviewed symbolic evidence are published"
+  ]
+}

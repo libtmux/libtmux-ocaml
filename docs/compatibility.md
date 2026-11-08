@@ -41,6 +41,12 @@ every release. Ready I/O still checks its deadline; busy pipes cannot bypass
 the timeout. These results qualify the implemented lifecycle contracts, not
 the final suite qualification. MCP integration is outside this port's scope.
 
+The near-limit [mixed workload](benchmarking.md#mixed-commands-stream-pressure-and-membership-changes)
+reproduces a tmux 3.4 daemon crash in the control-client detach notification
+path. The exact 3.8 source includes the upstream null-state guard. An earlier
+3.3 observer-command failure remains unattributed. Passing ordinary client
+checks does not close either mixed-workload failure.
+
 The I/O packages require Linux pidfds, the same PID namespace as the daemon,
 and shared local scratch storage. A socket pathname does not prove those
 conditions. Each connection has its own generation; a replacement daemon never
