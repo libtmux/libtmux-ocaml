@@ -17,6 +17,7 @@ and filter them locally, then perform an explicit action with a bound target.
 | Validate, preview and apply a JSON workspace | [Workspaces](workspaces.md) | [Project configuration](../examples/workspace/project.json) |
 | Compare measured capture workloads | [Benchmarks](benchmarking.md) | [Capture harness](../bench/capture.py) |
 | Browse modules and signatures | [API documentation](api.md) | Public `.mli` sources |
+| Review package-wide design choices | [Architecture decisions](dev/adr/README.md) | [Implemented architecture](dev/adr/0001-native-ocaml-suite.md) |
 
 The field, option and format references are generated from the same catalogs as
 the library: [fields](fields.md), [options](options.md), [formats](formats.md),
