@@ -6,6 +6,7 @@ and filter them locally, then perform an explicit action with a bound target.
 | Task | Guide | Executed program |
 | --- | --- | --- |
 | Install and connect | [First use](getting-started.md) | [Capture](../examples/native_capture.ml) |
+| Start a private daemon and its first session | [Native bootstrap](bootstrap.md) | [Bootstrap](../examples/showcase_bootstrap.ml) |
 | Choose libraries and optional runtimes | [Packages](packages.md) | [Authored manifests](../libtmux.opam) |
 | Run one self-contained capability program | [Standalone examples](showcases.md) | [Executed inventory](../examples/showcase.json) |
 | Understand sessions, shared windows and panes | [Object graph](graph.md) | [Inspect graph](../examples/native_graph.ml) |

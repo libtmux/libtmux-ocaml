@@ -75,22 +75,29 @@ with tempfile.TemporaryDirectory(prefix="libtmux-ocaml-showcase-consumer-") as t
             " p=Path(args[args.index('-f')+1])\n" +
             f" Path({str(audit)!r}).write_text(str(p.parent))\n" +
             " with p.open('a') as output:\n" +
-            "  output.write('new-session -d -s showcase -- /bin/cat -u\\n')\n" +
+            "  session=os.environ['LIBTMUX_SHOWCASE_COLLISION']\n" +
+            "  output.write(f'new-session -d -s {session} -- /bin/cat -u\\n')\n" +
             f"os.execv({actual!r}, [{actual!r}, *args])\n")
         fault.chmod(0o700)
         cases = [(name, entry, actual, False) for name, entry in programs.items()]
         cases.append(("showcase_create_window", programs["showcase_create_window"], str(fault), True))
+        cases.append(("showcase_bootstrap", programs["showcase_bootstrap"], str(fault), True))
         for name, entry, program, should_fail in cases:
             previous = children()
             command = [*entry["command"][:-1], program]
             process = subprocess.Popen(command,
-                                       cwd=project, env=environment, stdout=subprocess.PIPE,
+                                       cwd=project, env=dict(environment, LIBTMUX_SHOWCASE_COLLISION=
+                                           "bootstrap-demo" if name == "showcase_bootstrap" else "showcase"),
+                                       stdout=subprocess.PIPE,
                                        stderr=subprocess.PIPE)
             try:
                 output, error = process.communicate(timeout=1)
                 if should_fail:
                     assert process.returncode == 2 and error, (name, process.returncode, output, error)
                     assert entry["expected_stdout_line"].encode() not in output.splitlines()
+                    if name == "showcase_bootstrap":
+                        assert b"workspace " in error and b" did not complete" in error, error
+                        assert b"new-session" in error and b"no automatic retry" in error, error
                     directory = Path(audit.read_text())
                 else:
                     assert process.returncode == 0 and not error, (name, process.returncode, output, error)

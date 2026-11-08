@@ -8,6 +8,24 @@
   },
   "examples": [
     {
+      "capability": "bootstrap",
+      "title": "Start a private server and capture its first session",
+      "file": "examples/showcase_bootstrap.ml",
+      "whole_file": true,
+      "command": [
+        "opam",
+        "exec",
+        "--",
+        "dune",
+        "exec",
+        "examples/showcase_bootstrap.exe",
+        "--",
+        "tmux"
+      ],
+      "expected_stdout_line": "bootstrapped: 1 session, 1 window, 1 pane",
+      "success_exit_code": 0
+    },
+    {
       "capability": "graph",
       "title": "Navigate the typed object graph",
       "file": "examples/showcase_graph.ml",

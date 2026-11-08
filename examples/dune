@@ -39,10 +39,10 @@
  (libraries libtmux libtmux-eio eio_main))
 
 (executables
- (names showcase_create_window showcase_rename_window showcase_move_window
-  showcase_layout showcase_send_keys showcase_graph)
- (modules showcase_create_window showcase_rename_window showcase_move_window
-  showcase_layout showcase_send_keys showcase_graph)
+ (names showcase_bootstrap showcase_create_window showcase_rename_window
+  showcase_move_window showcase_layout showcase_send_keys showcase_graph)
+ (modules showcase_bootstrap showcase_create_window showcase_rename_window
+  showcase_move_window showcase_layout showcase_send_keys showcase_graph)
  (libraries libtmux libtmux-workspace libtmux-unix unix))
 
 (executable

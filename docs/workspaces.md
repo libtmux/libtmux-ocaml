@@ -208,5 +208,7 @@ For native code, use `Libtmux_json.Workspace.of_string`,
 `Libtmux_workspace.Plan.make`, and the backend's `Workspace.submit` or
 `Workspace.submit_bootstrap`. `inspect` reads the retained journal locally;
 `await` performs I/O. The application owns the Eio switch and scheduler.
+The [native bootstrap walkthrough](bootstrap.md) starts one private session
+without a JSON dependency and captures its graph through the resulting client.
 See the [API reference](api.md), [control outcomes](control.md) and
 [compatibility evidence](compatibility.md).

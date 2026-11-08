@@ -23,6 +23,7 @@ The watch program also needs `libtmux-eio` and `eio_main`. The
 
 | Task | Complete program | Expected outcome line |
 | --- | --- | --- |
+| Start a private server and its first session | [Bootstrap](../examples/showcase_bootstrap.ml) | `bootstrapped: 1 session, 1 window, 1 pane` |
 | Navigate sessions, shared windows and panes | [Graph](../examples/showcase_graph.ml) | `graph: 2 sessions, 2 windows, 3 links, 2 panes` |
 | Observe future bytes concurrently | [Watch](../examples/showcase_watch.ml) | `observed: changed` |
 | Send literal input and Enter | [Keys](../examples/showcase_send_keys.ml) | `sent: literal: $HOME; #{pane_id}` |
@@ -31,8 +32,16 @@ The watch program also needs `libtmux-eio` and `eio_main`. The
 | Move a window to another session's index | [Move](../examples/showcase_move_window.ml) | `moved: build at 7` |
 | Apply and verify horizontal pane geometry | [Layout](../examples/showcase_layout.ml) | `layout: 3 horizontal panes` |
 
-All programs print their temporary socket path before the outcome. Run the
-graph example; it traverses the snapshot after the client and daemon close:
+All programs print their temporary socket path before the outcome. The
+[bootstrap walkthrough](bootstrap.md) explains the missing-endpoint precondition
+and ownership of the resulting client:
+
+```console
+$ opam exec -- dune exec examples/showcase_bootstrap.exe -- tmux
+```
+
+Run the graph example; it traverses the snapshot after the client and daemon
+close:
 
 ```console
 $ opam exec -- dune exec examples/showcase_graph.exe -- tmux
