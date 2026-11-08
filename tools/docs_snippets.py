@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 MARKER = re.compile(r"^\s*\(\* docs:(begin|end) ([a-z-]+) \*\)\s*$")
 INCLUDE = re.compile(r"<!-- example: ([^\s]+) -->\n\n```(?:ocaml|json)\n(.*?)```", re.DOTALL)
 LINK = re.compile(r"(?<!!)\[[^\]]+\]\(([^\s)]+)\)")
+ASSET = re.compile(r'\b(?:src|srcset)="([^"\s]+)"')
 
 
 def anchors(path):
@@ -66,7 +67,9 @@ def snippet(reference):
 def check():
     count = 0
     links = 0
-    for document in [ROOT / "README.md", *sorted((ROOT / "docs").glob("*.md"))]:
+    documents = [ROOT / "README.md", *sorted((ROOT / "docs").glob("*.md"))]
+    documents += [ROOT / package / "README.md" for package in ("lib", "unix", "eio", "json")]
+    for document in documents:
         text = document.read_text()
         if text.count("<!-- example:") != len(INCLUDE.findall(text)):
             raise ValueError(f"malformed example include: {document.relative_to(ROOT)}")
@@ -74,7 +77,7 @@ def check():
             if code != snippet(reference):
                 raise ValueError(f"example differs: {document.relative_to(ROOT)}: {reference}")
             count += 1
-        for destination in LINK.findall(text):
+        for destination in LINK.findall(text) + ASSET.findall(text):
             url = urlsplit(destination)
             if url.scheme or url.netloc:
                 continue

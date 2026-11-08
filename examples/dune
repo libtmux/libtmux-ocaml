@@ -1,4 +1,14 @@
 (executable
+ (name query_description)
+ (modules query_description)
+ (libraries libtmux))
+
+(executable
+ (name query_json)
+ (modules query_json)
+ (libraries libtmux libtmux-json))
+
+(executable
  (name native_capture)
  (modules native_capture)
  (libraries libtmux libtmux-eio eio_main))

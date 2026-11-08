@@ -72,6 +72,28 @@ let () =
         assert Path(resolved) == prefix / "lib" / package
     subprocess.run(["dune", "exec", "--root", str(consumer), "--no-print-directory", "./main.exe"],
                    cwd=consumer, env=environment, check=True)
+    package_examples = temporary / "package-readmes"
+    package_examples.mkdir()
+    (package_examples / "dune-project").write_text("(lang dune 3.24)\n")
+    for package, name in [("lib", "query_description"), ("json", "query_json"),
+                          ("unix", "native_graph"), ("eio", "native_watch")]:
+        project = package_examples / package
+        project.mkdir()
+        readme = (root / package / "README.md").read_text()
+        stanza, = re.findall(r"```dune\n(.*?)```", readme, re.DOTALL)
+        (project / "dune").write_text(stanza)
+        (project / f"{name}.ml").write_text(snippet(f"examples/{name}.ml"))
+    subprocess.run(["dune", "build", "--root", str(package_examples)], cwd=package_examples,
+                   env=environment, check=True)
+    expected = {
+        "lib/query_description": b'all [pane_active = true; pane_current_command in ["nvim"; "vim"]; pane_width >= 120]\nambiguous: at least 2 entries\n',
+        "json/query_json": b'{"schema":"libtmux.filter/1","model":"pane","expr":{"node":"compare","field":"pane_current_command","op":"starts_with","value":"nv"}}\ninvalid operand at /expr/value\n',
+    }
+    for program, output in expected.items():
+        result = subprocess.run([str(package_examples / "_build/default" / f"{program}.exe")],
+                                env=environment, capture_output=True, check=True, timeout=1)
+        assert result.stdout == output and result.stderr == b"", result
+    print("installed package README Dune files and pure examples: PASS")
     runtime = temporary / "runtime"
     runtime.mkdir()
     (runtime / "dune-project").write_text("(lang dune 3.24)\n")
@@ -148,6 +170,8 @@ let () = Eio_main.run (fun env -> Eio.Switch.run (fun sw ->
     walkthrough = readme_walkthrough.prepare(root, temporary, environment)
     binaries = sys.argv[1:] or [root / f"scratch/tmux/tmux-{version}/tmux" for version in ["3.3", "3.3a", "3.4", "3.8"]]
     for binary in binaries:
+        for document in ("unix/README.md", "eio/README.md"):
+            readme_walkthrough.run(root, walkthrough, binary, environment, document)
         with TmuxFixture(binary) as fixture:
             result = subprocess.run([str(runtime / "_build/default/native_capture.exe"),
                                      fixture.binary, str(fixture.socket)],

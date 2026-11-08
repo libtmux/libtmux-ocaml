@@ -41,6 +41,10 @@ def run(root, project, binary, environment, document="README.md"):
         "docs/recovery.md": ("LIBTMUX_RECOVERY_DIR", "libtmux-ocaml-recovery.",
                              [b"waiter=cancelled; operation=retained\n",
                               b"operation=finished; postcondition=recovery-complete\n"]),
+        "unix/README.md": ("LIBTMUX_UNIX_DEMO_DIR", "libtmux-ocaml-unix-demo.",
+                           [b'session $0 "demo"', b"pane %0 active=true"]),
+        "eio/README.md": ("LIBTMUX_EIO_DEMO_DIR", "libtmux-ocaml-eio-demo.",
+                          [b"future_match_offset=", b"rendered_pane=%0\n"]),
     }[document]
     commands = []
     active = False

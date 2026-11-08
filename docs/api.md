@@ -6,10 +6,10 @@ and failure behavior. Source examples are compiled against installed libraries.
 
 | Package | Public interface | Start with |
 | --- | --- | --- |
-| Core | [Libtmux](../lib/libtmux.mli) | `Snapshot`, `Pane`, `Expr`, `Query`, `Operations` |
-| Blocking | [Libtmux_unix](../unix/libtmux_unix.mli) | `Client`, `Operation`, `Subscription`, `Cancellation`, `Workspace` |
-| Concurrent | [Libtmux_eio](../eio/libtmux_eio.mli) | `Client`, `Operation`, `Subscription`, `Workspace` |
-| JSON | [Libtmux_json](../json/libtmux_json.mli) | `Expr`, `Workspace`, `Error`, `Decode_error` |
+| [Core](../lib/) | [Libtmux](../lib/libtmux.mli) | `Snapshot`, `Pane`, `Expr`, `Query`, `Operations` |
+| [Blocking](../unix/) | [Libtmux_unix](../unix/libtmux_unix.mli) | `Client`, `Operation`, `Subscription`, `Cancellation`, `Workspace` |
+| [Concurrent](../eio/) | [Libtmux_eio](../eio/libtmux_eio.mli) | `Client`, `Operation`, `Subscription`, `Workspace` |
+| [JSON](../json/) | [Libtmux_json](../json/libtmux_json.mli) | `Expr`, `Workspace`, `Error`, `Decode_error` |
 | Workspaces | [Libtmux_workspace](../workspace/libtmux_workspace.mli) | `Config`, `Plan`, `Execution` |
 
 The `libtmux-workspace-cli` package installs the `tmux-workspace` executable.
