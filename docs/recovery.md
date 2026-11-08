@@ -37,8 +37,8 @@ $ opam exec -- dune exec examples/native_recovery.exe -- \
 ```
 
 Expected output is `waiter=cancelled; operation=retained`, followed by
-`operation=finished; postcondition=recovery-complete`. The program creates a
-window and removes its own pane afterward. It preserves the seed session and
+`operation=finished; postcondition=recovery-complete` and
+`cleanup-issues=0; omitted=0`. The program creates a window and removes its own pane afterward. It preserves the seed session and
 other panes, and closes its client on success or failure.
 
 Remove the private seed session and directory:
@@ -62,7 +62,9 @@ $ rmdir "$LIBTMUX_RECOVERY_DIR"
 
 The [complete source](../examples/native_recovery.ml) uses installed public
 libraries. Its Eio cancellation scope covers only the waiter. Client ownership
-and cleanup remain outside that scope.
+and cleanup remain outside that scope. A caller-owned `Cleanup` report is
+created before connecting and inspected after closing. It remains accessible
+if setup fails or cancellation prevents a client from being returned.
 
 <!-- example: examples/native_recovery.ml -->
 
@@ -70,6 +72,7 @@ and cleanup remain outside that scope.
 open Libtmux
 module Client = Libtmux_eio.Client
 module Operation = Libtmux_eio.Operation
+module Cleanup = Libtmux_eio.Cleanup
 
 let get = function
   | Ok value -> value
@@ -180,22 +183,38 @@ let () =
     exit 2);
   Eio_main.run @@ fun env ->
   Eio.Switch.run @@ fun sw ->
-  let client =
-    get
-      (Client.connect ~sw ~binary:Sys.argv.(1)
-         ~process_mgr:(Eio.Stdenv.process_mgr env)
-         ~mono_clock:(Eio.Stdenv.mono_clock env)
-         (Endpoint.socket_path Sys.argv.(2)))
-  in
+  let cleanup = Cleanup.create () in
   protect
     ~finally:(fun () ->
-      Eio.Cancel.protect (fun () -> get (Client.close client)))
+      let report = get (Cleanup.inspect cleanup) in
+      Iarray.iter
+        (fun issue ->
+          match issue.Cleanup.error with
+          | Some error -> Format.eprintf "cleanup: %a@." Error.pp error
+          | None ->
+              Format.eprintf "cleanup: %s@."
+                (Printexc.to_string issue.exception_))
+        report.issues;
+      Printf.printf "cleanup-issues=%d; omitted=%d\n"
+        (Iarray.length report.issues)
+        report.omitted)
     (fun () ->
-      let id = get (Session.Id.of_string Sys.argv.(3)) in
-      let session =
-        Snapshot.find_session (get (Client.capture client)) id |> Option.get
+      let client =
+        get
+          (Client.connect ~cleanup ~sw ~binary:Sys.argv.(1)
+             ~process_mgr:(Eio.Stdenv.process_mgr env)
+             ~mono_clock:(Eio.Stdenv.mono_clock env)
+             (Endpoint.socket_path Sys.argv.(2)))
       in
-      recover client (Session.target session))
+      protect
+        ~finally:(fun () ->
+          Eio.Cancel.protect (fun () -> get (Client.close client)))
+        (fun () ->
+          let id = get (Session.Id.of_string Sys.argv.(3)) in
+          let session =
+            Snapshot.find_session (get (Client.capture client)) id |> Option.get
+          in
+          recover client (Session.target session)))
 ```
 
 The release attempt is recorded before its I/O so cleanup cannot retry an

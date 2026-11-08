@@ -12,7 +12,9 @@ let start receipt io name =
 
 let () =
   let receipt = B.create () in
-  let connection, created = start receipt Io.blocking "workspace-bootstrap" in
+  let connection, created =
+    start receipt (Io.blocking ()) "workspace-bootstrap"
+  in
   Fun.protect
     ~finally:(fun () -> C.close connection)
     (fun () ->
@@ -37,7 +39,7 @@ let () =
       let collision = B.create () in
       (match
          Io.protect (fun () ->
-             start collision Io.blocking "workspace-bootstrap")
+             start collision (Io.blocking ()) "workspace-bootstrap")
        with
       | Error (Error.Command_failed { command = "new-session"; _ }) -> ()
       | _ -> failwith "bootstrap collision did not fail");
@@ -45,7 +47,7 @@ let () =
       let cancelled = B.create () in
       let io =
         {
-          Io.blocking with
+          (Io.blocking ()) with
           check =
             (fun () ->
               match cancelled.state with

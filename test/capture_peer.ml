@@ -35,7 +35,9 @@ let () =
             | Error Error.Unsupported_capture_hooks -> true
             | _ -> false)
       | "save-error" ->
-          let internal = Internal.connect ~io:Io.blocking ~binary endpoint in
+          let internal =
+            Internal.connect ~io:(Io.blocking ()) ~binary endpoint
+          in
           Fun.protect
             ~finally:(fun () -> Internal.close internal)
             (fun () ->

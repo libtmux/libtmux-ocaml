@@ -341,8 +341,13 @@ let close client =
   C.owner client.connection;
   List.iter (fun (Pack op) -> cancel op) client.queue;
   List.iter (fun (Pack op) -> finish op (Error Error.Closed)) client.active;
-  C.close client.connection;
-  client.changed ()
+  Cleanup.run
+    [
+      (fun () -> C.close client.connection);
+      (fun () ->
+        Cleanup.step client.connection.lane.io.cleanup Notify_waiters
+          client.changed);
+    ]
 
 let run (Pack op) =
   Fun.protect
@@ -353,10 +358,12 @@ let run (Pack op) =
       match protect (fun () -> execute op) with
       | result -> finish op result
       | exception exn ->
+          let bt = Printexc.get_raw_backtrace () in
           finish op
             (Error (Error.Outcome_unknown "operation owner interrupted"));
-          close op.client;
-          raise exn)
+          Cleanup.protect
+            ~finally:(fun () -> close op.client)
+            (fun () -> Printexc.raise_with_backtrace exn bt))
 
 let result op =
   C.owner op.client.connection;

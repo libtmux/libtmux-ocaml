@@ -1,6 +1,7 @@
 open Libtmux
 module Client = Libtmux_eio.Client
 module Operation = Libtmux_eio.Operation
+module Cleanup = Libtmux_eio.Cleanup
 
 let get = function
   | Ok value -> value
@@ -113,19 +114,35 @@ let () =
     exit 2);
   Eio_main.run @@ fun env ->
   Eio.Switch.run @@ fun sw ->
-  let client =
-    get
-      (Client.connect ~sw ~binary:Sys.argv.(1)
-         ~process_mgr:(Eio.Stdenv.process_mgr env)
-         ~mono_clock:(Eio.Stdenv.mono_clock env)
-         (Endpoint.socket_path Sys.argv.(2)))
-  in
+  let cleanup = Cleanup.create () in
   protect
     ~finally:(fun () ->
-      Eio.Cancel.protect (fun () -> get (Client.close client)))
+      let report = get (Cleanup.inspect cleanup) in
+      Iarray.iter
+        (fun issue ->
+          match issue.Cleanup.error with
+          | Some error -> Format.eprintf "cleanup: %a@." Error.pp error
+          | None ->
+              Format.eprintf "cleanup: %s@."
+                (Printexc.to_string issue.exception_))
+        report.issues;
+      Printf.printf "cleanup-issues=%d; omitted=%d\n"
+        (Iarray.length report.issues)
+        report.omitted)
     (fun () ->
-      let id = get (Session.Id.of_string Sys.argv.(3)) in
-      let session =
-        Snapshot.find_session (get (Client.capture client)) id |> Option.get
+      let client =
+        get
+          (Client.connect ~cleanup ~sw ~binary:Sys.argv.(1)
+             ~process_mgr:(Eio.Stdenv.process_mgr env)
+             ~mono_clock:(Eio.Stdenv.mono_clock env)
+             (Endpoint.socket_path Sys.argv.(2)))
       in
-      recover client (Session.target session))
+      protect
+        ~finally:(fun () ->
+          Eio.Cancel.protect (fun () -> get (Client.close client)))
+        (fun () ->
+          let id = get (Session.Id.of_string Sys.argv.(3)) in
+          let session =
+            Snapshot.find_session (get (Client.capture client)) id |> Option.get
+          in
+          recover client (Session.target session)))

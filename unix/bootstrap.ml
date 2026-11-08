@@ -114,8 +114,10 @@ let start t ?timeout ~io ~binary ~endpoint ~name ~window_name ~spawn ~width
       t.state <- Bound created;
       (connection, created)
     with exn ->
-      C.close connection;
-      raise exn
+      let bt = Printexc.get_raw_backtrace () in
+      Cleanup.protect
+        ~finally:(fun () -> C.close connection)
+        (fun () -> Printexc.raise_with_backtrace exn bt)
   with
   | Failure (Error.Command_failed { command = "new-session"; _ } as cause) ->
     t.state <- Rejected cause;

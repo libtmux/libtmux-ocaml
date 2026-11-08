@@ -67,7 +67,7 @@ let expect_fault connection manager pane name bytes =
 let () =
   Sys.set_signal Sys.sigpipe Sys.Signal_ignore;
   let connection =
-    C.connect ~io:Io.blocking ~binary:Sys.argv.(1)
+    C.connect ~io:(Io.blocking ()) ~binary:Sys.argv.(1)
       (Endpoint.socket_path Sys.argv.(2))
   in
   Fun.protect

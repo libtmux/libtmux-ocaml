@@ -415,7 +415,9 @@ let created c body =
           }
     | _ -> fail (Error.Malformed_data "creation response shape")
   with Failure cause ->
-    C.close c;
-    fail
-      (Error.Outcome_unknown
-         (Format.asprintf "creation response: %a" Error.pp cause))
+    Cleanup.protect
+      ~finally:(fun () -> C.close c)
+      (fun () ->
+        fail
+          (Error.Outcome_unknown
+             (Format.asprintf "creation response: %a" Error.pp cause)))

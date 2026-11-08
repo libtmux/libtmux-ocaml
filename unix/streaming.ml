@@ -58,12 +58,16 @@ let finish ?(gap = false) ?lost_bytes sub reason =
         (Output.Gap { after = sub.delivered; lost_bytes; reason })
         sub.queue;
     Queue.add (Output.End reason) sub.queue;
-    Option.iter
-      (fun lane ->
-        lane.subscribers <- List.filter (( != ) sub) lane.subscribers;
-        reclaim lane)
-      sub.lane;
-    sub.manager.changed ())
+    Cleanup.protect
+      ~finally:(fun () ->
+        Cleanup.step sub.manager.connection.lane.io.cleanup Notify_waiters
+          sub.manager.changed)
+      (fun () ->
+        Option.iter
+          (fun lane ->
+            lane.subscribers <- List.filter (( != ) sub) lane.subscribers;
+            reclaim lane)
+          sub.lane))
 
 let retire lane reason =
   List.iter (fun sub -> finish ~gap:true sub reason) lane.subscribers;
@@ -73,7 +77,7 @@ let retire lane reason =
     C.release_auxiliary lane.manager.connection lane.control)
 
 let close_all manager reason =
-  List.iter (fun lane -> retire lane reason) manager.lanes
+  Cleanup.run (List.map (fun lane () -> retire lane reason) manager.lanes)
 
 let create ~changed connection =
   let manager =
@@ -89,8 +93,11 @@ let create ~changed connection =
   let previous = connection.C.on_close in
   connection.on_close <-
     (fun () ->
-      close_all manager (Output.Transport_error Error.Closed);
-      previous ());
+      Cleanup.run
+        [
+          (fun () -> close_all manager (Output.Transport_error Error.Closed));
+          previous;
+        ]);
   manager
 
 let push sub bytes =
@@ -248,8 +255,10 @@ let open_lane manager session =
   try
     (try C.verify_auxiliary c control
      with exn ->
-       C.close c;
-       raise exn);
+       let bt = Printexc.get_raw_backtrace () in
+       Cleanup.protect
+         ~finally:(fun () -> C.close c)
+         (fun () -> Printexc.raise_with_backtrace exn bt));
     let lane =
       {
         manager;
@@ -277,8 +286,10 @@ let open_lane manager session =
     manager.lanes <- lane :: manager.lanes;
     lane
   with exn ->
-    C.release_auxiliary c control;
-    raise exn
+    let bt = Printexc.get_raw_backtrace () in
+    Cleanup.protect
+      ~finally:(fun () -> C.release_auxiliary c control)
+      (fun () -> Printexc.raise_with_backtrace exn bt)
 
 let subscribe ?session ?(capacity_bytes = 1_048_576) ?(capacity_events = 1024)
     manager pane =
@@ -329,7 +340,7 @@ let subscribe ?session ?(capacity_bytes = 1_048_576) ?(capacity_events = 1024)
     in
     sub.lane <- Some lane;
     lane.pending <- lane.pending + 1;
-    Fun.protect
+    Cleanup.protect
       ~finally:(fun () ->
         lane.pending <- lane.pending - 1;
         reclaim lane)
@@ -382,14 +393,21 @@ let subscribe ?session ?(capacity_bytes = 1_048_576) ?(capacity_events = 1024)
     if fresh then manager.started lane;
     sub
   with exn ->
-    Option.iter
-      (fun lane ->
-        retire lane
-          (Output.Transport_error
-             (Error.Disconnected "stream admission interrupted")))
-      sub.lane;
-    finish sub Output.Cancelled;
-    raise exn
+    let bt = Printexc.get_raw_backtrace () in
+    Cleanup.protect
+      ~finally:(fun () ->
+        Cleanup.run
+          [
+            (fun () ->
+              Option.iter
+                (fun lane ->
+                  retire lane
+                    (Output.Transport_error
+                       (Error.Disconnected "stream admission interrupted")))
+                sub.lane);
+            (fun () -> finish sub Output.Cancelled);
+          ])
+      (fun () -> Printexc.raise_with_backtrace exn bt)
 
 let poll (sub : subscription) =
   C.owner sub.manager.connection;
@@ -440,9 +458,11 @@ let next ?cancel ~timeout (sub : subscription) =
   | None -> run None
   | Some token -> (
       try Cancellation.borrow token (fun fd -> run (Some fd))
-      with Cancellation.Cancelled ->
-        close sub;
-        raise Cancellation.Cancelled)
+      with Cancellation.Cancelled as exn ->
+        let bt = Printexc.get_raw_backtrace () in
+        Cleanup.protect
+          ~finally:(fun () -> close sub)
+          (fun () -> Printexc.raise_with_backtrace exn bt))
 
 let wait_for_bytes ~next ~timeout (sub : subscription) ~text =
   match

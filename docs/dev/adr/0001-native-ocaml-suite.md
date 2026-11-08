@@ -333,11 +333,21 @@ daemon remains outside this policy. Grace is per child, not a whole-client
 deadline. Exchange deadlines, owned-child grace and filesystem completion are
 separate bounds; no library deadline bounds uninterruptible kernel work.
 
-The lifecycle gate remains open for cleanup-error retention and the descriptor
-ownership audit. A secondary cleanup exception can still replace a primary
-failure in existing cleanup paths. Cancellation must retain its native form;
-separately inspectable cleanup evidence needs an explicit lifetime that also
-covers failed setup and terminal calls without a returned client.
+Process and descriptor cleanup now records secondary failures in a caller-owned
+`Cleanup` report. Creating the report before connection, bootstrap or terminal
+attachment preserves evidence even when no client is returned. Successful
+clients expose their supplied report or a fresh default. Reports retain a
+typed library cause when available, the original exception and its backtrace.
+Their 64-entry bound limits count, not the heap retained by exception payloads.
+Reports belong to their creating domain and are not immutable graph snapshots.
+
+Cleanup attempts independent finalizers before propagating its first failure;
+an existing primary exception retains its identity and backtrace instead.
+Native cancellation is not combined with or converted into a cleanup error.
+After a failed KILL, only an already established exit permits reaping: an
+unconfirmed exit produces an `Unreaped_child` diagnostic instead of an
+unbounded await. The lifecycle gate remains open for Eio descriptor ownership
+and concurrent-close qualification.
 
 Expected failures use `result` and typed variants. Eio cancellation and blocking
 cancellation keep their native exception behavior. Catch-all exception

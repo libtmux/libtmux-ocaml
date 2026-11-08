@@ -78,6 +78,11 @@
  (libraries libtmux libtmux-unix alcotest qcheck-core unix))
 
 (test
+ (name cleanup_test)
+ (modules cleanup_test)
+ (libraries libtmux libtmux-unix libtmux-eio eio_main alcotest unix))
+
+(test
  (name workspace_test)
  (modules workspace_test)
  (libraries libtmux libtmux-workspace model_fixture alcotest))

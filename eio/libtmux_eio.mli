@@ -11,6 +11,11 @@
      guide} demonstrates application-owned switches, cancellation and continuity
     gaps. *)
 
+module Cleanup = Libtmux_unix.Cleanup
+(** Domain-owned cleanup diagnostics shared with the blocking backend. Supply a
+    report before setup to inspect secondary failures after native cancellation.
+    No scheduler is needed to inspect a report. *)
+
 module Rendered = Libtmux.Captured_text
 
 (** Interactive attachment using borrowed application streams. This utility
@@ -18,6 +23,7 @@ module Rendered = Libtmux.Captured_text
 *)
 module Terminal : sig
   val attach_current :
+    ?cleanup:Cleanup.t ->
     ?binary:string ->
     ?read_only:bool ->
     ?update_environment:bool ->
@@ -39,7 +45,9 @@ module Terminal : sig
       reaping this client; it does not stop the daemon. Cooperative TERM gets
       200 ms of grace before forced termination, while other fibers can run.
       Scheduling and kernel completion can add time. Success proves terminal
-      client exit. Diagnostics go to [stderr]; borrowed flows stay open. *)
+      client exit. Diagnostics go to [stderr]; borrowed flows stay open. Supply
+      [cleanup] before the call to retain secondary failures after cancellation.
+  *)
 end
 
 (** A retained admitted command. A cancelled waiter does not erase its eventual
@@ -114,6 +122,7 @@ module Client : sig
   type t
 
   val connect :
+    ?cleanup:Cleanup.t ->
     ?binary:string ->
     ?timeout:float ->
     sw:Eio.Switch.t ->
@@ -126,6 +135,10 @@ module Client : sig
       second. All client calls belong to the connecting OCaml domain. Initial
       and auxiliary attachments suppress tmux's [update-environment] behavior.
   *)
+
+  val cleanup : t -> Cleanup.t
+  (** Read the supplied report or the client's fresh default without I/O.
+      {!Cleanup.inspect} remains available after close. *)
 
   val source : t -> Libtmux.Source.t
   (** Read the retained endpoint, daemon PID and connection generation without
@@ -578,6 +591,7 @@ module Workspace : sig
       borrowed; closing the handle leaves it open. *)
 
   val submit_bootstrap :
+    ?cleanup:Cleanup.t ->
     ?binary:string ->
     ?timeout:float ->
     sw:Eio.Switch.t ->

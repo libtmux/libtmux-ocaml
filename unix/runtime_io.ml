@@ -1,6 +1,6 @@
 open Libtmux
 
-exception Failure of Error.t
+exception Failure = Cleanup.Failure
 
 let fail error = raise (Failure error)
 let get = function Ok value -> value | Error error -> fail error
@@ -25,6 +25,7 @@ type process = {
 }
 
 type t = {
+  cleanup : Cleanup.t;
   spawn : string list -> process;
   file_io : 'a. (unit -> 'a) -> 'a;
   check : unit -> unit;
@@ -59,34 +60,68 @@ let close_fd fd =
 
 let shutdown_grace = 0.2
 
-let shutdown ~signal ~await_grace ~await =
-  let exited = ref false in
-  Fun.protect
+let shutdown ~cleanup ~exited ~signal ~await_grace ~await =
+  let finished = ref false in
+  Cleanup.protect
     ~finally:(fun () ->
-      if not !exited then signal Sys.sigkill;
-      await ())
+      if !finished then Cleanup.step cleanup Reap await
+      else
+        match Cleanup.attempt cleanup Kill (fun () -> signal Sys.sigkill) with
+        | Ok () -> Cleanup.step cleanup Reap await
+        | Error ((cause, bt) as failure) ->
+            (* A failed signal cannot justify an unbounded reap of a live
+               child. Check only for an exit already observed by the runtime. *)
+            let status = Cleanup.attempt cleanup Reap exited in
+            (match status with
+            | Ok true -> ignore (Cleanup.attempt cleanup Reap await)
+            | Ok false | Error _ ->
+                Cleanup.record cleanup Unreaped_child cause bt);
+            Cleanup.get (Error failure))
     (fun () ->
-      signal Sys.sigterm;
-      exited := await_grace shutdown_grace)
+      Cleanup.step cleanup Terminate (fun () -> signal Sys.sigterm);
+      finished :=
+        Cleanup.step cleanup Grace (fun () -> await_grace shutdown_grace))
 
-let terminate pid =
+let cleanup_fd cleanup phase fd =
+  Cleanup.step cleanup phase (fun () -> close_fd fd)
+
+let terminate ?(cleanup = Cleanup.create ()) pid =
+  Cleanup.check cleanup;
   (* Only the creator reaps this child, so its PID cannot be reused here. *)
+  let reaped = ref false in
   let signal value =
-    try Unix.kill pid value with Unix.Unix_error (Unix.ESRCH, _, _) -> ()
+    if not !reaped then
+      try Unix.kill pid value with Unix.Unix_error (Unix.ESRCH, _, _) -> ()
   in
   let rec reap () =
-    try ignore (Unix.waitpid [] pid)
-    with Unix.Unix_error (Unix.EINTR, _, _) -> reap ()
+    if not !reaped then
+      try
+        ignore (Unix.waitpid [] pid);
+        reaped := true
+      with Unix.Unix_error (Unix.EINTR, _, _) -> reap ()
   in
   let descriptor =
-    try Some (Linux.pidfd_open pid) with Unix.Unix_error _ -> None
+    match
+      Cleanup.attempt cleanup Open_pidfd (fun () -> Linux.pidfd_open pid)
+    with
+    | Ok fd -> Some fd
+    | Error (Unix.Unix_error _, _) -> None
+    | Error failure -> Cleanup.get (Error failure)
   in
-  Fun.protect
-    ~finally:(fun () -> Option.iter close_fd descriptor)
+  let rec exited () =
+    if !reaped then true
+    else
+      try
+        let found, _ = Unix.waitpid [ Unix.WNOHANG ] pid in
+        reaped := found <> 0;
+        !reaped
+      with Unix.Unix_error (Unix.EINTR, _, _) -> exited ()
+  in
+  Cleanup.protect
+    ~finally:(fun () -> Option.iter (cleanup_fd cleanup Close_pidfd) descriptor)
     (fun () ->
-      shutdown ~signal ~await:reap ~await_grace:(fun seconds ->
+      shutdown ~cleanup ~exited ~signal ~await:reap ~await_grace:(fun seconds ->
           match descriptor with
-          (* A failed pidfd acquisition must not leave an unbounded TERM wait. *)
           | None -> false
           | Some pidfd -> (
               match
@@ -98,7 +133,8 @@ let terminate pid =
               | Error Error.Deadline_exceeded -> false
               | Error error -> fail error)))
 
-let spawn arguments =
+let spawn ~cleanup arguments =
+  Cleanup.check cleanup;
   let owned = ref [] in
   let child = ref None in
   let pipe () =
@@ -127,18 +163,31 @@ let spawn arguments =
     let stop () =
       if not !stopped then (
         stopped := true;
-        List.iter close_fd [ input; output; error ];
-        terminate pid)
+        Cleanup.run
+          (List.map
+             (fun fd () -> cleanup_fd cleanup Close_pipe fd)
+             [ input; output; error ]
+          @ [ (fun () -> terminate ~cleanup pid) ]))
     in
     { input; output; error; stop }
   with exn ->
-    Fun.protect
-      ~finally:(fun () -> Option.iter terminate !child)
-      (fun () -> List.iter close_fd !owned);
-    raise exn
+    let bt = Printexc.get_raw_backtrace () in
+    Cleanup.protect
+      ~finally:(fun () ->
+        Cleanup.run
+          (List.map (fun fd () -> cleanup_fd cleanup Close_pipe fd) !owned
+          @ [ (fun () -> Option.iter (terminate ~cleanup) !child) ]))
+      (fun () -> Printexc.raise_with_backtrace exn bt)
 
-let blocking =
-  { spawn; wait; file_io = (fun f -> f ()); check = (fun () -> ()) }
+let blocking ?(cleanup = Cleanup.create ()) () =
+  Cleanup.check cleanup;
+  {
+    cleanup;
+    spawn = spawn ~cleanup;
+    wait;
+    file_io = (fun f -> f ());
+    check = (fun () -> ());
+  }
 
 let check io ~deadline =
   io.check ();

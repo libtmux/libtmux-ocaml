@@ -193,7 +193,8 @@ let () = Eio_main.run (fun env -> Eio.Switch.run (fun sw ->
             before_recovery = fixture.command("list-panes", "-a", "-F", "#{pane_id}:#{window_id}:#{window_name}").stdout
             result = run_example("native_recovery", "$0")
             assert result.stdout == (b"waiter=cancelled; operation=retained\n"
-                                     b"operation=finished; postcondition=recovery-complete\n"), result
+                                     b"operation=finished; postcondition=recovery-complete\n"
+                                     b"cleanup-issues=0; omitted=0\n"), result
             assert result.stderr == b"", result
             assert fixture.command("list-clients").stdout == b""
             assert fixture.command("list-panes", "-a", "-F", "#{pane_id}:#{window_id}:#{window_name}").stdout == before_recovery

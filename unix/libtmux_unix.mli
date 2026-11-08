@@ -10,6 +10,53 @@
     {{:https://github.com/libtmux/libtmux-ocaml/blob/master/docs/control.md}control
      guide} explains binding, completion and recovery. *)
 
+(** Retained failures from releasing processes and descriptors. Reports belong
+    to their creating domain and remain readable after client closure. They
+    preserve secondary failures without replacing a primary exception or
+    cancellation. *)
+module Cleanup : sig
+  type t = Cleanup.t
+
+  type phase = Cleanup.phase =
+    | Close_pipe
+    | Open_pidfd
+    | Close_pidfd
+    | Terminate
+    | Grace
+    | Kill
+    | Reap
+    | Unreaped_child
+    | Cancel_workers
+    | Release_hook
+    | Notify_waiters
+
+  type issue = Cleanup.issue = {
+    phase : phase;
+    error : Libtmux.Error.t option;
+    exception_ : exn;
+    backtrace : Printexc.raw_backtrace;
+  }
+  (** One failed cleanup action. [error] retains a typed library cause when
+      available; [exception_] and [backtrace] retain the original exception.
+      [Unreaped_child] means exit was not established after a failed signal. It
+      does not release ownership or authorize signalling a reused PID. *)
+
+  type snapshot = Cleanup.snapshot = { issues : issue Iarray.t; omitted : int }
+  (** Issues in occurrence order, with a count of additional omitted issues. A
+      report retains at most 64 entries. This bounds entry count, not heap
+      retention: exception payloads and backtraces may retain other values.
+      These diagnostics are not immutable graph observations. *)
+
+  val create : unit -> t
+  (** Create an empty report without I/O. Supply it before {!Client.connect},
+      {!Workspace.submit_bootstrap} or {!Terminal.attach_current} to retain
+      cleanup evidence even when setup fails or cancellation raises. *)
+
+  val inspect : t -> (snapshot, Libtmux.Error.t) result
+  (** Copy the current diagnostics without I/O. Returns
+      {!Libtmux.Error.Wrong_domain} outside the creating domain. *)
+end
+
 module Rendered = Libtmux.Captured_text
 (** Blocking native Linux transport. No Eio scheduler is started. *)
 
@@ -34,6 +81,7 @@ end
 module Terminal : sig
   val attach_current :
     ?cancel:Cancellation.t ->
+    ?cleanup:Cleanup.t ->
     ?binary:string ->
     ?read_only:bool ->
     ?update_environment:bool ->
@@ -55,7 +103,8 @@ module Terminal : sig
       are removed. Cancellation terminates and reaps this terminal client,
       leaves the daemon running, then raises {!Cancellation.Cancelled}. TERM
       gets 200 ms of cooperative grace before KILL and reaping. Scheduling and
-      uninterruptible kernel work can add time. *)
+      uninterruptible kernel work can add time. Supply [cleanup] before the call
+      to retain secondary failures after cancellation. *)
 end
 
 (** A retained admitted command. A cancelled waiter does not erase its eventual
@@ -132,6 +181,7 @@ module Client : sig
   type t
 
   val connect :
+    ?cleanup:Cleanup.t ->
     ?binary:string ->
     ?timeout:float ->
     Libtmux.Endpoint.t ->
@@ -142,6 +192,10 @@ module Client : sig
       maximum seconds per control exchange, defaulting to one second. Requires
       Linux pidfd support. The client belongs to the current domain. Initial and
       auxiliary attachments suppress tmux's [update-environment] behavior. *)
+
+  val cleanup : t -> Cleanup.t
+  (** Read the report supplied at connection time, or its fresh default.
+      {!Cleanup.inspect} remains available after close. *)
 
   val source : t -> Libtmux.Source.t
   (** Read the retained endpoint, daemon PID and connection generation without
@@ -709,6 +763,7 @@ module Workspace : sig
       the supplied client; closing this handle leaves that client open. *)
 
   val submit_bootstrap :
+    ?cleanup:Cleanup.t ->
     ?binary:string ->
     ?timeout:float ->
     Libtmux_workspace.Plan.t ->

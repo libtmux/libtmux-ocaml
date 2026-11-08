@@ -66,20 +66,22 @@ let close t =
   owner t;
   if not t.closed then (
     t.closed <- true;
-    Fun.protect
-      ~finally:(fun () -> Runtime_io.close_fd t.pidfd)
-      (fun () ->
-        t.on_close ();
-        List.iter (release_auxiliary t) t.auxiliaries;
-        t.auxiliaries <- [];
-        stop t.lane))
+    Cleanup.run
+      ([ t.on_close ]
+      @ List.map (fun lane () -> release_auxiliary t lane) t.auxiliaries
+      @ [
+          (fun () -> t.auxiliaries <- []);
+          (fun () -> stop t.lane);
+          (fun () -> cleanup_fd t.lane.io.cleanup Close_pidfd t.pidfd);
+        ]))
 
 let check t =
   owner t;
   if t.closed then fail Error.Closed;
-  if not (Linux.pidfd_alive t.pidfd) then (
-    close t;
-    fail (Error.Disconnected "bound daemon exited"))
+  if not (Linux.pidfd_alive t.pidfd) then
+    Cleanup.protect
+      ~finally:(fun () -> close t)
+      (fun () -> fail (Error.Disconnected "bound daemon exited"))
 
 let rec event lane ~pidfd ~deadline =
   Runtime_io.check lane.io ~deadline;
@@ -241,9 +243,15 @@ let connect_process ?(timeout = 1.) ~io ~binary ~arguments ~initial endpoint =
       on_close = (fun () -> ());
     }
   with exn ->
-    Option.iter Runtime_io.close_fd !pidfd;
-    stop lane;
-    raise exn
+    let bt = Printexc.get_raw_backtrace () in
+    Cleanup.protect
+      ~finally:(fun () ->
+        Cleanup.run
+          [
+            (fun () -> Option.iter (cleanup_fd io.cleanup Close_pidfd) !pidfd);
+            (fun () -> stop lane);
+          ])
+      (fun () -> Printexc.raise_with_backtrace exn bt)
 
 let connect ?timeout ~io ~binary endpoint =
   connect_process ?timeout ~io ~binary
@@ -262,8 +270,10 @@ let request t ?acknowledged ?replied name arguments =
       with
       | Failure (Error.Command_failed _ as error) -> fail error
       | exn ->
-          close t;
-          raise exn)
+          let bt = Printexc.get_raw_backtrace () in
+          Cleanup.protect
+            ~finally:(fun () -> close t)
+            (fun () -> Printexc.raise_with_backtrace exn bt))
 
 let metadata t name arguments fields =
   let template = protocol (P.Metadata.format fields) in
@@ -272,9 +282,11 @@ let metadata t name arguments fields =
     (P.Metadata.decode ~dialect:t.dialect ~fields:(List.length fields) bytes)
 
 let no_output t ?acknowledged name arguments =
-  if request t ?acknowledged name arguments <> "" then (
-    close t;
-    fail (Error.Outcome_unknown ("unexpected output from " ^ name)))
+  if request t ?acknowledged name arguments <> "" then
+    Cleanup.protect
+      ~finally:(fun () -> close t)
+      (fun () ->
+        fail (Error.Outcome_unknown ("unexpected output from " ^ name)))
 
 let exclusive t f =
   owner t;
@@ -313,8 +325,7 @@ let open_process t arguments =
       if t.closed then (
         t.lane_slots <- t.lane_slots - 1;
         Budget.release t.budget (2 * 65_536);
-        process.stop ();
-        fail Error.Closed);
+        Cleanup.protect ~finally:process.stop (fun () -> fail Error.Closed));
       let lane =
         {
           io = t.lane.io;
@@ -334,7 +345,9 @@ let open_process t arguments =
 
 let with_process t arguments f =
   let lane = open_process t arguments in
-  Fun.protect ~finally:(fun () -> release_auxiliary t lane) (fun () -> f lane)
+  Cleanup.protect
+    ~finally:(fun () -> release_auxiliary t lane)
+    (fun () -> f lane)
 
 let with_auxiliary t f =
   with_process t
@@ -342,6 +355,8 @@ let with_auxiliary t f =
     (fun lane ->
       (try verify_auxiliary t lane
        with exn ->
-         close t;
-         raise exn);
+         let bt = Printexc.get_raw_backtrace () in
+         Cleanup.protect
+           ~finally:(fun () -> close t)
+           (fun () -> Printexc.raise_with_backtrace exn bt));
       f lane)

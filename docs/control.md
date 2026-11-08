@@ -56,6 +56,25 @@ Expected failures use `result` and `Error.t`. Backend cancellation propagates
 as cancellation. An uncertain result retains reported creation IDs and unresolved
 owned buffers; it never becomes an instruction to retry the mutation.
 
+`Client.cleanup` retains process and descriptor cleanup diagnostics after
+closure. Supply a `Cleanup.create ()` report through `~cleanup` before connecting
+when diagnostics must survive failed setup or cancellation. The same option is
+available on terminal attachment and workspace bootstrap. `Cleanup.inspect`
+returns the cleanup phase, typed library error when available, original
+exception and backtrace without I/O. The report retains at most 64 entries and
+counts further issues; exception payloads can still retain substantial memory.
+Reports and their diagnostics belong to the creating domain.
+
+Cleanup attempts independent releases even when one fails. A primary exception
+keeps its identity and backtrace; secondary failures go to the report. If there
+is no primary failure, the first unrecovered cleanup failure is returned or
+raised normally. A recovered fallback can still leave a diagnostic alongside
+`Ok`: failure to open a child pidfd skips TERM grace, forces termination and
+reaps, while retaining the `Open_pidfd` issue.
+Failed forced termination produces an `Unreaped_child` issue when exit cannot
+be established without blocking. That issue does not prove resource release.
+The [recovery example](recovery.md) keeps its report outside connection lifetime.
+
 ## Recover deliberately
 
 A replacement daemon retires the connection generation. Reconnect explicitly,

@@ -1,3 +1,4 @@
+module Cleanup = Cleanup
 module Rendered = Libtmux.Captured_text
 module Cancellation = Cancellation
 module Terminal = Terminal
@@ -52,24 +53,32 @@ end
 module Client = struct
   type t = { engine : Engine.t; streams : Streaming.t }
 
-  let connect ?(binary = "tmux") ?timeout endpoint =
+  let connect ?(cleanup = Cleanup.create ()) ?(binary = "tmux") ?timeout
+      endpoint =
     Runtime_io.protect (fun () ->
         let connection =
-          Connection.connect ?timeout ~io:Runtime_io.blocking ~binary endpoint
+          Connection.connect ?timeout
+            ~io:(Runtime_io.blocking ~cleanup ())
+            ~binary endpoint
         in
         {
           engine = Engine.create connection;
           streams = Streaming.create ~changed:(fun () -> ()) connection;
         })
 
+  let cleanup t = t.engine.connection.lane.io.cleanup
   let source t = t.engine.connection.source
   let version t = t.engine.connection.version
 
   let close t =
     Runtime_io.protect (fun () ->
         Connection.exclusive t.engine.connection (fun () ->
-            Streaming.close_all t.streams Libtmux.Output.Client_closed;
-            Engine.close t.engine))
+            Cleanup.run
+              [
+                (fun () ->
+                  Streaming.close_all t.streams Libtmux.Output.Client_closed);
+                (fun () -> Engine.close t.engine);
+              ]))
 
   let submit t command =
     Runtime_io.protect (fun () ->
@@ -156,16 +165,15 @@ module Workspace = struct
             (Client.submit client command));
     }
 
-  let cancel_io token f =
+  let cancel_io (base : Runtime_io.t) token f =
     match token with
-    | None -> f Runtime_io.blocking
+    | None -> f base
     | Some token ->
         Cancellation.borrow token (fun reader ->
             let check () =
               if Cancellation.is_cancelled token then
                 raise Cancellation.Cancelled
             in
-            let base = Runtime_io.blocking in
             let wait ~read ~write ~deadline =
               check ();
               base.wait ~read:(reader :: read) ~write ~deadline;
@@ -173,7 +181,9 @@ module Workspace = struct
             in
             f { base with check; wait })
 
-  let create ?client ?(binary = "tmux") ?timeout ~owned plan =
+  let create ?client ?(cleanup = Cleanup.create ()) ?(binary = "tmux") ?timeout
+      ~owned plan =
+    let base = Runtime_io.blocking ~cleanup () in
     let current = ref client and cancel = ref None in
     let protect f =
       let previous = !cancel in
@@ -207,14 +217,14 @@ module Workspace = struct
           let first = Iarray.get (Libtmux_workspace.Config.windows config) 0 in
           let width, height = Libtmux_workspace.Config.dimensions config in
           let connection, created =
-            cancel_io !cancel (fun io ->
+            cancel_io base !cancel (fun io ->
                 Bootstrap.start receipt ?timeout ~io ~binary
                   ~endpoint:(P.endpoint plan)
                   ~name:(Libtmux_workspace.Config.session config)
                   ~window_name:first.name ~spawn:(List.hd first.panes).spawn
                   ~width ~height ())
           in
-          connection.lane.io <- Runtime_io.blocking;
+          connection.lane.io <- base;
           let client =
             Client.
               {
@@ -243,9 +253,12 @@ module Workspace = struct
 
   let submit client plan = create ~client ~owned:false plan
 
-  let submit_bootstrap ?binary ?timeout plan =
+  let submit_bootstrap ?cleanup ?binary ?timeout plan =
     if Option.is_some (P.source plan) then Error Libtmux.Error.Stale_target
-    else create ?binary ?timeout ~owned:true plan
+    else
+      Result.join
+        (Runtime_io.protect (fun () ->
+             create ?cleanup ?binary ?timeout ~owned:true plan))
 
   let inspect t =
     Runtime_io.protect (fun () ->

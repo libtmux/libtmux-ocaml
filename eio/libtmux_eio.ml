@@ -1,4 +1,6 @@
 open Libtmux
+module Cleanup = Libtmux_unix.Cleanup
+module Cleanup_internal = Libtmux_unix__Cleanup
 module Io = Libtmux_unix__Runtime_io
 module C = Libtmux_unix__Connection
 module Engine = Libtmux_unix__Engine
@@ -10,9 +12,15 @@ let protect f =
   try Io.protect f
   with Eio.Io _ as exn -> Error (Error.Disconnected (Printexc.to_string exn))
 
-let terminate process =
+let terminate cleanup process =
   Eio.Cancel.protect (fun () ->
-      Io.shutdown
+      Io.shutdown ~cleanup
+        ~exited:(fun () ->
+          Eio.Fiber.first
+            (fun () ->
+              ignore (Eio.Process.await process);
+              true)
+            (fun () -> false))
         ~signal:(Eio.Process.signal process)
         ~await:(fun () -> ignore (Eio.Process.await process))
         ~await_grace:(fun seconds ->
@@ -25,10 +33,11 @@ let terminate process =
               false)))
 
 module Terminal = struct
-  let attach_current ?(binary = "tmux") ?(read_only = false)
-      ?(update_environment = false) ?stdin ?stdout ?stderr ~process_mgr endpoint
-      ~session =
+  let attach_current ?(cleanup = Cleanup.create ()) ?(binary = "tmux")
+      ?(read_only = false) ?(update_environment = false) ?stdin ?stdout ?stderr
+      ~process_mgr endpoint ~session =
     protect (fun () ->
+        Cleanup_internal.check cleanup;
         let module Terminal = Libtmux_unix__Terminal in
         let arguments =
           Terminal.arguments ~binary ~read_only ~update_environment endpoint
@@ -45,15 +54,16 @@ module Terminal = struct
               Eio.Process.spawn ~sw process_mgr ?stdin ?stdout ?stderr ~env
                 arguments
             in
-            Fun.protect
-              ~finally:(fun () -> terminate process)
+            Cleanup_internal.protect
+              ~finally:(fun () -> terminate cleanup process)
               (fun () ->
                 match Eio.Process.await process with
                 | `Exited code -> Terminal.exited code
                 | `Signaled signal -> Terminal.signaled signal)))
 end
 
-let io ~sw ~process_mgr ~mono_clock =
+let io ~cleanup ~sw ~process_mgr ~mono_clock =
+  Cleanup_internal.check cleanup;
   let io_failure exn = Io.fail (Error.Disconnected (Printexc.to_string exn)) in
   let spawn arguments =
     let closers = ref [] in
@@ -61,8 +71,12 @@ let io ~sw ~process_mgr ~mono_clock =
     let pipe () =
       let reader, writer = Eio_unix.pipe sw in
       closers :=
-        (fun () -> Eio.Flow.close reader)
-        :: (fun () -> Eio.Flow.close writer)
+        (fun () ->
+          Cleanup_internal.step cleanup Close_pipe (fun () ->
+              Eio.Flow.close reader))
+        :: (fun () ->
+          Cleanup_internal.step cleanup Close_pipe (fun () ->
+              Eio.Flow.close writer))
         :: !closers;
       (reader, writer)
     in
@@ -82,9 +96,8 @@ let io ~sw ~process_mgr ~mono_clock =
         Eio.Cancel.protect (fun () ->
             if not !stopped then (
               stopped := true;
-              Fun.protect
-                ~finally:(fun () -> terminate process)
-                (fun () -> List.iter (fun close -> close ()) !closers)))
+              Cleanup_internal.run
+                (!closers @ [ (fun () -> terminate cleanup process) ])))
       in
       stop_child := Some stop;
       Eio.Flow.close stdin;
@@ -103,12 +116,18 @@ let io ~sw ~process_mgr ~mono_clock =
           error = descriptor error;
           stop;
         }
-    with exn -> (
-      Eio.Cancel.protect (fun () ->
-          match !stop_child with
-          | Some stop -> stop ()
-          | None -> List.iter (fun close -> close ()) !closers);
-      match exn with Eio.Io _ -> io_failure exn | _ -> raise exn)
+    with exn ->
+      let bt = Printexc.get_raw_backtrace () in
+      Cleanup_internal.protect
+        ~finally:(fun () ->
+          Eio.Cancel.protect (fun () ->
+              match !stop_child with
+              | Some stop -> stop ()
+              | None -> Cleanup_internal.run !closers))
+        (fun () ->
+          match exn with
+          | Eio.Io _ -> io_failure exn
+          | _ -> Printexc.raise_with_backtrace exn bt)
   in
   let wait ~read ~write ~deadline =
     try
@@ -122,7 +141,8 @@ let io ~sw ~process_mgr ~mono_clock =
     with Eio.Io _ as exn -> io_failure exn
   in
   {
-    Io.spawn;
+    Io.cleanup;
+    spawn;
     wait;
     check =
       (fun () ->
@@ -206,8 +226,11 @@ module Subscription = struct
               sub.sleep timeout;
               Io.fail Error.Deadline_exceeded))
     with Eio.Cancel.Cancelled _ as exn ->
-      Eio.Cancel.protect (fun () -> Streaming.close sub.inner);
-      raise exn
+      let bt = Printexc.get_raw_backtrace () in
+      Cleanup_internal.protect
+        ~finally:(fun () ->
+          Eio.Cancel.protect (fun () -> Streaming.close sub.inner))
+        (fun () -> Printexc.raise_with_backtrace exn bt)
 
   let wait_for_bytes ?(timeout = 1.) sub ~text =
     Streaming.wait_for_bytes ~timeout sub.inner ~text ~next:(fun timeout ->
@@ -233,22 +256,35 @@ module Client = struct
     if not t.closing then
       Eio.Cancel.protect (fun () ->
           t.closing <- true;
-          List.iter
-            (fun context -> Eio.Cancel.cancel context Client_closed)
-            t.contexts;
-          Streaming.close_all t.streams Output.Client_closed;
-          Engine.close t.engine;
-          Eio.Switch.remove_hook t.release;
-          Eio.Condition.broadcast t.changed)
+          let report = t.engine.connection.lane.io.cleanup in
+          Cleanup_internal.run
+            (List.map
+               (fun context () ->
+                 Cleanup_internal.step report Cancel_workers (fun () ->
+                     Eio.Cancel.cancel context Client_closed))
+               t.contexts
+            @ [
+                (fun () -> Streaming.close_all t.streams Output.Client_closed);
+                (fun () -> Engine.close t.engine);
+                (fun () ->
+                  Cleanup_internal.step report Release_hook (fun () ->
+                      Eio.Switch.remove_hook t.release));
+                (fun () ->
+                  Cleanup_internal.step report Notify_waiters (fun () ->
+                      Eio.Condition.broadcast t.changed));
+              ]))
 
   let close t =
     protect (fun () ->
-        close_exn t;
-        Eio.Cancel.protect (fun () ->
-            while t.contexts <> [] do
-              Eio.Condition.await_no_mutex t.changed
-            done))
+        Cleanup_internal.protect
+          ~finally:(fun () ->
+            Eio.Cancel.protect (fun () ->
+                while t.contexts <> [] do
+                  Eio.Condition.await_no_mutex t.changed
+                done))
+          (fun () -> close_exn t))
 
+  let cleanup t = t.engine.connection.lane.io.cleanup
   let source t = t.engine.connection.source
   let version t = t.engine.connection.version
 
@@ -263,10 +299,18 @@ module Client = struct
                    Eio.Condition.broadcast t.changed)
                  f)
          with
-        | Eio.Cancel.Cancelled _ -> close_exn t
+        | Eio.Cancel.Cancelled _ as exn -> (
+            let bt = Printexc.get_raw_backtrace () in
+            try
+              Cleanup_internal.protect
+                ~finally:(fun () -> close_exn t)
+                (fun () -> Printexc.raise_with_backtrace exn bt)
+            with Eio.Cancel.Cancelled _ -> ())
         | exn ->
-            close_exn t;
-            raise exn);
+            let bt = Printexc.get_raw_backtrace () in
+            Cleanup_internal.protect
+              ~finally:(fun () -> close_exn t)
+              (fun () -> Printexc.raise_with_backtrace exn bt));
         `Stop_daemon)
 
   let idle_events t =
@@ -365,12 +409,12 @@ module Client = struct
         match protect pump with Ok () -> () | Error _ -> close_exn t);
     t
 
-  let connect ?(binary = "tmux") ?timeout ~sw ~process_mgr ~mono_clock endpoint
-      =
+  let connect ?(cleanup = Cleanup.create ()) ?(binary = "tmux") ?timeout ~sw
+      ~process_mgr ~mono_clock endpoint =
     protect (fun () ->
         let connection =
           C.connect ?timeout
-            ~io:(io ~sw ~process_mgr ~mono_clock)
+            ~io:(io ~cleanup ~sw ~process_mgr ~mono_clock)
             ~binary endpoint
         in
         of_connection ~sw ~mono_clock connection)
@@ -502,8 +546,8 @@ module Workspace = struct
       ~bootstrap:(fun _ _ -> Error Error.Stale_target)
       plan
 
-  let submit_bootstrap ?(binary = "tmux") ?timeout ~sw ~process_mgr ~mono_clock
-      plan =
+  let submit_bootstrap ?(cleanup = Cleanup.create ()) ?(binary = "tmux")
+      ?timeout ~sw ~process_mgr ~mono_clock plan =
     if Option.is_some (P.source plan) then Error Error.Stale_target
     else
       let bootstrap receipt config =
@@ -514,7 +558,7 @@ module Workspace = struct
             let width, height = Libtmux_workspace.Config.dimensions config in
             let connection, created =
               Libtmux_unix__Bootstrap.start receipt ?timeout
-                ~io:(io ~sw ~process_mgr ~mono_clock)
+                ~io:(io ~cleanup ~sw ~process_mgr ~mono_clock)
                 ~binary ~endpoint:(P.endpoint plan)
                 ~name:(Libtmux_workspace.Config.session config)
                 ~window_name:first.name ~spawn:(List.hd first.panes).spawn

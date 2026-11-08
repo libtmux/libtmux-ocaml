@@ -11,7 +11,7 @@ let interrupted_owner binary endpoint =
   let module E = Libtmux_unix__Engine in
   let interrupt = ref false in
   let io =
-    { Io.blocking with check = (fun () -> if !interrupt then raise Exit) }
+    { (Io.blocking ()) with check = (fun () -> if !interrupt then raise Exit) }
   in
   let connection = C.connect ~io ~binary endpoint in
   let client = E.create connection in

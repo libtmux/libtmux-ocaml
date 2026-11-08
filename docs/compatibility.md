@@ -48,8 +48,11 @@ KILL if necessary and reaps the child. The policy covers control, read-process
 and terminal helpers; it never sends these signals to the daemon. Eio waits
 allow other fibers to progress. The grace applies per helper, not to the whole
 client, and cannot bound uninterruptible kernel work or scratch-file completion.
-Cleanup-error retention and Eio descriptor ownership still require separate
-lifecycle qualification.
+Caller-owned `Cleanup` reports retain secondary process and descriptor failures
+without replacing native cancellation or the primary exception. Independent
+releases are still attempted. A failed KILL only permits a nonblocking exit
+check; an unconfirmed exit is reported as `Unreaped_child`. Eio descriptor
+ownership and concurrent closure still require separate lifecycle qualification.
 
 The shutdown regression checks stopped helpers and helpers that survive TERM
 and input closure, while keeping the parent and its Eio switch alive to verify

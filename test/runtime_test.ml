@@ -82,9 +82,9 @@ let ready_deadline () =
         | Error Error.Deadline_exceeded -> ()
         | _ -> Alcotest.fail "ready I/O bypassed the deadline"
       in
-      expired (fun () -> Io.read Io.blocking process ~pidfd:None ~deadline);
+      expired (fun () -> Io.read (Io.blocking ()) process ~pidfd:None ~deadline);
       expired (fun () ->
-          Io.write Io.blocking process ~pidfd:None ~deadline "late"))
+          Io.write (Io.blocking ()) process ~pidfd:None ~deadline "late"))
 
 let high_descriptor_readiness () =
   let owned = ref [] in
@@ -115,6 +115,51 @@ let high_descriptor_readiness () =
       with
       | Error Error.Deadline_exceeded -> ()
       | _ -> Alcotest.fail "unready high descriptor did not reach its deadline")
+
+let shutdown_failure_reaps () =
+  let reaped = ref false in
+  (match
+     Io.shutdown
+       ~cleanup:(Libtmux_unix.Cleanup.create ())
+       ~exited:(fun () -> true)
+       ~signal:(fun value -> if value = Sys.sigkill then raise Exit)
+       ~await_grace:(fun _ -> false)
+       ~await:(fun () -> reaped := true)
+   with
+  | () -> Alcotest.fail "forced-termination failure disappeared"
+  | exception (Exit | Fun.Finally_raised Exit) -> ());
+  Alcotest.(check bool) "reaping attempted after signal failure" true !reaped
+
+exception Setup_failure
+exception Cleanup_failure
+
+let setup_primary_failure () =
+  let cleanup = Libtmux_unix.Cleanup.create () in
+  let process =
+    Io.
+      {
+        input = Unix.stdin;
+        output = Unix.stdout;
+        error = Unix.stderr;
+        stop =
+          (fun () ->
+            Libtmux_unix__Cleanup.step cleanup Close_pipe (fun () ->
+                raise Cleanup_failure));
+      }
+  in
+  let io = { (Io.blocking ~cleanup ()) with spawn = (fun _ -> process) } in
+  match
+    Libtmux_unix__Connection.connect_process ~io ~binary:"unused" ~arguments:[]
+      ~initial:(fun _ ~deadline:_ -> raise Setup_failure)
+      (Endpoint.named_socket "libtmux-ocaml-unopened")
+  with
+  | _ -> Alcotest.fail "failed connection returned"
+  | exception Setup_failure ->
+      let report = Result.get_ok (Libtmux_unix.Cleanup.inspect cleanup) in
+      Alcotest.(check int)
+        "secondary setup failure retained" 1
+        (Iarray.length report.issues);
+      assert ((Iarray.get report.issues 0).exception_ = Cleanup_failure)
 
 let cancellation_lifetime () =
   let module K = Libtmux_unix__Cancellation in
@@ -295,6 +340,10 @@ let () =
             ready_deadline;
           Alcotest.test_case "high-descriptor readiness and deadline" `Quick
             high_descriptor_readiness;
+          Alcotest.test_case "signal failure still attempts reaping" `Quick
+            shutdown_failure_reaps;
+          Alcotest.test_case "setup error survives a cleanup failure" `Quick
+            setup_primary_failure;
           Alcotest.test_case "token scope outlives a borrowed descriptor" `Quick
             cancellation_lifetime;
           Alcotest.test_case "environment records and limits" `Quick

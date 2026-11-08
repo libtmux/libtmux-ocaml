@@ -27,10 +27,11 @@ let signaled signal =
     (Error.Disconnected
        (Printf.sprintf "terminal client exited from signal %d" signal))
 
-let attach_current ?cancel ?(binary = "tmux") ?(read_only = false)
-    ?(update_environment = false) ?(stdin = Unix.stdin) ?(stdout = Unix.stdout)
-    ?(stderr = Unix.stderr) endpoint ~session =
+let attach_current ?cancel ?(cleanup = Cleanup.create ()) ?(binary = "tmux")
+    ?(read_only = false) ?(update_environment = false) ?(stdin = Unix.stdin)
+    ?(stdout = Unix.stdout) ?(stderr = Unix.stderr) endpoint ~session =
   protect (fun () ->
+      Cleanup.check cleanup;
       let arguments =
         arguments ~binary ~read_only ~update_environment endpoint session
       in
@@ -48,10 +49,14 @@ let attach_current ?cancel ?(binary = "tmux") ?(read_only = false)
             (environment ()) stdin stdout stderr
         in
         let reaped = ref false and descriptor = ref None in
-        Fun.protect
+        Cleanup.protect
           ~finally:(fun () ->
-            Option.iter close_fd !descriptor;
-            if not !reaped then terminate pid)
+            Cleanup.run
+              [
+                (fun () ->
+                  Option.iter (cleanup_fd cleanup Close_pidfd) !descriptor);
+                (fun () -> if not !reaped then terminate ~cleanup pid);
+              ])
           (fun () ->
             let pidfd = Linux.pidfd_open pid in
             descriptor := Some pidfd;
