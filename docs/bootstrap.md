@@ -60,11 +60,12 @@ let bootstrap ~binary ~version ~directory endpoint =
   get (Workspace.submit_bootstrap ~binary plan)
 ```
 
-`observed:None` means the endpoint is known to be missing. The full program
-uses a newly created private directory to establish that precondition. Passing
-`None` after a failed capture would discard the failure and produce the wrong
-plan. A plan remains advisory; another process can still change the endpoint
-before execution.
+Passing [`None`](https://ocaml.org/manual/5.5/api/Option.html#TYPEELTt.None) as the
+`observed` argument means the endpoint is known to be missing. The full program
+uses a newly created private directory to establish that precondition. A failed
+capture must remain an error; treating it as a missing observation discards that
+failure and produces the wrong plan. A plan remains advisory; another process
+can still change the endpoint before execution.
 
 Keep that handle outside the cleanup scope. Await it, check the receipt, then
 borrow its client for the capture:
