@@ -75,9 +75,9 @@ Reports and their diagnostics belong to the creating domain.
 Cleanup attempts independent releases even when one fails. A primary exception
 keeps its identity and backtrace; secondary failures go to the report. If there
 is no primary failure, the first unrecovered cleanup failure is returned or
-raised normally. A recovered fallback can still leave a diagnostic alongside
-`Ok`: failure to open a child pidfd skips TERM grace, forces termination and
-reaps, while retaining the `Open_pidfd` issue.
+raised normally. A recovered fallback can still leave a diagnostic after a
+successful return: failure to open a child pidfd skips TERM grace, forces
+termination and reaps, while retaining the `Open_pidfd` issue.
 Failed forced termination produces an `Unreaped_child` issue when exit cannot
 be established without blocking. That issue does not prove resource release.
 The [recovery example](recovery.md) keeps its report outside connection lifetime.
