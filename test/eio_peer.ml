@@ -19,6 +19,48 @@ let cancel_wait op =
 
 let () =
   Eio_main.run (fun env ->
+      List.iter
+        (fun cancel ->
+          let retained = ref None and reader_cancelled = ref false in
+          (try
+             Eio.Switch.run (fun owned ->
+                 let client =
+                   get
+                     (C.connect ~sw:owned
+                        ~process_mgr:(Eio.Stdenv.process_mgr env)
+                        ~mono_clock:(Eio.Stdenv.mono_clock env)
+                        ~binary:Sys.argv.(1)
+                        (Endpoint.socket_path Sys.argv.(2)))
+                 in
+                 let pane =
+                   Iarray.get (Snapshot.panes (get (C.capture client))) 0
+                 in
+                 let subscription = get (C.subscribe client pane) in
+                 let operation =
+                   get (C.submit client (Operations.wait_for "scope-teardown"))
+                 in
+                 retained := Some operation;
+                 assert (
+                   get (O.await_stage operation `Acknowledged) = O.Acknowledged);
+                 Eio.Fiber.fork_daemon ~sw:owned (fun () ->
+                     (try
+                        ignore
+                          (get
+                             (Libtmux_eio.Subscription.next ~timeout:0.5
+                                subscription));
+                        failwith
+                          "pending stream read returned before scope \
+                           cancellation"
+                      with Eio.Cancel.Cancelled _ -> reader_cancelled := true);
+                     `Stop_daemon);
+                 if cancel then raise Stop_waiting)
+           with Stop_waiting when cancel -> ());
+          assert !reader_cancelled;
+          assert (
+            match get (O.inspect (Option.get !retained)) with
+            | O.Outcome_unknown _ -> true
+            | _ -> false))
+        [ false; true ];
       Eio.Switch.run (fun sw ->
           let client =
             get

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Reject process I/O after closure and retain helper cleanup failures on
+  repeated stops.
 - Add caller-owned cleanup reports and preserve primary failures while
   attempting independent resource releases.
 - Reap stopped and TERM-resistant client helpers after a 200 ms shutdown grace,

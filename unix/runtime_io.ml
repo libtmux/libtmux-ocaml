@@ -21,6 +21,8 @@ type process = {
   input : Unix.file_descr;
   output : Unix.file_descr;
   error : Unix.file_descr;
+  is_open : unit -> bool;
+  await : (unit -> unit) -> unit;
   stop : unit -> unit;
 }
 
@@ -160,16 +162,33 @@ let spawn ~cleanup arguments =
     release stderr;
     List.iter Unix.set_nonblock [ input; output; error ];
     let stopped = ref false in
+    let finished = ref None in
     let stop () =
       if not !stopped then (
         stopped := true;
-        Cleanup.run
-          (List.map
-             (fun fd () -> cleanup_fd cleanup Close_pipe fd)
-             [ input; output; error ]
-          @ [ (fun () -> terminate ~cleanup pid) ]))
+        finished :=
+          Some
+            (try
+               Cleanup.run
+                 (List.map
+                    (fun fd () -> cleanup_fd cleanup Close_pipe fd)
+                    [ input; output; error ]
+                 @ [ (fun () -> terminate ~cleanup pid) ]);
+               Ok ()
+             with exn -> Error (exn, Printexc.get_raw_backtrace ())));
+      Option.iter Cleanup.get !finished
     in
-    { input; output; error; stop }
+    {
+      input;
+      output;
+      error;
+      is_open = (fun () -> not !stopped);
+      await =
+        (fun f ->
+          if !stopped then fail Error.Closed;
+          f ());
+      stop;
+    }
   with exn ->
     let bt = Printexc.get_raw_backtrace () in
     Cleanup.protect
@@ -193,6 +212,9 @@ let check io ~deadline =
   io.check ();
   if Linux.now () >= deadline then fail Error.Deadline_exceeded
 
+(* Runtime checks can yield, allowing close to recycle a descriptor meanwhile. *)
+let check_process process = if not (process.is_open ()) then fail Error.Closed
+
 let endpoint_arguments ?(start_server = false) ~binary endpoint =
   let endpoint =
     match Endpoint.kind endpoint with
@@ -210,6 +232,7 @@ let write io process ~pidfd ~deadline bytes =
   let rec loop offset =
     if offset < length then (
       check io ~deadline;
+      check_process process;
       Option.iter
         (fun fd ->
           if not (Linux.pidfd_alive fd) then
@@ -224,8 +247,9 @@ let write io process ~pidfd ~deadline bytes =
         loop (offset + count)
       with
       | Unix.Unix_error ((Unix.EAGAIN | Unix.EWOULDBLOCK), _, _) ->
-          io.wait ~read:(Option.to_list pidfd) ~write:[ process.input ]
-            ~deadline;
+          process.await (fun () ->
+              io.wait ~read:(Option.to_list pidfd) ~write:[ process.input ]
+                ~deadline);
           loop offset
       | Unix.Unix_error (Unix.EINTR, _, _) -> loop offset)
   in
@@ -235,6 +259,7 @@ let read io process ~pidfd ~deadline =
   let buffer = Bytes.create 65_536 in
   let rec loop () =
     check io ~deadline;
+    check_process process;
     Option.iter
       (fun fd ->
         if not (Linux.pidfd_alive fd) then
@@ -262,7 +287,8 @@ let read io process ~pidfd ~deadline =
         if diagnostic = 0 then [ process.output ]
         else [ process.output; process.error ]
       in
-      io.wait ~read:(watched @ Option.to_list pidfd) ~write:[] ~deadline;
+      process.await (fun () ->
+          io.wait ~read:(watched @ Option.to_list pidfd) ~write:[] ~deadline);
       loop ()
   in
   loop ()
@@ -272,6 +298,7 @@ let collect io process ~pidfd ~deadline =
   let chunk = Bytes.create 65_536 in
   let rec loop streams =
     check io ~deadline;
+    check_process process;
     if not (Linux.pidfd_alive pidfd) then
       fail (Error.Disconnected "bound daemon exited");
     if streams <> [] then (
@@ -301,9 +328,10 @@ let collect io process ~pidfd ~deadline =
           streams
       in
       if not !progressed then
-        io.wait
-          ~read:(pidfd :: List.map (fun (fd, _, _) -> fd) pending)
-          ~write:[] ~deadline;
+        process.await (fun () ->
+            io.wait
+              ~read:(pidfd :: List.map (fun (fd, _, _) -> fd) pending)
+              ~write:[] ~deadline);
       loop pending)
   in
   loop

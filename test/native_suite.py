@@ -1,5 +1,6 @@
 """Outer: qualify the implemented native components against one exact binary."""
 from pathlib import Path
+import os
 import subprocess
 import sys
 import time
@@ -21,7 +22,19 @@ subprocess.run([sys.executable, str(root / "test/workspace_test.py"), "--eio", b
                cwd=root, check=True, timeout=5)
 subprocess.run([sys.executable, str(root / "test/workspace_cli_test.py"), binary],
                cwd=root, check=True, timeout=5)
+# Eio's POSIX fallback reaps through switch-owned fibers rather than pidfd
+# completion. Exercise cancellation before those fibers' release hooks run.
+if os.environ.get("EIO_BACKEND") != "posix":
+    for name, arguments in [("eio", []), ("capture_cancel", []), ("streaming", []),
+                            ("bootstrap", []), ("workspace", ["--eio"])]:
+        subprocess.run([sys.executable, str(root / "test" / f"{name}_test.py"),
+                        *arguments, binary], cwd=root, check=True, timeout=5,
+                       env=os.environ | {"EIO_BACKEND": "posix"})
+        print(f"PASS Eio POSIX lifecycle: {name}", flush=True)
 subprocess.run([sys.executable, str(root / "test/pid_race_test.py")],
                cwd=root, check=True, timeout=5)
+for backend in ("linux", "posix"):
+    subprocess.run([str(root / "_build/default/test/ownership_peer.exe")],
+                   cwd=root, env=os.environ | {"EIO_BACKEND": backend}, check=True, timeout=1)
 subprocess.run([sys.executable, str(root / "test/tmux_cache_test.py"), binary],
                cwd=root, check=True, timeout=5)

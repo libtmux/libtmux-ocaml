@@ -49,18 +49,20 @@ type t = {
 let stop lane =
   if not lane.stopped then (
     lane.stopped <- true;
-    Queue.clear lane.events;
-    lane.process.stop ())
+    Queue.clear lane.events);
+  lane.process.stop ()
 
 let owner t = if Domain.self () <> t.owner then fail Error.Wrong_domain
 
 let release_auxiliary t lane =
-  if lane.reserved then (
-    lane.reserved <- false;
-    t.lane_slots <- t.lane_slots - 1;
-    Budget.release t.budget (2 * 65_536);
-    t.auxiliaries <- List.filter (fun item -> item != lane) t.auxiliaries);
-  stop lane
+  Cleanup.protect
+    ~finally:(fun () ->
+      if lane.reserved then (
+        lane.reserved <- false;
+        t.lane_slots <- t.lane_slots - 1;
+        Budget.release t.budget (2 * 65_536);
+        t.auxiliaries <- List.filter (fun item -> item != lane) t.auxiliaries))
+    (fun () -> stop lane)
 
 let close t =
   owner t;

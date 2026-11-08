@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Reject resumed process I/O after close, including when descriptor numbers
+  have been reused. Retain helper-stop results across repeated cleanup.
 - Wait for shared teardown completion when Eio callers close a client
   concurrently.
 - Retain process cleanup diagnostics across failed setup, cancellation and

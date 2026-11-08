@@ -12,26 +12,6 @@ let protect f =
   try Io.protect f
   with Eio.Io _ as exn -> Error (Error.Disconnected (Printexc.to_string exn))
 
-let terminate cleanup process =
-  Eio.Cancel.protect (fun () ->
-      Io.shutdown ~cleanup
-        ~exited:(fun () ->
-          Eio.Fiber.first
-            (fun () ->
-              ignore (Eio.Process.await process);
-              true)
-            (fun () -> false))
-        ~signal:(Eio.Process.signal process)
-        ~await:(fun () -> ignore (Eio.Process.await process))
-        ~await_grace:(fun seconds ->
-          Eio.Fiber.first
-            (fun () ->
-              ignore (Eio.Process.await process);
-              true)
-            (fun () ->
-              Eio_unix.sleep seconds;
-              false)))
-
 module Terminal = struct
   let attach_current ?(cleanup = Cleanup.create ()) ?(binary = "tmux")
       ?(read_only = false) ?(update_environment = false) ?stdin ?stdout ?stderr
@@ -51,108 +31,14 @@ module Terminal = struct
                    [ ("TMUX", None); ("TMUX_PANE", None) ]
             in
             let process =
-              Eio.Process.spawn ~sw process_mgr ?stdin ?stdout ?stderr ~env
-                arguments
+              Owned_process.spawn ~cleanup ~sw ~process_mgr ?stdin ?stdout
+                ?stderr ~env arguments
             in
-            Cleanup_internal.protect
-              ~finally:(fun () -> terminate cleanup process)
-              (fun () ->
-                match Eio.Process.await process with
+            Cleanup_internal.protect ~finally:process.stop (fun () ->
+                match process.await () with
                 | `Exited code -> Terminal.exited code
                 | `Signaled signal -> Terminal.signaled signal)))
 end
-
-let io ~cleanup ~sw ~process_mgr ~mono_clock =
-  Cleanup_internal.check cleanup;
-  let io_failure exn = Io.fail (Error.Disconnected (Printexc.to_string exn)) in
-  let spawn arguments =
-    let closers = ref [] in
-    let stop_child = ref None in
-    let pipe () =
-      let reader, writer = Eio_unix.pipe sw in
-      closers :=
-        (fun () ->
-          Cleanup_internal.step cleanup Close_pipe (fun () ->
-              Eio.Flow.close reader))
-        :: (fun () ->
-          Cleanup_internal.step cleanup Close_pipe (fun () ->
-              Eio.Flow.close writer))
-        :: !closers;
-      (reader, writer)
-    in
-    try
-      let stdin, input = pipe ()
-      and output, stdout = pipe ()
-      and error, stderr = pipe () in
-      let env =
-        Eio.Process.environment process_mgr
-        |> Eio.Process.Env.override [ ("TMUX", None); ("TMUX_PANE", None) ]
-      in
-      let process =
-        Eio.Process.spawn ~sw process_mgr ~stdin ~stdout ~stderr ~env arguments
-      in
-      let stopped = ref false in
-      let stop () =
-        Eio.Cancel.protect (fun () ->
-            if not !stopped then (
-              stopped := true;
-              Cleanup_internal.run
-                (!closers @ [ (fun () -> terminate cleanup process) ])))
-      in
-      stop_child := Some stop;
-      Eio.Flow.close stdin;
-      Eio.Flow.close stdout;
-      Eio.Flow.close stderr;
-      let descriptor flow =
-        Eio_unix.Fd.use_exn "libtmux control pipe" (Eio_unix.Resource.fd flow)
-          (fun fd ->
-            Unix.set_nonblock fd;
-            fd)
-      in
-      Io.
-        {
-          input = descriptor input;
-          output = descriptor output;
-          error = descriptor error;
-          stop;
-        }
-    with exn ->
-      let bt = Printexc.get_raw_backtrace () in
-      Cleanup_internal.protect
-        ~finally:(fun () ->
-          Eio.Cancel.protect (fun () ->
-              match !stop_child with
-              | Some stop -> stop ()
-              | None -> Cleanup_internal.run !closers))
-        (fun () ->
-          match exn with
-          | Eio.Io _ -> io_failure exn
-          | _ -> Printexc.raise_with_backtrace exn bt)
-  in
-  let wait ~read ~write ~deadline =
-    try
-      Eio.Fiber.any
-        ((fun () ->
-           let remaining = deadline -. Linux.now () in
-           if remaining > 0. then Eio.Time.Mono.sleep mono_clock remaining;
-           Io.fail Error.Deadline_exceeded)
-         :: List.map (fun fd () -> Eio_unix.await_readable fd) read
-        @ List.map (fun fd () -> Eio_unix.await_writable fd) write)
-    with Eio.Io _ as exn -> io_failure exn
-  in
-  {
-    Io.cleanup;
-    spawn;
-    wait;
-    check =
-      (fun () ->
-        Eio.Fiber.check ();
-        Eio.Fiber.yield ());
-    file_io =
-      (fun f ->
-        Eio.Cancel.protect (fun () ->
-            Eio_unix.run_in_systhread ~label:"libtmux scratch I/O" f));
-  }
 
 module Operation = struct
   type 'a t = { inner : 'a Engine.operation; changed : Eio.Condition.t }
@@ -383,12 +269,14 @@ module Client = struct
                       if not lane.retired then (
                         Streaming.poll_lane lane;
                         if not lane.retired then (
-                          Eio.Fiber.first
-                            (fun () ->
-                              Eio_unix.await_readable
-                                lane.control.process.output)
-                            (fun () ->
-                              Eio_unix.await_readable lane.control.process.error);
+                          lane.control.process.await (fun () ->
+                              Eio.Fiber.first
+                                (fun () ->
+                                  Eio_unix.await_readable
+                                    lane.control.process.output)
+                                (fun () ->
+                                  Eio_unix.await_readable
+                                    lane.control.process.error));
                           read ()))
                     in
                     match protect read with
@@ -406,7 +294,8 @@ module Client = struct
                 Eio.Fiber.first
                   (fun () -> Eio.Condition.await_no_mutex changed)
                   (fun () ->
-                    Eio_unix.await_readable connection.lane.process.output;
+                    connection.lane.process.await (fun () ->
+                        Eio_unix.await_readable connection.lane.process.output);
                     let bytes =
                       Io.read connection.lane.io connection.lane.process
                         ~pidfd:(Some connection.pidfd)
@@ -428,7 +317,7 @@ module Client = struct
     protect (fun () ->
         let connection =
           C.connect ?timeout
-            ~io:(io ~cleanup ~sw ~process_mgr ~mono_clock)
+            ~io:(Runtime.create ~cleanup ~sw ~process_mgr ~mono_clock)
             ~binary endpoint
         in
         of_connection ~sw ~mono_clock connection)
@@ -572,7 +461,7 @@ module Workspace = struct
             let width, height = Libtmux_workspace.Config.dimensions config in
             let connection, created =
               Libtmux_unix__Bootstrap.start receipt ?timeout
-                ~io:(io ~cleanup ~sw ~process_mgr ~mono_clock)
+                ~io:(Runtime.create ~cleanup ~sw ~process_mgr ~mono_clock)
                 ~binary ~endpoint:(P.endpoint plan)
                 ~name:(Libtmux_workspace.Config.session config)
                 ~window_name:first.name ~spawn:(List.hd first.panes).spawn

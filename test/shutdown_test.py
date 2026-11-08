@@ -69,7 +69,7 @@ def line(stream, timeout=1):
     return value
 
 
-def run_case(fixture, backend, mode, stopped):
+def run_case(fixture, backend, mode, stopped, eio_backend=None):
     path = Path(fixture.directory.name) / "shutdown-barrier"
     proxy = Path(fixture.directory.name) / "shutdown-tmux"
     proxy.write_text(f"#!/bin/sh\nexec '{sys.executable}' '{Path(__file__).resolve()}' \"$@\"\n")
@@ -85,11 +85,13 @@ def run_case(fixture, backend, mode, stopped):
             barrier.settimeout(1)
             env = fixture.environment | {
                 "LIBTMUX_SHUTDOWN_HELPER": "1",
-                "LIBTMUX_SHUTDOWN_MODE": "close" if mode == "close-join" else mode,
+                "LIBTMUX_SHUTDOWN_MODE": "close" if mode in ("close-join", "scope", "cancel-scope") else mode,
                 "LIBTMUX_SHUTDOWN_BINARY": fixture.binary,
                 "LIBTMUX_SHUTDOWN_BARRIER": str(path),
                 "LIBTMUX_SHUTDOWN_STOPPED": str(int(stopped)),
             }
+            if eio_backend is not None:
+                env["EIO_BACKEND"] = eio_backend
             process = subprocess.Popen(
                 [str(peer), str(proxy), str(fixture.socket), backend, mode, os.ttyname(slave)],
                 env=env, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
@@ -101,7 +103,7 @@ def run_case(fixture, backend, mode, stopped):
                     pids = json.loads(line(message))
                 children = [(pid, os.pidfd_open(pid)) for pid in pids.values() if pid]
                 connection.sendall(b"G")
-            if mode in ("close", "close-join"):
+            if mode in ("close", "close-join", "scope", "cancel-scope"):
                 assert line(process.stdout) == b"READY\n"
                 if stopped:
                     signal.pidfd_send_signal(children[0][1], signal.SIGSTOP)
@@ -124,7 +126,8 @@ def run_case(fixture, backend, mode, stopped):
             process.stdin.flush()
             stdout, stderr = process.communicate(timeout=1)
             assert process.returncode == 0 and stdout == b"" and stderr == b"", (process.returncode, stdout, stderr)
-            print(f"PASS {backend} {mode} {'stopped' if stopped else 'TERM/EOF resistant'}: {elapsed:.3f}s", flush=True)
+            label = f"{backend}/{eio_backend}" if eio_backend else backend
+            print(f"PASS {label} {mode} {'stopped' if stopped else 'TERM/EOF resistant'}: {elapsed:.3f}s", flush=True)
     except (AssertionError, TimeoutError, RuntimeError) as error:
         if process is not None and process.poll() is not None:
             detail = process.stderr.read().decode(errors="replace")
@@ -160,14 +163,14 @@ else:
     failures = []
     for binary in sys.argv[1:]:
         with TmuxFixture(binary) as fixture:
-            for backend in ("unix", "eio"):
-                modes = ("close", "failed", "terminal") + (("cancel-setup", "close-join") if backend == "eio" else ())
+            for backend, eio_backend in (("unix", None), ("eio", "linux"), ("eio", "posix")):
+                modes = ("close", "failed", "terminal") + (("cancel-setup", "close-join", "scope", "cancel-scope") if backend == "eio" else ())
                 for mode in modes:
                     for stopped in (False, True):
                         try:
-                            run_case(fixture, backend, mode, stopped)
+                            run_case(fixture, backend, mode, stopped, eio_backend)
                         except (AssertionError, TimeoutError, RuntimeError) as error:
-                            failures.append((backend, mode, stopped, str(error)))
-                            print(f"FAIL {backend} {mode} stopped={stopped}: {error}", flush=True)
+                            failures.append((backend, eio_backend, mode, stopped, str(error)))
+                            print(f"FAIL {backend}/{eio_backend} {mode} stopped={stopped}: {error}", flush=True)
     if failures:
         raise SystemExit(f"{len(failures)} shutdown cases failed")

@@ -82,6 +82,11 @@
  (modules cleanup_test)
  (libraries libtmux libtmux-unix libtmux-eio eio_main alcotest unix))
 
+(executable
+ (name ownership_peer)
+ (modules ownership_peer)
+ (libraries libtmux libtmux-unix libtmux-eio eio_main unix))
+
 (test
  (name workspace_test)
  (modules workspace_test)

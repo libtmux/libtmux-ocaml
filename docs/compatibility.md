@@ -52,8 +52,13 @@ Caller-owned `Cleanup` reports retain secondary process and descriptor failures
 without replacing native cancellation or the primary exception. Independent
 releases are still attempted. A failed KILL only permits a nonblocking exit
 check; an unconfirmed exit is reported as `Unreaped_child`. Concurrent Eio
-client closes await one retained teardown result. Descriptor ownership and
-overlapping subscription/resource closure still require lifecycle qualification.
+client closes await one retained teardown result. The Eio runtime owns its pipe
+ends explicitly and joins their readiness waiters before closing them. Process
+I/O rechecks closure after yielding, preventing access to reused descriptors.
+A private Eio process owner keeps its reaper alive through cancellation and
+switch release; callers join its completed teardown. Shutdown regressions cover
+both Eio's Linux and POSIX backends on Linux. This does not add platform support.
+Admission during close and overlapping connection closure remain under review.
 
 The shutdown regression checks stopped helpers and helpers that survive TERM
 and input closure, while keeping the parent and its Eio switch alive to verify

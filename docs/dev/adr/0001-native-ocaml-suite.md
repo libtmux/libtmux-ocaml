@@ -302,13 +302,30 @@ and read streams. Pipe readiness is asynchronous; local scratch-file work runs
 on a system thread and must finish its cleanup. The library does not start an
 independent scheduler.
 
-The adapter extracts raw descriptors through Eio's
+The reviewed adapter retained raw descriptors beyond Eio's
 [`Fd.use_exn`](https://github.com/ocaml-multicore/eio/blob/v1.6/lib_eio/unix/fd.mli#L29-L33)
-and retains them in the private engine. The enclosing flow/switch ownership
-and worker-close ordering must keep those descriptors valid beyond the
-callback. Callback scope alone does not prove that lifetime. Deadline
-arithmetic also uses the native monotonic clock, so supplying an Eio clock
-does not establish deterministic virtual-time testing.
+callback. The private runtime now transfers ownership of its pipe ends using
+[`Fd.remove`](https://github.com/ocaml-multicore/eio/blob/v1.6/lib_eio/unix/fd.mli#L50-L59).
+It registers cleanup before transfer, cancels and joins pipe-readiness waiters
+before closing those descriptors, and retains one helper-stop result. Switch
+release invokes the same cleanup. Process I/O checks the closed state after a
+runtime check can yield, so resumed code cannot use a recycled pipe descriptor.
+
+Each Eio child has a private process switch inside a protected owner fiber.
+A cancellable watcher requests termination when the application's switch ends;
+explicit close requests the same action and joins its retained result. The
+owner publishes completion only after its process switch releases. This keeps
+Eio's reaper alive while shutdown awaits it. The
+[POSIX process reaper](https://github.com/ocaml-multicore/eio/blob/v1.6/lib_eio_posix/low_level.ml#L683-L697)
+is otherwise cancelled before application release hooks run, according to
+[`Switch.dec_fibers` and `await_idle`](https://github.com/ocaml-multicore/eio/blob/v1.6/lib_eio/core/switch.ml#L70-L119).
+Awaiting that reaper from a later protected hook deadlocks. Reordering one
+hook does not fix cancellation inside connection setup or active operations.
+Control/read helpers and terminal attachment share the private owner; startup
+and kernel/filesystem completion retain the limits described below.
+
+Deadline arithmetic still uses the native monotonic clock; supplying an Eio
+clock does not establish deterministic virtual-time testing.
 
 The blocking client starts no worker or scheduler. Its awaiting caller pumps
 admitted work. Scoped cancellation tokens can wake it from another domain or
@@ -348,9 +365,10 @@ After a failed KILL, only an already established exit permits reaping: an
 unconfirmed exit produces an `Unreaped_child` diagnostic instead of an
 unbounded await. Concurrent Eio client closes now share one completion result,
 including its original failure. A closing flag elects the teardown owner and
-stops the pump; it does not establish completion. Eio descriptor ownership,
-admission during close and overlapping resource closure remain open lifecycle
-work.
+stops the pump; it does not establish completion. Pipe ownership and helper-stop
+regressions cover descriptor reuse, pending reads, cancellation and switch
+release. Admission during close and overlapping connection closure remain open
+lifecycle work.
 
 Expected failures use `result` and typed variants. Eio cancellation and blocking
 cancellation keep their native exception behavior. Catch-all exception

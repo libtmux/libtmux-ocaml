@@ -58,13 +58,22 @@ let () =
               Eio.Buf_read.of_flow ~max_size:1024 (Eio.Stdenv.stdin env)
             in
             let read () = Eio.Buf_read.line input in
-            let connect () =
+            let connect_on sw =
               Libtmux_eio.Client.connect ~binary ~sw
                 ~process_mgr:(Eio.Stdenv.process_mgr env)
                 ~mono_clock:(Eio.Stdenv.mono_clock env)
                 endpoint
             in
+            let connect () = connect_on sw in
             (match mode with
+            | "scope" | "cancel-scope" -> (
+                try
+                  Eio.Switch.run (fun owned ->
+                      ignore (get (connect_on owned));
+                      print_endline "READY";
+                      assert (read () = "GO");
+                      if mode = "cancel-scope" then raise Stop_setup)
+                with Stop_setup when mode = "cancel-scope" -> ())
             | "close" | "close-join" ->
                 let client = get (connect ()) in
                 print_endline "READY";

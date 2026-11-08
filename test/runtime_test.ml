@@ -73,6 +73,8 @@ let ready_deadline () =
             input = writer;
             output = reader;
             error = reader;
+            is_open = (fun () -> true);
+            await = (fun f -> f ());
             stop = (fun () -> ());
           }
       in
@@ -141,6 +143,8 @@ let setup_primary_failure () =
         input = Unix.stdin;
         output = Unix.stdout;
         error = Unix.stderr;
+        is_open = (fun () -> true);
+        await = (fun f -> f ());
         stop =
           (fun () ->
             Libtmux_unix__Cleanup.step cleanup Close_pipe (fun () ->
