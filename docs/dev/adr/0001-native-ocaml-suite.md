@@ -346,8 +346,11 @@ an existing primary exception retains its identity and backtrace instead.
 Native cancellation is not combined with or converted into a cleanup error.
 After a failed KILL, only an already established exit permits reaping: an
 unconfirmed exit produces an `Unreaped_child` diagnostic instead of an
-unbounded await. The lifecycle gate remains open for Eio descriptor ownership
-and concurrent-close qualification.
+unbounded await. Concurrent Eio client closes now share one completion result,
+including its original failure. A closing flag elects the teardown owner and
+stops the pump; it does not establish completion. Eio descriptor ownership,
+admission during close and overlapping resource closure remain open lifecycle
+work.
 
 Expected failures use `result` and typed variants. Eio cancellation and blocking
 cancellation keep their native exception behavior. Catch-all exception

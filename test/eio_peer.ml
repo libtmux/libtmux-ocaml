@@ -110,7 +110,26 @@ let () =
                 get (C.submit client (Operations.wait_for "will-not-complete"))
               in
               ignore (get (O.await_stage unknown `Acknowledged));
-              ignore (get (C.close client));
+              let finished, publish = Eio.Promise.create () in
+              let foreign =
+                Domain.spawn (fun () ->
+                    Eio_main.run (fun _ ->
+                        Eio.Promise.resolve publish
+                          (try Ok (C.close client) with exn -> Error exn)))
+              in
+              let foreign_result =
+                Fun.protect
+                  ~finally:(fun () ->
+                    ignore (get (C.close client));
+                    Domain.join foreign)
+                  (fun () ->
+                    Eio.Fiber.first
+                      (fun () -> Eio.Promise.await_exn finished)
+                      (fun () ->
+                        Eio.Time.Mono.sleep (Eio.Stdenv.mono_clock env) 0.5;
+                        failwith "foreign-domain close waited on owned workers"))
+              in
+              assert (foreign_result = Error Error.Wrong_domain);
               assert (
                 match get (O.inspect unknown) with
                 | O.Outcome_unknown _ -> true

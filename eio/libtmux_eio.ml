@@ -246,6 +246,8 @@ module Client = struct
     sleep : float -> unit;
     mutable contexts : Eio.Cancel.t list;
     mutable closing : bool;
+    closed : (unit, exn * Printexc.raw_backtrace) result Eio.Promise.t;
+    finish_close : (unit, exn * Printexc.raw_backtrace) result Eio.Promise.u;
     mutable release : Eio.Switch.hook;
   }
 
@@ -253,29 +255,38 @@ module Client = struct
 
   let close_exn t =
     C.owner t.engine.connection;
-    if not t.closing then
-      Eio.Cancel.protect (fun () ->
+    Eio.Cancel.protect (fun () ->
+        if not t.closing then (
           t.closing <- true;
           let report = t.engine.connection.lane.io.cleanup in
-          Cleanup_internal.run
-            (List.map
-               (fun context () ->
-                 Cleanup_internal.step report Cancel_workers (fun () ->
-                     Eio.Cancel.cancel context Client_closed))
-               t.contexts
-            @ [
-                (fun () -> Streaming.close_all t.streams Output.Client_closed);
-                (fun () -> Engine.close t.engine);
-                (fun () ->
-                  Cleanup_internal.step report Release_hook (fun () ->
-                      Eio.Switch.remove_hook t.release));
-                (fun () ->
-                  Cleanup_internal.step report Notify_waiters (fun () ->
-                      Eio.Condition.broadcast t.changed));
-              ]))
+          let result =
+            try
+              Cleanup_internal.run
+                (List.map
+                   (fun context () ->
+                     Cleanup_internal.step report Cancel_workers (fun () ->
+                         Eio.Cancel.cancel context Client_closed))
+                   t.contexts
+                @ [
+                    (fun () ->
+                      Streaming.close_all t.streams Output.Client_closed);
+                    (fun () -> Engine.close t.engine);
+                    (fun () ->
+                      Cleanup_internal.step report Release_hook (fun () ->
+                          Eio.Switch.remove_hook t.release));
+                    (fun () ->
+                      Cleanup_internal.step report Notify_waiters (fun () ->
+                          Eio.Condition.broadcast t.changed));
+                  ]);
+              Ok ()
+            with exn -> Error (exn, Printexc.get_raw_backtrace ())
+          in
+          Eio.Promise.resolve t.finish_close result);
+        Cleanup_internal.get (Eio.Promise.await t.closed))
 
   let close t =
     protect (fun () ->
+        C.owner t.engine.connection;
         Cleanup_internal.protect
           ~finally:(fun () ->
             Eio.Cancel.protect (fun () ->
@@ -327,6 +338,7 @@ module Client = struct
 
   let of_connection ~sw ~mono_clock connection =
     let changed = Eio.Condition.create () in
+    let closed, finish_close = Eio.Promise.create () in
     let t =
       {
         engine =
@@ -342,6 +354,8 @@ module Client = struct
         sleep = (fun seconds -> Eio.Time.Mono.sleep mono_clock seconds);
         contexts = [];
         closing = false;
+        closed;
+        finish_close;
         release = Eio.Switch.null_hook;
       }
     in

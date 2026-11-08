@@ -51,8 +51,9 @@ client, and cannot bound uninterruptible kernel work or scratch-file completion.
 Caller-owned `Cleanup` reports retain secondary process and descriptor failures
 without replacing native cancellation or the primary exception. Independent
 releases are still attempted. A failed KILL only permits a nonblocking exit
-check; an unconfirmed exit is reported as `Unreaped_child`. Eio descriptor
-ownership and concurrent closure still require separate lifecycle qualification.
+check; an unconfirmed exit is reported as `Unreaped_child`. Concurrent Eio
+client closes await one retained teardown result. Descriptor ownership and
+overlapping subscription/resource closure still require lifecycle qualification.
 
 The shutdown regression checks stopped helpers and helpers that survive TERM
 and input closure, while keeping the parent and its Eio switch alive to verify

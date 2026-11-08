@@ -65,16 +65,27 @@ let () =
                 endpoint
             in
             (match mode with
-            | "close" ->
+            | "close" | "close-join" ->
                 let client = get (connect ()) in
                 print_endline "READY";
-                assert (read () = "GO");
+                let message = read () in
+                let helper =
+                  if mode = "close-join" then
+                    Scanf.sscanf message "GO %d" Fun.id
+                  else (
+                    assert (message = "GO");
+                    0)
+                in
                 let closing =
                   Eio.Fiber.fork_promise ~sw (fun () ->
                       get (Libtmux_eio.Client.close client))
                 in
                 assert (not (Eio.Promise.is_resolved closing));
                 print_endline "YIELDED";
+                if mode = "close-join" then (
+                  get (Libtmux_eio.Client.close client);
+                  if Sys.file_exists (Printf.sprintf "/proc/%d" helper) then
+                    failwith "second close returned before helper was reaped");
                 Eio.Promise.await_exn closing
             | "failed" -> failed (connect ())
             | "terminal" | "cancel-setup" ->

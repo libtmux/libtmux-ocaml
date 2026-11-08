@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Make concurrent client closes await the same teardown result and retain an
+  earlier teardown failure on later calls.
 - Share cleanup reports with the blocking backend and preserve native
   cancellation when secondary resource cleanup fails.
 - Escalate owned-helper shutdown after a 200 ms cooperative grace while other

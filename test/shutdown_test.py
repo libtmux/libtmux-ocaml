@@ -85,7 +85,7 @@ def run_case(fixture, backend, mode, stopped):
             barrier.settimeout(1)
             env = fixture.environment | {
                 "LIBTMUX_SHUTDOWN_HELPER": "1",
-                "LIBTMUX_SHUTDOWN_MODE": mode,
+                "LIBTMUX_SHUTDOWN_MODE": "close" if mode == "close-join" else mode,
                 "LIBTMUX_SHUTDOWN_BINARY": fixture.binary,
                 "LIBTMUX_SHUTDOWN_BARRIER": str(path),
                 "LIBTMUX_SHUTDOWN_STOPPED": str(int(stopped)),
@@ -101,15 +101,15 @@ def run_case(fixture, backend, mode, stopped):
                     pids = json.loads(line(message))
                 children = [(pid, os.pidfd_open(pid)) for pid in pids.values() if pid]
                 connection.sendall(b"G")
-            if mode == "close":
+            if mode in ("close", "close-join"):
                 assert line(process.stdout) == b"READY\n"
                 if stopped:
                     signal.pidfd_send_signal(children[0][1], signal.SIGSTOP)
             if mode != "failed":
-                process.stdin.write(b"GO\n")
+                process.stdin.write(f"GO {pids['helper']}\n".encode() if mode == "close-join" else b"GO\n")
                 process.stdin.flush()
             started = time.monotonic()
-            if backend == "eio" and mode == "close":
+            if backend == "eio" and mode in ("close", "close-join"):
                 assert line(process.stdout, 0.75) == b"YIELDED\n"
             assert line(process.stdout, 0.75) == b"DONE\n"
             elapsed = time.monotonic() - started
@@ -125,6 +125,11 @@ def run_case(fixture, backend, mode, stopped):
             stdout, stderr = process.communicate(timeout=1)
             assert process.returncode == 0 and stdout == b"" and stderr == b"", (process.returncode, stdout, stderr)
             print(f"PASS {backend} {mode} {'stopped' if stopped else 'TERM/EOF resistant'}: {elapsed:.3f}s", flush=True)
+    except (AssertionError, TimeoutError, RuntimeError) as error:
+        if process is not None and process.poll() is not None:
+            detail = process.stderr.read().decode(errors="replace")
+            raise RuntimeError(f"{error}; peer stderr: {detail}") from error
+        raise
     finally:
         # Recovery is scoped to the helper/client pidfds created by this case.
         for _, pidfd in children:
@@ -156,7 +161,7 @@ else:
     for binary in sys.argv[1:]:
         with TmuxFixture(binary) as fixture:
             for backend in ("unix", "eio"):
-                modes = ("close", "failed", "terminal") + (("cancel-setup",) if backend == "eio" else ())
+                modes = ("close", "failed", "terminal") + (("cancel-setup", "close-join") if backend == "eio" else ())
                 for mode in modes:
                     for stopped in (False, True):
                         try:
