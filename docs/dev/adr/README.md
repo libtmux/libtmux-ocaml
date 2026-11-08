@@ -7,4 +7,4 @@ qualification results.
 
 | Record | Status | Scope |
 | --- | --- | --- |
-| [0001: Native OCaml snapshots and explicit tmux control](0001-native-ocaml-suite.md) | Proposed record of implemented design | Model, queries, clients, interchange, workspaces and documentation |
+| [0001: Native OCaml snapshots and explicit tmux control](0001-native-ocaml-suite.md) | Reviewed; final acceptance open | Model, queries, clients, interchange, workspaces and documentation |

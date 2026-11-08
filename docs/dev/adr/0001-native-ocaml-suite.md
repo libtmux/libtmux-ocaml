@@ -15,18 +15,36 @@ that occasionally runs a tmux command needs.
 
 ## Status
 
-Proposed record of the implemented architecture, dated 2026-11-08. The design
-has been adopted for implementation; this record awaits architectural review.
-Accepting it does not establish complete-suite adoption, a package release or
+Reviewed record of the implemented architecture, dated 2026-11-08. The design
+remains adopted for implementation. Independent assessment recommends retaining
+it; final record acceptance remains open. This does not establish complete-suite
+adoption, a package release or
 hosted-documentation qualification. [Current status](../../status.md) and
 [compatibility](../../compatibility.md) own those changing results.
 
-The reviewed implementation is
+The original review examined
 [the immutable source baseline](https://github.com/libtmux/libtmux-ocaml/tree/53a51bed2caa198be0fc3d81cb464e29d9f29403).
-The port has no release tag at this baseline. Its implementation links below
-therefore use that commit; upstream links use existing release tags and line
-anchors at the named symbols. Repository-relative links lead to maintained
-guides and examples.
+The port has no release tag at this baseline. Original design links retain that
+commit; the runtime section links subsequent ownership and cleanup corrections
+at [revision 3c0c07a](https://github.com/libtmux/libtmux-ocaml/tree/3c0c07a43d4b0930f3a7f9c8d0239588675bb54e).
+Upstream links use release tags and anchors at the named symbols.
+Repository-relative links lead to maintained guides and examples.
+
+## Decision map
+
+| Topic | Decision |
+| --- | --- |
+| [Packages and compiler](#use-native-modules-and-a-standard-library-core) | Standard-library core, optional runtimes, current OCaml only |
+| [Observations](#materialize-immutable-observations-and-retain-window-link-context) | Complete immutable graphs with session-specific window links |
+| [Queries](#compose-ordinary-predicates-with-typed-query-data) | Native collections and callbacks alongside typed expressions |
+| [Authority](#keep-connection-ownership-and-operational-identity-explicit) | Explicit endpoints and generation-bound targets |
+| [Transport](#drive-tmux-control-clients-and-classify-each-response-route) | Owned control clients and separately validated read processes |
+| [Runtime lifetime](#share-protocol-semantics-while-preserving-each-runtimes-cancellation) | Application-owned scheduler, retained teardown and explicit cleanup bounds |
+| [Commands](#retain-outcomes-and-separate-acknowledgement-from-completion) | Retained outcomes and explicit uncertainty |
+| [Output](#bound-future-output-and-make-continuity-loss-observable) | Bounded future-byte delivery with observable gaps |
+| [Interchange](#validate-interchange-and-keep-encoding-boundaries-separate) | Validated typed JSON and a documented shared subset |
+| [Workspaces](#keep-workspace-planning-pure-and-retain-execution-progress) | Pure plans, in-memory journals and conservative compensation |
+| [Evidence](#make-documentation-and-conformance-part-of-the-public-boundary) | Installed examples, source provenance and reproducible conformance |
 
 ## Context and problem
 
@@ -319,14 +337,16 @@ independent scheduler.
 
 The reviewed adapter retained raw descriptors beyond Eio's
 [`Fd.use_exn`](https://github.com/ocaml-multicore/eio/blob/v1.6/lib_eio/unix/fd.mli#L29-L33)
-callback. The private runtime now transfers ownership of its pipe ends using
+callback. The [private runtime](https://github.com/libtmux/libtmux-ocaml/blob/3c0c07a43d4b0930f3a7f9c8d0239588675bb54e/eio/runtime.ml#L22-L135)
+transfers ownership of its pipe ends using
 [`Fd.remove`](https://github.com/ocaml-multicore/eio/blob/v1.6/lib_eio/unix/fd.mli#L50-L59).
 It registers cleanup before transfer, cancels and joins pipe-readiness waiters
 before closing those descriptors, and retains one helper-stop result. Switch
 release invokes the same cleanup. Process I/O checks the closed state after a
 runtime check can yield, so resumed code cannot use a recycled pipe descriptor.
 
-Each Eio child has a private process switch inside a protected owner fiber.
+[`Owned_process.spawn`](https://github.com/libtmux/libtmux-ocaml/blob/3c0c07a43d4b0930f3a7f9c8d0239588675bb54e/eio/owned_process.ml#L25-L74)
+gives each Eio child a private process switch inside a protected owner fiber.
 A cancellable watcher requests termination when the application's switch ends;
 explicit close requests the same action and joins its retained result. The
 owner publishes completion only after its process switch releases. This keeps
@@ -353,10 +373,13 @@ TERM and then await exit without a grace deadline or escalation. Protected
 Eio cleanup can therefore wait indefinitely. Its blocking readiness also uses
 `Unix.select`, whose
 [descriptor check](https://github.com/ocaml/ocaml/blob/5.5.2/otherlibs/unix/select_unix.c#L35-L44)
-rejects descriptors outside `FD_SETSIZE`. Blocking readiness now uses a shared
-private `poll` binding for protocol work and terminal attachment.
+rejects descriptors outside `FD_SETSIZE`. Blocking readiness now uses a private
+`poll` binding through
+[`Runtime_io.wait`](https://github.com/libtmux/libtmux-ocaml/blob/3c0c07a43d4b0930f3a7f9c8d0239588675bb54e/unix/runtime_io.ml#L68-L77)
+for protocol work and terminal attachment.
 
-Owned-child shutdown now uses one private policy across both adapters and
+[`Runtime_io.shutdown`](https://github.com/libtmux/libtmux-ocaml/blob/3c0c07a43d4b0930f3a7f9c8d0239588675bb54e/unix/runtime_io.ml#L84-L104)
+defines one private policy across both adapters and
 terminal helpers: send TERM, allow 200 ms of cooperative grace, then force
 termination if needed and reap. Eio uses its process handle and asynchronous
 monotonic timer; the blocking adapter waits on the owned child's pidfd. Failed
@@ -392,6 +415,12 @@ Eio callers join a protected finalizer and receive the same result, including
 its original failure and backtrace. Callbacks must not re-enter their own
 finalizer. A subscription keeps its first terminal reason and joins helper
 reaping when it releases the last user of a lane.
+
+[`Engine.retire`](https://github.com/libtmux/libtmux-ocaml/blob/3c0c07a43d4b0930f3a7f9c8d0239588675bb54e/unix/engine.ml#L340-L353)
+closes admission and saves outcomes before
+[`Client.close_exn`](https://github.com/libtmux/libtmux-ocaml/blob/3c0c07a43d4b0930f3a7f9c8d0239588675bb54e/eio/libtmux_eio.ml#L142-L179)
+cancels workers or tears down lanes. Pending written operations retain the
+initiating library cause when cleanup yields to a cancelled worker.
 
 Expected failures use `result` and typed variants. Eio cancellation and blocking
 cancellation keep their native exception behavior. Catch-all exception
