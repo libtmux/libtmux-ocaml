@@ -41,7 +41,7 @@ concurrency:
 
 jobs:
   build:
-    uses: libtmux/docs/.github/workflows/port-docs.yml@6955e6f3df2de3014b8a121a58a5c0d801b02327
+    uses: libtmux/docs/.github/workflows/port-docs.yml@8f256b463bd665e670fd0474c19e632c31f7fe47
     with:
       port: ocaml
       tag-prefix: ''
@@ -62,7 +62,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    uses: libtmux/docs/.github/workflows/reusable-deploy.yml@6955e6f3df2de3014b8a121a58a5c0d801b02327
+    uses: libtmux/docs/.github/workflows/reusable-deploy.yml@8f256b463bd665e670fd0474c19e632c31f7fe47
     with:
       path-prefix: ocaml/${{ matrix.version }}
       artifact: docs-ocaml-${{ matrix.version }}
