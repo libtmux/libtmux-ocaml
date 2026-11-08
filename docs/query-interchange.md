@@ -9,19 +9,19 @@ encoding and structured errors.
 
 ## Document and nodes
 
-A document has exactly `schema`, `model` and `expr` properties. The supported
+A document has exactly `"schema"`, `"model"` and `"expr"` properties. The supported
 values are `"libtmux.filter/1"` and `"pane"`. An expression is one of these nodes:
 
-| `node` | Other required properties | Meaning |
+| `"node"` | Other required properties | Meaning |
 | --- | --- | --- |
-| `compare` | `field`, `op`, `value` | Compare one canonical scalar field |
-| `and` | `operands`: expression array | Every operand matches; empty is true |
-| `or` | `operands`: expression array | Any operand matches; empty is false |
-| `not` | `operand`: expression | Negate one expression |
+| `"compare"` | `"field"`, `"op"`, `"value"` | Compare one canonical scalar field |
+| `"and"` | `"operands"`: expression array | Every operand matches; empty is true |
+| `"or"` | `"operands"`: expression array | Any operand matches; empty is false |
+| `"not"` | `"operand"`: expression | Negate one expression |
 
 Property order is irrelevant. Duplicate, missing and unknown properties are
 errors. Encoders preserve query meaning, not the original spelling: a
-`not_equals` comparison can encode as `not` around `equals`.
+`"not_equals"` comparison can encode as `"not"` around `"equals"`.
 
 ## Fields and operators
 
@@ -29,11 +29,11 @@ Field names are case-sensitive canonical identities, not arbitrary accessors.
 
 | Value type | Fields | Operators |
 | --- | --- | --- |
-| String | `pane_id`, `pane_current_command`, `pane_title`, `pane_current_path` | `equals`, `not_equals`, `starts_with`, `ends_with`, `contains`, `in` |
-| Integer | `pane_index`, `pane_width`, `pane_height`, `pane_left`, `pane_top` | `equals`, `not_equals`, `less_than`, `at_most`, `greater_than`, `at_least` |
-| Boolean | `pane_active` | `equals`, `not_equals` |
+| String | `"pane_id"`, `"pane_current_command"`, `"pane_title"`, `"pane_current_path"` | `"equals"`, `"not_equals"`, `"starts_with"`, `"ends_with"`, `"contains"`, `"in"` |
+| Integer | `"pane_index"`, `"pane_width"`, `"pane_height"`, `"pane_left"`, `"pane_top"` | `"equals"`, `"not_equals"`, `"less_than"`, `"at_most"`, `"greater_than"`, `"at_least"` |
+| Boolean | `"pane_active"` | `"equals"`, `"not_equals"` |
 
-`value` has the field's JSON type. String `in` takes an array of strings and
+`"value"` has the field's JSON type. String `"in"` takes an array of strings and
 matches equality with any member; an empty array matches nothing. Integers must
 be integral JSON numbers in the signed 32-bit range, from −2,147,483,648 through
 2,147,483,647. Floating-point values are rejected.
@@ -42,8 +42,8 @@ Text is valid UTF-8 with exact, case-sensitive matching. The codec performs no
 normalization or case folding. Native OCaml predicates can process arbitrary
 bytes, but invalid UTF-8 has no representation in this query schema.
 
-Relationships, other models, native extension fields such as `pane_dead`,
-optional fields such as `pane_pid`, integer membership and Java's `matches`
+Relationships, other models, native extension fields such as `"pane_dead"`,
+optional fields such as `"pane_pid"`, integer membership and Java's `"matches"`
 regex operator are outside this subset. Use native expressions or ordinary
 `Seq.filter` for local behavior outside it.
 
@@ -58,12 +58,13 @@ Both decoding and encoding enforce these limits:
 | Expression nodes | 1,024 |
 | String membership values | 256 |
 
-`of_string` checks input bytes and nesting before parsing. `decode` validates
+`Libtmux_json.Expr.of_string` checks input bytes and nesting before parsing.
+`Libtmux_json.Expr.decode` validates
 the supplied Yojson tree, including duplicate properties and the size of its
 compact JSON representation. Encoding applies the same subset and bounds.
 
 Failures return `Decode_error.t`: a JSON pointer, category and message. For
-example, a string supplied to `pane_width` reports `Wrong_type` at
+example, a string supplied to `"pane_width"` reports `Wrong_type` at
 `/expr/value`. The decoder returns the first detected error, not an aggregate
 validation report. It does not include the whole input in the error.
 
