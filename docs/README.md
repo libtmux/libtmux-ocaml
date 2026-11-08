@@ -10,6 +10,7 @@ and filter them locally, then perform an explicit action with a bound target.
 | Run one self-contained capability program | [Standalone examples](showcases.md) | [Executed inventory](../examples/showcase.json) |
 | Understand sessions, shared windows and panes | [Object graph](graph.md) | [Inspect graph](../examples/native_graph.ml) |
 | Native predicates, typed queries and cardinality | [Queries](queries.md) | [Query snapshot](../examples/native_query.ml) |
+| Exchange scalar query JSON | [Wire subset](query-interchange.md) | [Decode and encode](../examples/query_json.ml) |
 | Create layouts, set options and handle outcomes | [Control and recovery](control.md) | [Build layout](../examples/native_build.ml) |
 | Cancel a waiter and recover its operation | [Recovery walkthrough](recovery.md) | [Retained outcome](../examples/native_recovery.ml) |
 | Concurrent literal send and output observation | [Streaming](streaming.md) | [Eio send and observe](../examples/native_watch.ml) |

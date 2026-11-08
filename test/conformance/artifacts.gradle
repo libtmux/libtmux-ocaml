@@ -1,0 +1,23 @@
+gradle.beforeProject { project ->
+    if (project.path == ':libtmux-jackson') {
+        project.pluginManager.withPlugin('java') {
+            project.tasks.register('ocamlConformanceArtifacts', Sync) {
+                from(project.tasks.named('jar'))
+                from(project.configurations.named('runtimeClasspath'))
+                into(project.providers.gradleProperty('ocamlConformanceDir'))
+                duplicatesStrategy = DuplicatesStrategy.FAIL
+            }
+        }
+    }
+}
+
+gradle.taskGraph.whenReady { graph ->
+    def expected = new File(System.getenv('JAVA_HOME')).canonicalFile
+    graph.allTasks.findAll { it instanceof JavaCompile }.each { task ->
+        def actual = task.javaCompiler.get().metadata.installationPath.asFile.canonicalFile
+        if (actual != expected) {
+            throw new GradleException("${task.path} selected ${actual}, expected ${expected}")
+        }
+        logger.lifecycle("Conformance compiler ${task.path}: ${actual}")
+    }
+}

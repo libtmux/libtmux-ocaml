@@ -6,6 +6,9 @@ violations before constructing typed OCaml values.
 
 {!Libtmux_json.Expr} implements the declared scalar pane subset of
 [libtmux.filter/1]. Java regex and relationship documents are unsupported.
+The
+{{:https://github.com/libtmux/libtmux-ocaml/blob/master/docs/query-interchange.md}wire
+subset} lists canonical fields, operators, text semantics and bounds.
 
 {!Libtmux_json.Workspace} decodes [libtmux.workspace/1] without I/O. Explicit
 argv and shell code remain distinct. Relative directories resolve against the

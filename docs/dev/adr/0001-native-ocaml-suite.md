@@ -535,12 +535,16 @@ suite, all supported releases or a published consumer installation. Follow
 [compatibility](../../compatibility.md), [benchmarks](../../benchmarking.md) and
 [adoption gaps](../../status.md) for those results.
 
-Cross-language compatibility needs a reproducible pinned Java qualification
-path, including both evaluator and codec directions. The existing scratch
-checkout/cache-dependent runner is recorded evidence, not a continuously
-maintained CI guarantee. Keep it separate from core dependencies and fast
-tests. The current query property test varies values against a fixed compound
-expression; it does not generate arbitrary expression trees.
+The [scalar interchange contract](../../query-interchange.md) defines the
+supported wire subset. Its [conformance procedure](../../../test/conformance/README.md)
+fetches pinned Java source, prepares and verifies artifact digests, builds the
+current OCaml peer, and runs both evaluators and codec directions. It retains
+fixtures, exchanged documents, outputs and failures with source/tool identities.
+This remains a separate qualification step, not a continuously maintained
+cross-language CI guarantee or a core runtime dependency. Ordinary CI checks
+the runner's evidence validation without a JVM. The current query property
+test varies values against a fixed compound expression; it does not generate
+arbitrary expression trees.
 
 This requires maintaining fixtures and documentation tooling alongside the
 library. It makes examples and contracts reviewable without forcing a browser,

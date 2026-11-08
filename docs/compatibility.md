@@ -111,11 +111,14 @@ with status 1 after an earlier command failed, even when later commands and
 shutdown succeeded. Tests retain that distinction.
 
 The optional JSON codec supports the scalar pane registry and Boolean nodes
-from Java's [`libtmux.filter/1`](../json/index.mld) at revision
+from Java's [`libtmux.filter/1`](query-interchange.md) at revision
 `e8a39689d8d60968ac978a1dd2a89c6112333896`. Both implementations agree on 66
 captured-value cases and read each other's encoded queries. Numeric operands
 use signed 32-bit bounds. Regex, relationship documents, numeric membership
 and native extension fields remain unsupported in this wire schema.
+The [conformance procedure](../test/conformance/README.md) rebuilds the peers
+from identified inputs and retains both codec directions and artifact digests.
+It is a separate qualification command, not part of ordinary hosted OCaml CI.
 
 Reproduce native checks with the commands in
 [CONTRIBUTING.md](../.github/CONTRIBUTING.md). The fixture builders use official

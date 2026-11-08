@@ -67,6 +67,9 @@ module Workspace : sig
       and hints never establish a connection binding. *)
 end
 
+(** Portable scalar pane expressions. See the
+    {{:https://github.com/libtmux/libtmux-ocaml/blob/master/docs/query-interchange.md}wire
+     subset} for canonical fields, operators and bounds. *)
 module Expr : sig
   val decode :
     'a Libtmux.Model.t ->
