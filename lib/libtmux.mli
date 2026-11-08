@@ -5,6 +5,10 @@
     client closure. Use [Libtmux_unix.Client] or [Libtmux_eio.Client] to acquire
     or mutate state.
 
+    Retaining any entity retains its complete snapshot graph. Copy scalar
+    summaries when captured relationships are no longer needed. Targets omit the
+    graph but remain restricted to their original {!Source.t}.
+
     {1 Typical flow}
 
     Capture explicitly, traverse {!Session.window_links} and {!Window.panes},
@@ -104,7 +108,12 @@ module Source : sig
   val endpoint : t -> Endpoint.t
   val generation : t -> Generation.t
   val server_pid : t -> int
+
   val equal : t -> t -> bool
+  (** Compare endpoint, observed daemon PID and connection generation.
+      Independent connections compare unequal even when they observe the same
+      PID. Equality establishes neither a live binding nor fresh observations.
+  *)
 end
 
 module Client_name : sig
@@ -202,8 +211,12 @@ module rec Session : sig
   val attached : t -> int
   val source : t -> Source.t
   val target : t -> target
+
   val same_entity : t -> t -> bool
+  (** Compare IDs within the same bound {!Source.t} generation. *)
+
   val same_observation : t -> t -> bool
+  (** Compare entity identity and snapshot identity. *)
 
   val window_links : t -> Window_link.t Iarray.t
   (** All captured links, in capture order, including repeated windows. *)
@@ -249,8 +262,13 @@ and Window : sig
   val layout : t -> string
   val source : t -> Source.t
   val target : t -> target
+
   val same_entity : t -> t -> bool
+  (** Compare IDs within the same bound {!Source.t} generation. *)
+
   val same_observation : t -> t -> bool
+  (** Compare entity identity and snapshot identity. *)
+
   val panes : t -> Pane.t Iarray.t
   val links : t -> Window_link.t Iarray.t
 end
@@ -336,8 +354,12 @@ and Pane : sig
   val window : t -> Window.t
   val source : t -> Source.t
   val target : t -> target
+
   val same_entity : t -> t -> bool
+  (** Compare IDs within the same bound {!Source.t} generation. *)
+
   val same_observation : t -> t -> bool
+  (** Compare entity identity and snapshot identity. *)
 end
 
 and Client_observation : sig

@@ -57,14 +57,24 @@ $ env -u TMUX -u TMUX_PANE tmux \
     kill-session -t '=linked'
 ```
 
-An entity ID is scoped to a connection source. `same_entity` compares that
-identity; `same_observation` also distinguishes captures. Use those operations
-or explicit `Id.equal`, rather than polymorphic equality over observations.
+An entity ID is scoped to a connection source. `same_entity` requires the same
+bound source generation as well as the same entity ID; separate connections
+compare unequal even when they observe the same daemon. `same_observation`
+also distinguishes captures. Use those operations or explicit `Id.equal`,
+rather than polymorphic equality over observations. A valid target does not
+make captured names, geometry or membership current.
 A link context is an observed session/index/window tuple, not a stable link
 incarnation across unlinking or reindexing.
 
 Capture provenance records an acquisition interval. Several tmux commands do
 not form an atomic server transaction. Disappearing or conflicting objects
 produce a capture error rather than a fabricated empty relationship.
+
+Each entity retains the complete snapshot graph so its relationships remain
+available. Retaining one pane from every refresh therefore retains every one
+of those captures. Keep scalar summaries when navigation is unnecessary.
+`Pane.target` omits the graph but remains bound to its original connection
+generation; it is not a durable target for a future connection. Relationship
+traversal can allocate wrapper arrays even when a query stops testing early.
 
 [Queries](queries.md) · [Recovery](control.md) · [API](api.md)

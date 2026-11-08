@@ -8,6 +8,11 @@ Optional packages provide blocking Linux and Eio clients, JSON interchange,
 workspace execution and a CLI. Ordinary OCaml collections and functions remain
 the primary way to process observations.
 
+The primary workload is a local Linux application that needs captured graphs,
+retained command outcomes and bounded live observation. The persistent client
+serves those automation requirements; it is a larger dependency than a script
+that occasionally runs a tmux command needs.
+
 ## Status
 
 Proposed record of the implemented architecture, dated 2026-11-08. The design
@@ -34,7 +39,7 @@ effects already sent to tmux.
 The Python port's
 [`QueryList`](https://github.com/tmux-python/libtmux/blob/v0.62.0/src/libtmux/_internal/query_list.py#L327-L355)
 and Java port's
-[typed filtering API](https://github.com/libtmux/libtmux-java/blob/v0.1.2/docs/guide/filtering.md#L18-L26)
+[typed filtering API](https://github.com/libtmux/libtmux-java/blob/v0.1.2/docs/guide/filtering.md#L21-L26)
 provide behavioral references. They do not require the OCaml port to copy their
 objects, collection wrappers or runtime dependencies. OCaml can express the
 model through modules, abstract types, GADTs and standard-library collections.
@@ -51,6 +56,11 @@ A **target** describes an entity in that source. An **operation** retains one
 admitted command's progress and outcome. A **subscription** observes future
 bytes with explicit continuity boundaries. A **workspace receipt** records
 steps, partial effects and compensation outcomes.
+
+Immutable observations and local evaluation are API guarantees. Source
+generation equality and queue limits are identity and resource policies.
+Passing a workload on one tmux release is qualification evidence. None of
+those establishes that another release, workload or deployment is supported.
 
 MCP integration is excluded by project policy. The automation surfaces are
 native OCaml APIs and the workspace CLI. Remote transports, an embedded JVM,
@@ -74,7 +84,7 @@ The package boundaries are:
 | --- | --- | --- |
 | [libtmux](../../../lib/) | Immutable graph, descriptors, expressions, commands | Standard library |
 | [libtmux-workspace](../../../workspace/) | Configuration, plans and journals | Core and standard library |
-| [libtmux-unix](../../../unix/) | Blocking client and private native transport engine | Linux, Unix and small C bindings |
+| [libtmux-unix](../../../unix/) | Blocking client, workspace executor and private native transport engine | Core, pure workspace, Unix and Linux C bindings |
 | [libtmux-eio](../../../eio/) | Concurrent client and workspace executor | Native engine and Eio |
 | [libtmux-json](../../../json/) | Validated query/workspace interchange | Pure packages and Yojson |
 | [libtmux-workspace-cli](../../../cli/) | Installed `tmux-workspace` command | Optional clients, JSON and CLI dependencies |
@@ -82,6 +92,13 @@ The package boundaries are:
 Internal package versions move together. Opam manifests are authored directly;
 Dune builds and installs the libraries. Tests and documentation tools do not
 become core runtime dependencies. See [package selection](../../packages.md).
+
+Exact external dependency constraints currently serve both qualification and
+installation. This narrows the dependency combinations a downstream switch can
+accept. A future distribution range needs consumer qualification separately
+from the reproducible development environment. The current-compiler-only
+policy remains exact; relaxing other dependencies does not authorize older
+compiler support.
 
 This costs some adapter code and explicit package selection. It lets a program
 inspect a snapshot or validate a native workspace without adopting a scheduler,
@@ -114,17 +131,24 @@ order. A link context does not prove a stable incarnation across unlinking or
 reindexing. [The graph example](../../../examples/native_graph.ml) exercises
 shared windows.
 
-[`Snapshot.create`](https://github.com/libtmux/libtmux-ocaml/blob/53a51bed2caa198be0fc3d81cb464e29d9f29403/lib/libtmux.mli#L441-L471)
+[`Snapshot.create`](https://github.com/libtmux/libtmux-ocaml/blob/53a51bed2caa198be0fc3d81cb464e29d9f29403/lib/libtmux.mli#L436-L471)
 validates references and graph invariants. Equal duplicate global rows collapse
 in first-occurrence order; conflicting rows and dangling references fail.
 Capture records start and finish times. Several listing commands do not form
 an atomic transaction. A failed acquisition cannot become an empty successful
 snapshot, and an unloaded relation cannot masquerade as an empty relation.
 
-Materialization consumes memory and can fail during concurrent graph changes.
-The benefit is a complete local graph without per-object subprocesses or
-surprise refreshes. Partial snapshots would need a distinct completeness
-contract before introduction.
+Each entity retains the entire captured arena. Keeping one pane from each
+refresh keeps each corresponding graph alive. A detached scalar summary avoids
+that retention; a target also omits the graph but retains its source-generation
+restriction. Relationship traversal can allocate wrapper arrays before an
+expression stops testing children. Measure retained heap and traversal costs
+before introducing partial capture or caches.
+
+Materialization can fail during concurrent graph changes. Its benefit is a
+complete local graph without per-object subprocesses or surprise refreshes.
+Partial snapshots would need a distinct completeness contract that separates
+unloaded, absent and empty relationships.
 
 ### Compose ordinary predicates with typed query data
 
@@ -144,12 +168,9 @@ values. OCaml's
 does not guarantee replayability for arbitrary input sequences. A caller's
 stateful predicate can still perform effects or return different answers.
 
-Relationship `any` over no children is false; `all` and `none` are true. One
-child must satisfy an entire nested expression. Two separate existential
-conditions can match different children. `exactly_one` and `one_or_none`
-return cardinality errors, count duplicates and stop at a second match.
-Proving uniqueness exhausts the remaining finite input. Select before mutating;
-that sequence still does not lock the server. See the
+The public interfaces define
+[relationship quantifiers and cardinality](../../../lib/libtmux.mli).
+Select before mutating; that sequence still does not lock the server. See the
 [executed query program](../../../examples/native_query.ml).
 
 [`Plan.panes`](https://github.com/libtmux/libtmux-ocaml/blob/53a51bed2caa198be0fc3d81cb464e29d9f29403/lib/libtmux.mli#L640-L661)
@@ -165,6 +186,19 @@ vocabulary. The chosen design instead keeps portable data more restricted than
 ordinary OCaml functions. That restriction makes validation and planning
 possible, at the cost of explicitly composing the two layers.
 
+The capabilities differ by layer:
+
+| Layer | Available behavior | Boundary |
+| --- | --- | --- |
+| Observation accessors | Captured scalars and relationships, including optional values such as `Pane.pid` | Reading an option does not make it a registered expression field |
+| Native expressions | Registered Boolean, integer and text fields; typed relations and Boolean composition | Arbitrary functions remain ordinary predicates |
+| Query JSON | Shared scalar pane registry and Boolean composition | Native-only fields, relationships and Java regex are rejected |
+| Source planning | Exact pane active/dead predicates and supported Boolean composition | Unsupported conditions remain local or fail `Require_exact` |
+| Current clients | Complete graph acquisition and local evaluation | Capture does not execute source plans |
+
+This is the capability boundary for interoperability. A generated format
+catalog describes names and availability; it does not acquire extra fields.
+
 ### Keep connection ownership and operational identity explicit
 
 [`Endpoint`, `Generation` and `Source`](https://github.com/libtmux/libtmux-ocaml/blob/53a51bed2caa198be0fc3d81cb464e29d9f29403/lib/libtmux.mli#L22-L108)
@@ -173,8 +207,12 @@ nonce. Imported source metadata does not establish a live binding. Backends
 validate the binding before admitting operations. Targets carry their source;
 old targets cannot silently retarget a replacement daemon or connection.
 
-Use explicit identity functions instead of structural comparison. Entity
-identity and snapshot observation identity differ. Captured client names have
+Use explicit identity functions instead of structural comparison.
+`same_entity` means the same entity within the same bound source generation.
+Independent connections do not establish that equality merely by observing
+equal daemon PIDs and entity IDs. A valid target establishes authority, not
+freshness of its captured name, geometry or membership. Cross-connection
+correlation would need a separate contract. Captured client names have
 current-name semantics because tmux may reuse them; the model does not promise
 stable client incarnation identity.
 
@@ -196,12 +234,64 @@ socket reuse or imported IDs sufficient authority to replay an old operation.
 A portable or remote backend must establish an equivalent binding contract
 before extending the support claim.
 
+### Drive tmux control clients and classify each response route
+
+The native backend launches the tmux executable in control mode; it does not
+implement tmux's private socket protocol. The primary invocation uses `-u`,
+`-N` and an explicit endpoint, then `-C attach-session -E -f no-output`.
+Additional client flags control sizing and release-specific detach behavior.
+Each observation lane attaches to a session because that membership determines
+which panes' output tmux forwards. Attachments affect client counts and hooks,
+appear in `list-clients` and can be detached by other clients.
+
+The engine serializes ordinary jobs. Each control request has a completion
+marker in addition to its command reply. Waiting operations use a separate
+bound lane. Public environment, option and hook acquisitions use registered
+one-shot command processes so arbitrary response bytes cannot impersonate
+control guards. Their PID, completion marker, diagnostics and original pidfd
+are checked before the result is accepted. They never carry mutation retries.
+Rendered capture's hook preflight is a separate path: its eight hook-scope
+reads still use the control lane.
+
+Rendered capture currently checks applicable hooks, creates an owned paste
+buffer, reads its size, saves it to a private file and removes it. This adds
+shared-filesystem access, synchronous daemon file work, system-thread work in
+Eio and a buffer visible to other clients. Output-producing or interfering
+hooks are outside that route's contract. A raw read-process capture is a
+candidate optimization, requiring equivalent byte, binding, hook and cleanup
+evidence before adoption.
+
+The framer relies on tmux's guarantee that notifications occur outside command
+output blocks. Group attribution also depends on flags 1 for direct control
+commands and 0 for hook commands. The
+[manual's flags description and notification rule](https://github.com/tmux/tmux/blob/3.8/tmux.1#L9087-L9109)
+do not document that distinction; the implementation derives it from
+[`CMDQ_STATE_CONTROL`](https://github.com/tmux/tmux/blob/3.8/cmd-queue.c#L585-L605).
+Connect already requires direct-command attribution. Release qualification
+must exercise both classes; an unknown flag cannot silently become a reply.
+
+Joining listings reduces round trips but does not make a snapshot atomic.
+tmux runs
+[after-list-windows hooks](https://github.com/tmux/tmux/blob/3.8/cmd-list-windows.c#L44-L56)
+between commands; a hook can change the graph before the next listing. Keep
+validation, acquisition timestamps and explicit race failures for grouped
+acquisition too. Command-list and flags behavior are versioned implementation
+dependencies, not timeless protocol guarantees.
+
+Version admission currently accepts tmux 3.3 and later. The required exact
+qualification cells are 3.3, 3.3a, 3.4 and 3.8, with 3.2a rejection tested
+separately. Admission does not imply catalog availability or qualification of
+every intermediate or future release. Ordinary component passes do not qualify
+intensive observation: the recorded 3.4 mixed-workload failure and unexplained
+earlier 3.3 observer failure remain open in
+[compatibility](../../compatibility.md).
+
 ### Share protocol semantics while preserving each runtime's cancellation
 
 The blocking and Eio adapters use the same private
 [`Engine` state machine](https://github.com/libtmux/libtmux-ocaml/blob/53a51bed2caa198be0fc3d81cb464e29d9f29403/unix/engine.ml#L1-L40)
 and connection/streaming machinery. The
-[`Eio adapter`](https://github.com/libtmux/libtmux-ocaml/blob/53a51bed2caa198be0fc3d81cb464e29d9f29403/eio/libtmux_eio.ml#L1-L7)
+[`Eio adapter`](https://github.com/libtmux/libtmux-ocaml/blob/53a51bed2caa198be0fc3d81cb464e29d9f29403/eio/libtmux_eio.ml#L45-L122)
 supplies runtime-specific process, readiness and cancellation operations. This
 is an internal boundary, not a public functor that every caller must configure.
 
@@ -212,11 +302,31 @@ and read streams. Pipe readiness is asynchronous; local scratch-file work runs
 on a system thread and must finish its cleanup. The library does not start an
 independent scheduler.
 
+The adapter extracts raw descriptors through Eio's
+[`Fd.use_exn`](https://github.com/ocaml-multicore/eio/blob/v1.6/lib_eio/unix/fd.mli#L29-L33)
+and retains them in the private engine. The enclosing flow/switch ownership
+and worker-close ordering must keep those descriptors valid beyond the
+callback. Callback scope alone does not prove that lifetime. Deadline
+arithmetic also uses the native monotonic clock, so supplying an Eio clock
+does not establish deterministic virtual-time testing.
+
 The blocking client starts no worker or scheduler. Its awaiting caller pumps
 admitted work. Scoped cancellation tokens can wake it from another domain or
 systhread. Cancellation drains written work before raising, subject to the
 documented exchange bound and completion of local scratch I/O. Live handles
 belong to their creating OCaml domain; immutable observations can be shared.
+
+The reviewed baseline does not bound owned-child shutdown: both adapters send
+TERM and then await exit without a grace deadline or escalation. Protected
+Eio cleanup can therefore wait indefinitely. Its blocking readiness also uses
+`Unix.select`, whose
+[descriptor check](https://github.com/ocaml/ocaml/blob/5.5.2/otherlibs/unix/select_unix.c#L35-L44)
+rejects descriptors outside `FD_SETSIZE`. These are open lifecycle defects,
+not accepted guarantees. The required correction is finite cooperative grace,
+forced termination and reaping of owned helpers, plus high-descriptor-capable
+readiness. Exchange deadlines, owned-child grace and filesystem completion
+need separate contracts. No library deadline bounds uninterruptible kernel
+work; the daemon remains outside helper termination policy.
 
 Expected failures use `result` and typed variants. Eio cancellation and blocking
 cancellation keep their native exception behavior. Catch-all exception
@@ -236,7 +346,7 @@ fiber drains it. The handle retains the eventual result on the owning domain,
 including after client closure.
 
 tmux's
-[control-mode framing](https://github.com/tmux/tmux/blob/3.8/tmux.1#L9068-L9103)
+[control-mode framing](https://github.com/tmux/tmux/blob/3.8/tmux.1#L9068-L9109)
 describes command output blocks. The library's acknowledgement state does not
 establish final operation completion: hooks or completion markers can remain.
 Even a finished `send_keys` operation proves tmux accepted input, not that the
@@ -258,6 +368,13 @@ subscription generation; they do not name a historical server position or a
 snapshot instant. Queue admission reserves bounded resources. A slow consumer
 can overflow its queue without blocking another subscriber; a gap ends that
 subscription's continuity and is followed by `End`.
+
+Admission limits are resource policies. Command slots, queued bytes, frame and
+field sizes, graph rows, subscriptions, lane count and capture payloads each
+have bounds, alongside aggregate accounting. The shared lane pool also serves
+reads and waits, so observers can exhaust their capacity. Raising a per-object
+limit cannot bypass aggregate reservation. These limits bound library-owned
+payloads, not caller-retained snapshots, process RSS or tmux's own allocations.
 
 Subscriptions start after an admission marker. They provide neither history
 nor an atomic capture/stream barrier. Membership and layout changes can end
@@ -306,7 +423,7 @@ See [capture and hook limits](../../compatibility.md).
 A broader codec or transport must prove semantic equivalence for each added
 operator and encoding. Shared names alone do not establish interoperability.
 
-### Keep workspace planning pure and execution journaled
+### Keep workspace planning pure and retain execution progress
 
 [`Config`, `Plan` and `Execution`](https://github.com/libtmux/libtmux-ocaml/blob/53a51bed2caa198be0fc3d81cb464e29d9f29403/workspace/libtmux_workspace.mli#L1-L15)
 separate native validation, an ordered preview and effectful execution through
@@ -319,18 +436,29 @@ This differs from tmuxp's
 [`expandshell`](https://github.com/tmux-python/tmuxp/blob/v1.74.0/src/tmuxp/workspace/loader.py#L13-L28),
 which uses user and environment expansion. The OCaml workspace format is
 `libtmux.workspace/1`; tmuxp JSON/YAML compatibility is not implied.
+The versioned native schema keeps path expansion, argv/shell distinctions and
+validation explicit. A tmuxp loader would be a separately qualified translation
+layer, not a change in the meaning of existing documents.
 
 Plans retain collision policy and generation-bound targets. Execution rechecks
-preconditions and applies once. Explicit bootstrap handles a missing endpoint;
-it does not turn missing acquisition data into an empty graph. Append mode
+preconditions and applies once per execution handle. Explicit bootstrap handles
+a missing endpoint; it does not turn missing acquisition data into an empty
+graph. Append mode
 rejects conflicting windows and preserves the documented session constraints.
 
-[`Execution.await`](https://github.com/libtmux/libtmux-ocaml/blob/53a51bed2caa198be0fc3d81cb464e29d9f29403/workspace/libtmux_workspace.mli#L229-L258)
+[`Execution.await`](https://github.com/libtmux/libtmux-ocaml/blob/53a51bed2caa198be0fc3d81cb464e29d9f29403/workspace/libtmux_workspace.mli#L248-L258)
 retains ordered step outcomes, creations and uncertainty. Cancellation records
 progress and propagates. Optional compensation targets only panes whose
 creation is proven by completed commands, in reverse order. Borrowed panes and
 containers with foreign content remain. Compensation is partial recovery,
 not transaction rollback, and its failures have separate outcomes.
+
+The journal is retained in process memory while its execution object remains
+available, including across waiter cancellation and client closure. It is not
+a durable write-ahead log. A new handle or CLI invocation is a new execution;
+operation IDs correlate outcomes and provide no deduplication. Compensation
+cannot undo files, network requests or other effects of programs started in
+panes. Forced process termination cannot guarantee delivery of a CLI receipt.
 
 JSON plans and receipts are advisory documents. Imported IDs or hints do not
 establish live bindings and cannot be replayed as execution input. The
@@ -357,18 +485,27 @@ suite, all supported releases or a published consumer installation. Follow
 [compatibility](../../compatibility.md), [benchmarks](../../benchmarking.md) and
 [adoption gaps](../../status.md) for those results.
 
+Cross-language compatibility needs a reproducible pinned Java qualification
+path, including both evaluator and codec directions. The existing scratch
+checkout/cache-dependent runner is recorded evidence, not a continuously
+maintained CI guarantee. Keep it separate from core dependencies and fast
+tests. The current query property test varies values against a fixed compound
+expression; it does not generate arbitrary expression trees.
+
 This requires maintaining fixtures and documentation tooling alongside the
 library. It makes examples and contracts reviewable without forcing a browser,
 JSON library or concurrency runtime into the pure core.
 
 ## Alternatives and consequences
 
-The strongest smaller alternative is a set of subprocess helpers returning
-records and accepting string predicates. That would reduce initial transport
-and type machinery. It would leave binding validation, linked-window context,
-typed query interchange, cancellation recovery and stream continuity to every
-caller. This suite accepts the additional machinery because those behaviors
-are part of its public contract.
+The strongest smaller alternative keeps the same immutable graph, typed
+expressions, cardinality and standard collections, backed by one-shot
+acquisition and explicit commands. It reduces persistent resource management
+and qualification work for occasional scripts. Continuous observation and
+retained written-operation outcomes would still need additional machinery.
+The selected transport pays that cost because stateful automation and live
+observation are required workloads. Pure query ergonomics do not justify the
+transport complexity by themselves.
 
 A mutable ORM or QuerySet façade would match some companion APIs but obscure
 the capture boundary and add a second collection vocabulary. A mandatory Eio
@@ -395,6 +532,13 @@ partial snapshots, durable output replay, an executed source-filter plan,
 additional wire operators, or independent internal package versions. Each
 change needs a concrete caller task and evidence preserving the affected
 identity, completeness, cancellation and encoding contracts.
+
+Also revisit transport attribution if command-list grouping or flags change;
+deadline/closure policy if bounded resynchronization is introduced; and the
+public integration boundary when engine-ops chaining, tmuxp translation or
+format subscriptions have a concrete consumer. The current `Command.view`
+supports typed inspection, not arbitrary engine injection. Add a focused
+decision record when one of these contracts changes independently.
 
 Architecture review should evaluate those contracts against the linked source.
 Release readiness remains a separate decision based on the exact candidate's

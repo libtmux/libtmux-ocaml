@@ -6,6 +6,8 @@ and opam 2.6.1.
 
 The implementation targets Linux and tmux 3.3 or newer. Current evidence covers
 specific components; final suite qualification has a separate acceptance gate.
+The table records the exercised fixtures, not every possible cleanup path.
+The additional lifecycle cases described below reopen that qualification.
 
 | Component | 3.3 | 3.3a | 3.4 | 3.8 |
 | --- | --- | --- | --- | --- |
@@ -13,7 +15,7 @@ specific components; final suite qualification has a separate acceptance gate.
 | Exact Boolean pane filters | PASS | PASS | PASS | PASS |
 | Argument and metadata byte codecs | PASS | PASS | PASS | PASS |
 | Split control framing and command groups | PASS | PASS | PASS | PASS |
-| Bound graph capture and client teardown | PASS | PASS | PASS | PASS |
+| Bound graph capture and ordinary client teardown | PASS | PASS | PASS | PASS |
 | Replacement-daemon rejection | PASS | PASS | PASS | PASS |
 | Private-file capture and failed-save callbacks | PASS | PASS | PASS | PASS |
 | Eio waiter cancellation and retained outcomes | PASS | PASS | PASS | PASS |
@@ -38,8 +40,17 @@ not replace the published 3.8 cell. PID-acquisition races and malformed replies 
 pass deterministic fault checks with real Linux child processes. Cancellation
 at each capture transfer step and unresolved-buffer receipts also pass on
 every release. Ready I/O still checks its deadline; busy pipes cannot bypass
-the timeout. These results qualify the implemented lifecycle contracts, not
-the final suite qualification. MCP integration is outside this port's scope.
+the timeout. These results remain evidence for those tested cases.
+MCP integration is outside this port's scope.
+
+Two lifecycle defects remain open in the reviewed implementation. Owned-child
+cleanup sends TERM and waits without escalation, so a stopped helper or one
+that survives TERM and input closure can prevent close or cancellation cleanup
+from returning. Both blocking and Eio cleanup reproduced that behavior with
+owned helper processes. Blocking readiness also uses `Unix.select`, which
+rejects high-numbered descriptors in the calling OCaml process. Neither result
+establishes a crash or hang in a supported tmux daemon. See the
+[architecture's cleanup boundary](dev/adr/0001-native-ocaml-suite.md#share-protocol-semantics-while-preserving-each-runtimes-cancellation).
 
 The near-limit [mixed workload](benchmarking.md#mixed-commands-stream-pressure-and-membership-changes)
 reproduces a tmux 3.4 daemon crash in the control-client detach notification
@@ -55,7 +66,8 @@ the daemon running.
 
 The blocking client accepts a scoped `Cancellation` token that another domain
 or systhread can cancel. It drains admitted work before raising
-`Cancellation.Cancelled`, with at most one exchange timeout from detection.
+`Cancellation.Cancelled`. The drain has at most one exchange timeout from
+detection; that timeout does not bound subsequent owned-child cleanup.
 The operation handle retains success, failure or uncertainty. Eio cancellation
 releases the waiter immediately while a client-owned fiber drains the work.
 Local scratch I/O must finish in either case; Eio performs it on a system

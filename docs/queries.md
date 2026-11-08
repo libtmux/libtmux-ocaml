@@ -88,5 +88,9 @@ Conjunctions, disjunctions, negation and relationships require different lowerin
 rules; local sequence processing never issues a tmux query implicitly.
 
 The [native reference](../lib/index.mld) executes a pure planning example with MDX.
+The [architecture capability table](dev/adr/0001-native-ocaml-suite.md#compose-ordinary-predicates-with-typed-query-data)
+distinguishes observation accessors, native expressions, JSON, planning and
+client acquisition. An available accessor or format name need not be a
+portable expression field.
 
 [Field reference](fields.md) · [API](api.md) · [Guide](README.md)

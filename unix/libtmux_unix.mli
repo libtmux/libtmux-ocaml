@@ -192,7 +192,8 @@ module Client : sig
       caller may own the client at a time. Cancellation removes queued work or
       drains admitted work before raising [Cancellation.Cancelled]. The handle
       retains its outcome. Draining has at most one exchange timeout from
-      detection; local scratch filesystem I/O must also finish. No background
+      detection; local scratch filesystem I/O and owned-child cleanup must also
+      finish. Owned-child cleanup is not yet time-bounded. No background
       scheduler or worker is started. *)
 
   val run :

@@ -156,9 +156,12 @@ module Plan : sig
       printed or serialized preview cannot supply operational targets. *)
 end
 
-(** Apply a plan once and retain an immutable journal of effects, uncertainty
-    and cleanup. Ordinary applications use their backend's Workspace module;
-    executors below integrate another transport. *)
+(** Apply a plan once per handle and retain effects, uncertainty and cleanup.
+    The journal lives in process memory while its execution handle is retained;
+    {!Execution.val-inspect} returns immutable copies. It survives waiter
+    cancellation and client closure, but supplies no crash-durable recovery or
+    cross-invocation deduplication. Ordinary applications use their backend's
+    Workspace module; executors below integrate another transport. *)
 module Execution : sig
   type hint = {
     session : Libtmux.Session.Id.t;
@@ -240,20 +243,24 @@ module Execution : sig
     Plan.t ->
     (t, Libtmux.Error.t) result
   (** Allocate a retained handle without I/O. IDs have 1..64 ASCII letters,
-      digits, underscores or hyphens. *)
+      digits, underscores or hyphens. [operation_id] correlates receipts; it
+      does not deduplicate handles. A new handle starts a new execution even if
+      its ID matches an earlier one. *)
 
   val inspect : t -> receipt
   (** Return an immutable copy of the retained journal without I/O. *)
 
   val await : ?compensate_on_failure:bool -> t -> receipt
-  (** Execute once, rechecking generation and captured preconditions first.
-      Expected failures return a partial journal. Exceptions, including native
-      cancellation, propagate after recording progress and bounded compensation.
-      Subsequent calls only return the retained receipt; mutations never retry.
+  (** Execute once per handle, rechecking generation and captured preconditions
+      first. Expected failures return a partial journal. Exceptions, including
+      native cancellation, propagate after recording progress and bounded
+      compensation. Subsequent calls only return the retained receipt; mutations
+      never retry.
 
       Compensation kills only panes reported by completed creation commands, in
       reverse creation order. tmux removes windows and sessions that become
       empty. Containers with foreign panes or window links remain; adding a
       borrowed pane never makes it eligible for cleanup. Cleanup failures have
-      separate outcomes. *)
+      separate outcomes. Compensation cannot undo external effects of programs
+      started inside the panes. *)
 end

@@ -174,6 +174,13 @@ journal, identify proven effects, then choose compensation or another explicit
 action. A saved JSON receipt describes observations; it is not an executable
 target or a transaction to replay.
 
+The execution journal is retained in process memory. `await` initiates steps
+only once for a particular execution handle; a new handle or CLI invocation
+starts a new execution. Operation IDs correlate receipts and do not suppress
+duplicates. Neither a retained handle nor an exported receipt is a durable
+write-ahead log. Compensation cannot undo files, network requests or other
+effects of the programs launched in panes.
+
 | Exit | Meaning |
 | --- | --- |
 | 0 | Validation, planning or apply succeeded |
