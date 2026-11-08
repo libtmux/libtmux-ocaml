@@ -185,6 +185,10 @@ module Client = struct
   let source t = t.engine.connection.source
   let version t = t.engine.connection.version
 
+  let check_admission t =
+    C.owner t.engine.connection;
+    if t.closing then Io.fail Error.Closed
+
   let worker ~sw t f =
     Eio.Fiber.fork_daemon ~sw (fun () ->
         (try
@@ -324,6 +328,7 @@ module Client = struct
 
   let submit t command =
     protect (fun () ->
+        check_admission t;
         let inner = Engine.submit t.engine command in
         Operation.{ inner; changed = t.changed })
 
@@ -348,6 +353,7 @@ module Client = struct
 
   let subscribe ?session ?capacity_bytes ?capacity_events t pane =
     protect (fun () ->
+        check_admission t;
         let inner =
           Streaming.subscribe ?session ?capacity_bytes ?capacity_events
             t.streams pane

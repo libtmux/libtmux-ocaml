@@ -160,7 +160,8 @@ module Client : sig
       MiB/1024 events; max 16 subscribers and eight total client lanes, sharing
       the 32 MiB payload budget. Overflow or coverage/layout changes emit Gap
       then End. Data starts after admission's marker, with no snapshot/history
-      barrier, automatic reconnect or silent cursor reuse. *)
+      barrier, automatic reconnect or silent cursor reuse. New admission returns
+      [Error Libtmux.Error.Closed] once {!close} starts. *)
 
   val wait_for_text :
     ?timeout:float ->
@@ -178,7 +179,8 @@ module Client : sig
 
   val submit :
     t -> 'a Libtmux.Command.t -> ('a Operation.t, Libtmux.Error.t) result
-  (** Validate and reserve bounded capacity without I/O. *)
+  (** Validate and reserve bounded capacity without I/O. Return
+      [Error Libtmux.Error.Closed] once {!close} starts. *)
 
   val await : 'a Operation.t -> ('a, Libtmux.Error.t) result
   (** Cancellation propagates as Eio cancellation. Store the handle outside the
@@ -572,6 +574,7 @@ module Client : sig
 
   val close : t -> (unit, Libtmux.Error.t) result
   (** Retire the generation and close owned control clients and descriptors.
+      Reject new {!submit} and {!subscribe} calls as soon as closing starts.
       Concurrent calls await the same teardown result. Later calls retain a
       teardown failure instead of treating the closed flag as success. Each
       helper gets 200 ms of TERM grace, followed by KILL if needed and reaping.

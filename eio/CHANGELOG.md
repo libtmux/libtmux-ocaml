@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Reject new Eio command and subscription admission as soon as client close
+  starts, before waiting for stream helpers to exit.
 - Own transferred control pipes explicitly and join readiness waiters before
   closing their descriptors. Switch release shares the same helper cleanup.
 - Keep process reapers alive during cancellation and switch release, avoiding

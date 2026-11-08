@@ -367,7 +367,8 @@ unbounded await. Concurrent Eio client closes now share one completion result,
 including its original failure. A closing flag elects the teardown owner and
 stops the pump; it does not establish completion. Pipe ownership and helper-stop
 regressions cover descriptor reuse, pending reads, cancellation and switch
-release. Admission during close and overlapping connection closure remain open
+release. The closing flag rejects new commands and subscriptions before
+validation or I/O. Overlapping internal connection closure remains open
 lifecycle work.
 
 Expected failures use `result` and typed variants. Eio cancellation and blocking

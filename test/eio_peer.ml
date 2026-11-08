@@ -19,6 +19,32 @@ let cancel_wait op =
 
 let () =
   Eio_main.run (fun env ->
+      Eio.Switch.run (fun sw ->
+          let client =
+            get
+              (C.connect ~sw
+                 ~process_mgr:(Eio.Stdenv.process_mgr env)
+                 ~mono_clock:(Eio.Stdenv.mono_clock env)
+                 ~binary:Sys.argv.(1)
+                 (Endpoint.socket_path Sys.argv.(2)))
+          in
+          let pane = Iarray.get (Snapshot.panes (get (C.capture client))) 0 in
+          ignore (get (C.subscribe client pane));
+          let closing =
+            Eio.Fiber.fork_promise ~sw (fun () -> get (C.close client))
+          in
+          Fun.protect
+            ~finally:(fun () -> Eio.Promise.await_exn closing)
+            (fun () ->
+              assert (not (Eio.Promise.is_resolved closing));
+              (match
+                 C.submit client (Operations.signal "after-close-started")
+               with
+              | Error Error.Closed -> ()
+              | _ -> failwith "closing client admitted a new command");
+              match C.subscribe ~capacity_bytes:0 client pane with
+              | Error Error.Closed -> ()
+              | _ -> failwith "closing client validated a new subscription"));
       List.iter
         (fun cancel ->
           let retained = ref None and reader_cancelled = ref false in

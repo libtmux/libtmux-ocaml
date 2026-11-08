@@ -37,7 +37,8 @@ cancellation tokens signalled from another domain or systhread.
 The blocking bound covers transport draining. Local scratch I/O must still
 finish before the call returns.
 
-Concurrent Eio `Client.close` calls wait for the same teardown result. A later
+Eio `Client.close` rejects new command and subscription admission as soon as
+closing starts. Concurrent closes wait for the same teardown result. A later
 close retains an earlier teardown failure; the closed state alone does not
 prove resources were released. Inspect the client's `Cleanup` report for
 secondary failures.

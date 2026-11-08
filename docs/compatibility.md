@@ -58,7 +58,8 @@ I/O rechecks closure after yielding, preventing access to reused descriptors.
 A private Eio process owner keeps its reaper alive through cancellation and
 switch release; callers join its completed teardown. Shutdown regressions cover
 both Eio's Linux and POSIX backends on Linux. This does not add platform support.
-Admission during close and overlapping connection closure remain under review.
+New commands and subscriptions are rejected as soon as client close starts.
+Overlapping internal connection closure remains under review.
 
 The shutdown regression checks stopped helpers and helpers that survive TERM
 and input closure, while keeping the parent and its Eio switch alive to verify

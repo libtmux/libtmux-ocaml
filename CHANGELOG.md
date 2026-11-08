@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Reject new Eio command and subscription admission as soon as client close
+  starts, before waiting for stream helpers to exit.
 - Reject resumed process I/O after close, including when descriptor numbers
   have been reused. Retain helper-stop results across repeated cleanup.
 - Wait for shared teardown completion when Eio callers close a client
