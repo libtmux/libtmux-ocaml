@@ -6,7 +6,7 @@ let get = function
 
 exception Stop_terminal
 
-let () =
+let main () =
   let binary = if Sys.argv.(6) = "invalid" then "" else Sys.argv.(1)
   and endpoint = Endpoint.socket_path Sys.argv.(2)
   and backend = Sys.argv.(3)
@@ -90,3 +90,18 @@ let () =
               (Option.get (Eio_unix.Resource.fd_opt tty))
               (fun fd -> assert (Unix.isatty fd))));
   print_endline "PASS terminal attachment and reaping"
+
+let () =
+  let descriptors = ref [] in
+  Fun.protect
+    ~finally:(fun () -> List.iter Unix.close !descriptors)
+    (fun () ->
+      (* The terminal's pidfd and cancellation pipe must work beyond select's
+         descriptor ceiling in the embedding application. *)
+      if Sys.argv.(3) = "unix" then
+        for _ = 1 to 1100 do
+          descriptors :=
+            Unix.openfile "/dev/null" [ Unix.O_RDONLY; Unix.O_CLOEXEC ] 0
+            :: !descriptors
+        done;
+      main ())

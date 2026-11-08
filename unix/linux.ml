@@ -3,6 +3,12 @@ external pidfd_alive : Unix.file_descr -> bool = "libtmux_pidfd_alive"
 external monotonic_ns : unit -> int64 = "libtmux_monotonic_ns"
 external random_bytes : unit -> string = "libtmux_random_bytes"
 
+external poll :
+  read:Unix.file_descr list ->
+  write:Unix.file_descr list ->
+  timeout:float ->
+  bool = "libtmux_poll"
+
 let nonce () =
   let bytes = random_bytes () in
   let digits = "0123456789abcdef" in

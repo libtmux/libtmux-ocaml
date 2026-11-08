@@ -86,6 +86,36 @@ let ready_deadline () =
       expired (fun () ->
           Io.write Io.blocking process ~pidfd:None ~deadline "late"))
 
+let high_descriptor_readiness () =
+  let owned = ref [] in
+  let keep fd =
+    owned := fd :: !owned;
+    fd
+  in
+  Fun.protect
+    ~finally:(fun () -> List.iter Unix.close !owned)
+    (fun () ->
+      for _ = 1 to 1100 do
+        ignore
+          (keep (Unix.openfile "/dev/null" [ Unix.O_RDONLY; Unix.O_CLOEXEC ] 0))
+      done;
+      let reader, writer = Unix.pipe ~cloexec:true () in
+      ignore (keep reader);
+      ignore (keep writer);
+      let deadline () = Libtmux_unix__Linux.now () +. 0.1 in
+      Io.wait ~read:[] ~write:[ writer ] ~deadline:(deadline ());
+      ignore (Unix.write_substring writer "x" 0 1);
+      Io.wait ~read:[ reader ] ~write:[] ~deadline:(deadline ());
+      let byte = Bytes.create 1 in
+      Alcotest.(check int) "ready high descriptor" 1 (Unix.read reader byte 0 1);
+      match
+        Io.protect (fun () ->
+            Io.wait ~read:[ reader ] ~write:[]
+              ~deadline:(Libtmux_unix__Linux.now () +. 0.001))
+      with
+      | Error Error.Deadline_exceeded -> ()
+      | _ -> Alcotest.fail "unready high descriptor did not reach its deadline")
+
 let cancellation_lifetime () =
   let module K = Libtmux_unix__Cancellation in
   let before = Array.length (Sys.readdir "/proc/self/fd") in
@@ -263,6 +293,8 @@ let () =
           Alcotest.test_case "aggregate reservations" `Quick payload_budget;
           Alcotest.test_case "ready I/O observes deadlines" `Quick
             ready_deadline;
+          Alcotest.test_case "high-descriptor readiness and deadline" `Quick
+            high_descriptor_readiness;
           Alcotest.test_case "token scope outlives a borrowed descriptor" `Quick
             cancellation_lifetime;
           Alcotest.test_case "environment records and limits" `Quick

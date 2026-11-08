@@ -321,10 +321,11 @@ TERM and then await exit without a grace deadline or escalation. Protected
 Eio cleanup can therefore wait indefinitely. Its blocking readiness also uses
 `Unix.select`, whose
 [descriptor check](https://github.com/ocaml/ocaml/blob/5.5.2/otherlibs/unix/select_unix.c#L35-L44)
-rejects descriptors outside `FD_SETSIZE`. These are open lifecycle defects,
-not accepted guarantees. The required correction is finite cooperative grace,
-forced termination and reaping of owned helpers, plus high-descriptor-capable
-readiness. Exchange deadlines, owned-child grace and filesystem completion
+rejects descriptors outside `FD_SETSIZE`. Blocking readiness now uses a shared
+private `poll` binding for protocol work and terminal attachment. Owned-child
+shutdown remains open: the required correction is finite cooperative grace,
+forced termination and reaping of owned helpers. Exchange deadlines,
+owned-child grace and filesystem completion
 need separate contracts. No library deadline bounds uninterruptible kernel
 work; the daemon remains outside helper termination policy.
 

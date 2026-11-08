@@ -60,9 +60,9 @@ let attach_current ?cancel ?(binary = "tmux") ?(read_only = false)
               if Linux.pidfd_alive pidfd then (
                 (try
                    ignore
-                     (Unix.select
-                        (pidfd :: Option.to_list cancel_fd)
-                        [] [] (-1.))
+                     (Linux.poll
+                        ~read:(pidfd :: Option.to_list cancel_fd)
+                        ~write:[] ~timeout:(-1.))
                  with Unix.Unix_error (Unix.EINTR, _, _) -> ());
                 wait ())
             in

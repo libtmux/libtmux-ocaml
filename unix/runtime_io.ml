@@ -46,11 +46,13 @@ let environment () =
 let rec wait ~read ~write ~deadline =
   let remaining = deadline -. Linux.now () in
   if remaining <= 0. then fail Error.Deadline_exceeded;
-  try
-    match Unix.select read write [] remaining with
-    | [], [], [] -> fail Error.Deadline_exceeded
-    | _ -> ()
-  with Unix.Unix_error (Unix.EINTR, _, _) -> wait ~read ~write ~deadline
+  let ready =
+    try Linux.poll ~read ~write ~timeout:remaining
+    with Unix.Unix_error (Unix.EINTR, _, _) -> false
+  in
+  (* A poll timeout can be capped by the platform; only the absolute deadline
+     establishes expiry. EINTR uses the same recomputation. *)
+  if not ready then wait ~read ~write ~deadline
 
 let close_fd fd =
   try Unix.close fd with Unix.Unix_error (Unix.EBADF, _, _) -> ()

@@ -43,13 +43,14 @@ every release. Ready I/O still checks its deadline; busy pipes cannot bypass
 the timeout. These results remain evidence for those tested cases.
 MCP integration is outside this port's scope.
 
-Two lifecycle defects remain open in the reviewed implementation. Owned-child
-cleanup sends TERM and waits without escalation, so a stopped helper or one
+Owned-child shutdown remains an open lifecycle defect. Cleanup
+sends TERM and waits without escalation, so a stopped helper or one
 that survives TERM and input closure can prevent close or cancellation cleanup
 from returning. Both blocking and Eio cleanup reproduced that behavior with
-owned helper processes. Blocking readiness also uses `Unix.select`, which
-rejects high-numbered descriptors in the calling OCaml process. Neither result
-establishes a crash or hang in a supported tmux daemon. See the
+owned helper processes. This does not establish a hang in a supported tmux
+daemon. Blocking readiness now uses `poll`; ready reads, ready writes and
+deadlines work above descriptor 1100. Terminal attachment and cancellation
+also exercise high-numbered descriptors on all four exact releases. See the
 [architecture's cleanup boundary](dev/adr/0001-native-ocaml-suite.md#share-protocol-semantics-while-preserving-each-runtimes-cancellation).
 
 The near-limit [mixed workload](benchmarking.md#mixed-commands-stream-pressure-and-membership-changes)
