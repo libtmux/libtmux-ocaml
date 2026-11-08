@@ -84,8 +84,9 @@ let snapshot =
 ```
 
 `require_success` reports failed steps and compensation before raising. The
-`protect` helper keeps that primary exception if closing also fails, reporting
-the cleanup failure separately. Both helpers are in the complete source.
+[`protect` helper](../examples/showcase_bootstrap.ml#L14) keeps that primary
+exception if closing also fails, reporting the cleanup failure separately.
+Both helpers are in the complete source.
 `Workspace.inspect execution` reads the retained journal after closure; inspect
 reported creations and uncertainty before choosing another action. The
 program stops without retrying. The
