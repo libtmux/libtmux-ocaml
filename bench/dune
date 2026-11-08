@@ -17,3 +17,8 @@
  (name retention)
  (modules retention)
  (libraries libtmux libtmux-unix yojson))
+
+(executable
+ (name control)
+ (modules control)
+ (libraries libtmux libtmux-eio eio_main mtime yojson))

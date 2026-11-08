@@ -112,7 +112,74 @@ $ opam exec -- python3 bench/retention.py scratch/tmux/tmux-3.8/tmux \
     --output scratch/retention.json
 ```
 
-## Concurrent requests, streaming and cancellation
+## Completed control-lane mutations
+
+The [control benchmark](../bench/control.py) measures typed
+`Libtmux.Operations.set_option` mutations through one persistent Eio control
+client. Each sample starts a fresh one-session, one-window, one-pane daemon,
+warms the connection, then
+completes 128 distinct option writes with 1, 8 or 32 concurrent callers.
+Six samples per cell rotate the order of those caller counts.
+
+Every handle must finish successfully. After the measured phase, an independent
+read checks every option name and value. Launch logs and process/client counts
+verify one persistent helper, with no subprocess per mutation. Owned teardown
+checks helper, client, pane and daemon exit.
+
+Build the executable outside normal test loops:
+
+```console
+$ opam exec -- dune build bench/control.exe
+```
+
+Run the complete matrix on one endpoint fixture:
+
+```console
+$ opam exec -- python3 bench/control.py scratch/tmux/tmux-3.8/tmux \
+    --requests 128 \
+    --concurrency 1 8 32 \
+    --repeat 6 \
+    --output scratch/control-baseline.json
+```
+
+OCaml 5.5.2 results on the two supported endpoints:
+
+| tmux | Callers | Median ops/s (min–max) | Submit-to-await p95, ms | Loop allocation, MiB |
+| --- | --- | --- | --- | --- |
+| 3.3a | 1 | 6068.2 (5016.1–7190.8) | 0.292 | 12.64 |
+| 3.3a | 8 | 6287.1 (4645.9–7017.5) | 2.020 | 13.30 |
+| 3.3a | 32 | 4961.3 (3640.1–7007.8) | 9.103 | 17.43 |
+| 3.8 | 1 | 3969.2 (3533.3–4966.2) | 0.435 | 12.64 |
+| 3.8 | 8 | 4100.4 (2949.3–5087.1) | 3.077 | 13.29 |
+| 3.8 | 32 | 3421.2 (2744.9–4300.8) | 13.175 | 17.42 |
+
+Raw [3.3a](../bench/results/control-3.3a-128-1-8-32.json) and
+[3.8](../bench/results/control-3.8-128-1-8-32.json) records retain all 768
+operation observations per cell, six sample durations, source/executable/binary
+hashes and platform details. One-minute host load started at 2.12 for 3.3a and
+9.14 for 3.8, with 12 available CPUs. Other host work was active. These samples
+do not establish a release-speed comparison or a recommended caller count.
+Increasing callers does not add lanes: the engine still serializes this client.
+
+The native phase includes command construction, completion checks and result-row
+allocation. It excludes connection, warmup, observer probes, independent
+verification and teardown. Per-operation time starts immediately before
+`Libtmux_eio.Client.submit`, after a benchmark worker becomes available; it
+includes admitted lane queueing and `Libtmux_eio.Client.await`, but excludes
+waiting for that worker slot. The pooled p95 uses nearest rank over the 768
+observations. Allocation includes the benchmark's
+own command and result values. The "sample_seconds" field includes setup and
+teardown; "consumer_and_topology_cpu_seconds" covers reaped children through
+consumer exit, including the topology probe, rather than daemon or whole-sample
+CPU.
+
+The raw "whole_command_seconds" field times the collector's entry point.
+Timing the outer command separately also includes Python and opam startup.
+
+These results qualify this fixed mutation workload. They do not qualify the
+stream-gap or mixed-load failures in [compatibility](compatibility.md).
+
+## Concurrent reads, streaming and cancellation
 
 The [Eio benchmark](../bench/concurrency.py) runs bounded concurrent option
 reads with distinct expected values. It checks response attribution and input
@@ -121,6 +188,10 @@ echo disabled. Output cursors must advance. Finally it cancels active byte
 waits and checks subscription cleanup. One primary client becomes two while a
 stream lane is active; both observed client and child-process counts are
 checked. No clients remain after closure, and owned pane/daemon exit is verified.
+
+Each option read starts a read-only tmux process inside the client's pump.
+The request rates below include process launch and are separate from the
+control-lane mutation measurements above.
 
 Build the executable outside normal test loops:
 

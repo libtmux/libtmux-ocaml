@@ -258,6 +258,13 @@ are checked before the result is accepted. They never carry mutation retries.
 Rendered capture's hook preflight is a separate path: its eight hook-scope
 reads still use the control lane.
 
+A [fixed-topology mutation benchmark](../../benchmarking.md#completed-control-lane-mutations)
+measures completed typed writes through one persistent control client, checking
+every resulting option value and owned process exit. Option-read throughput
+includes a subprocess per read and is recorded separately; it does not measure
+control-lane throughput. Neither workload qualifies mixed observation or
+establishes that batching would preserve capture semantics.
+
 Rendered capture currently checks applicable hooks, creates an owned paste
 buffer, reads its size, saves it to a private file and removes it. This adds
 shared-filesystem access, synchronous daemon file work, system-thread work in
