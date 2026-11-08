@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Retain connection and subscription cleanup results; overlapping Eio closes
+  wait for the same helper cleanup instead of returning before reaping.
 - Reject process I/O after closure and retain helper cleanup failures on
   repeated stops.
 - Add caller-owned cleanup reports and preserve primary failures while

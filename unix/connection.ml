@@ -39,6 +39,7 @@ type t = {
   binary : string;
   timeout : float;
   mutable closed : bool;
+  finalize : (unit -> unit) -> unit;
   busy : bool Atomic.t;
   mutable auxiliaries : lane list;
   mutable lane_slots : int;
@@ -66,16 +67,16 @@ let release_auxiliary t lane =
 
 let close t =
   owner t;
-  if not t.closed then (
-    t.closed <- true;
-    Cleanup.run
-      ([ t.on_close ]
-      @ List.map (fun lane () -> release_auxiliary t lane) t.auxiliaries
-      @ [
-          (fun () -> t.auxiliaries <- []);
-          (fun () -> stop t.lane);
-          (fun () -> cleanup_fd t.lane.io.cleanup Close_pidfd t.pidfd);
-        ]))
+  t.closed <- true;
+  t.finalize (fun () ->
+      Cleanup.run
+        ([ t.on_close ]
+        @ List.map (fun lane () -> release_auxiliary t lane) t.auxiliaries
+        @ [
+            (fun () -> t.auxiliaries <- []);
+            (fun () -> stop t.lane);
+            (fun () -> cleanup_fd t.lane.io.cleanup Close_pidfd t.pidfd);
+          ]))
 
 let check t =
   owner t;
@@ -238,6 +239,7 @@ let connect_process ?(timeout = 1.) ~io ~binary ~arguments ~initial endpoint =
       binary;
       timeout;
       closed = false;
+      finalize = io.finalizer ();
       busy = Atomic.make false;
       auxiliaries = [];
       lane_slots = 1;

@@ -368,8 +368,12 @@ including its original failure. A closing flag elects the teardown owner and
 stops the pump; it does not establish completion. Pipe ownership and helper-stop
 regressions cover descriptor reuse, pending reads, cancellation and switch
 release. The closing flag rejects new commands and subscriptions before
-validation or I/O. Overlapping internal connection closure remains open
-lifecycle work.
+validation or I/O. Connections and subscriptions each have a private runtime
+finalizer that retains one completion. Blocking callers remain serialized;
+Eio callers join a protected finalizer and receive the same result, including
+its original failure and backtrace. Callbacks must not re-enter their own
+finalizer. A subscription keeps its first terminal reason and joins helper
+reaping when it releases the last user of a lane.
 
 Expected failures use `result` and typed variants. Eio cancellation and blocking
 cancellation keep their native exception behavior. Catch-all exception

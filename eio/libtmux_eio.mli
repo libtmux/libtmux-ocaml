@@ -102,8 +102,11 @@ module Subscription : sig
       closes it, releases its lane when unused, and propagates. *)
 
   val close : t -> (unit, Libtmux.Error.t) result
-  (** Discard pending data and retain End Cancelled. Borrowed clients and the
-      daemon remain alive. *)
+  (** End an active subscription with Cancelled and discard pending data.
+      Preserve an already ended subscription's terminal reason. Concurrent calls
+      join the same cleanup, including reaping a lane when it becomes unused;
+      later calls retain cleanup failures. Borrowed clients and the daemon
+      remain alive. {!poll} can still read the terminal event. *)
 
   val wait_for_bytes :
     ?timeout:float ->

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Retain connection and subscription cleanup results; overlapping Eio closes
+  wait for the same helper cleanup instead of returning before reaping.
 - Reject new Eio command and subscription admission as soon as client close
   starts, before waiting for stream helpers to exit.
 - Own transferred control pipes explicitly and join readiness waiters before

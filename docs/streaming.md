@@ -48,6 +48,11 @@ when a subscriber stalls. The blocking backend advances all stream lanes during
 propagates through the backend's cancellation mechanism. Client close releases
 all owned lanes and retains terminal events; it leaves the daemon alive.
 
+When a subscription releases the last user of a lane, close waits for its
+owned helper to be reaped. Concurrent Eio subscription closes join that same
+cleanup. Repeated closes preserve the first terminal reason and any cleanup
+failure; unconsumed terminal events remain readable through `Subscription.poll`.
+
 The [recovery program](recovery.md) shows how to cancel one operation waiter
 while keeping its retained outcome available. Cancelling a subscription closes
 that subscription; it does not cancel an already admitted command.

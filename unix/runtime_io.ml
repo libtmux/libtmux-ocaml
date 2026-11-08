@@ -29,6 +29,9 @@ type process = {
 type t = {
   cleanup : Cleanup.t;
   spawn : string list -> process;
+  (* Callbacks must not re-enter their own finalizer. Blocking clients serialize
+     access; Eio joins overlapping calls while retaining the first result. *)
+  finalizer : unit -> (unit -> unit) -> unit;
   file_io : 'a. (unit -> 'a) -> 'a;
   check : unit -> unit;
   wait :
@@ -37,6 +40,22 @@ type t = {
     deadline:float ->
     unit;
 }
+
+let finalizer () =
+  let result = ref None in
+  fun f ->
+    let outcome =
+      match !result with
+      | Some outcome -> outcome
+      | None ->
+          let outcome =
+            try Ok (f ())
+            with exn -> Error (exn, Printexc.get_raw_backtrace ())
+          in
+          result := Some outcome;
+          outcome
+    in
+    Cleanup.get outcome
 
 let environment () =
   Unix.environment () |> Array.to_list
@@ -203,6 +222,7 @@ let blocking ?(cleanup = Cleanup.create ()) () =
   {
     cleanup;
     spawn = spawn ~cleanup;
+    finalizer;
     wait;
     file_io = (fun f -> f ());
     check = (fun () -> ());

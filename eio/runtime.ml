@@ -5,6 +5,20 @@ module Linux = Libtmux_unix__Linux
 
 exception Process_closed
 
+let finalizer () =
+  let started = ref false in
+  let finished, publish = Eio.Promise.create () in
+  fun f ->
+    Eio.Cancel.protect (fun () ->
+        if not !started then (
+          started := true;
+          let result =
+            try Ok (f ())
+            with exn -> Error (exn, Printexc.get_raw_backtrace ())
+          in
+          Eio.Promise.resolve publish result);
+        Cleanup_internal.get (Eio.Promise.await finished))
+
 let create ~cleanup ~sw ~process_mgr ~mono_clock =
   Cleanup_internal.check cleanup;
   let io_failure exn = Io.fail (Error.Disconnected (Printexc.to_string exn)) in
@@ -134,6 +148,7 @@ let create ~cleanup ~sw ~process_mgr ~mono_clock =
   {
     Io.cleanup;
     spawn;
+    finalizer;
     wait;
     check =
       (fun () ->

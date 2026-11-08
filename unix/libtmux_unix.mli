@@ -160,8 +160,10 @@ module Subscription : sig
       subscription active; cancellation closes it and raises Cancelled. *)
 
   val close : t -> (unit, Libtmux.Error.t) result
-  (** Discard pending data and retain End Cancelled. Release an unused lane.
-      Does not stop the daemon. *)
+  (** End an active subscription with Cancelled and discard pending data.
+      Preserve an already ended subscription's terminal reason. Release and reap
+      an unused lane; later calls retain cleanup failures. Does not stop the
+      daemon. {!poll} can still read the terminal event. *)
 
   val wait_for_bytes :
     ?cancel:Cancellation.t ->
@@ -743,12 +745,13 @@ module Client : sig
   (* END GENERATED OPERATIONS *)
 
   val close : t -> (unit, Libtmux.Error.t) result
-  (** Close owned control clients and descriptors. Idempotent on the owning
-      domain. Each owned helper gets 200 ms of TERM grace, followed by KILL if
-      needed and reaping. This is not a whole-client deadline or a bound on
-      uninterruptible kernel work. No signal targets the daemon. tmux's
-      [exit-unattached] and [exit-empty] policies can end the daemon after its
-      clients or sessions disappear. *)
+  (** Close owned control clients and descriptors on the owning domain. Later
+      calls retain the original cleanup result, including failure. Each owned
+      helper gets 200 ms of TERM grace, followed by KILL if needed and reaping.
+      This is not a whole-client deadline or a bound on uninterruptible kernel
+      work. No signal targets the daemon. tmux's [exit-unattached] and
+      [exit-empty] policies can end the daemon after its clients or sessions
+      disappear. *)
 end
 
 (** Apply validated plans with blocking I/O and scoped cancellation tokens.

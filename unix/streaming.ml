@@ -38,6 +38,7 @@ and subscription = {
   mutable bytes : int;
   mutable offset : int64;
   mutable delivered : Output.cursor option;
+  finalize : (unit -> unit) -> unit;
 }
 
 let reclaim lane =
@@ -47,27 +48,28 @@ let reclaim lane =
     C.release_auxiliary lane.manager.connection lane.control)
 
 let finish ?(gap = false) ?lost_bytes sub reason =
-  if sub.active then (
-    sub.active <- false;
-    sub.manager.count <- sub.manager.count - 1;
-    C.Budget.release sub.manager.connection.budget sub.capacity_bytes;
-    Queue.clear sub.queue;
-    sub.bytes <- 0;
-    if gap then
-      Queue.add
-        (Output.Gap { after = sub.delivered; lost_bytes; reason })
-        sub.queue;
-    Queue.add (Output.End reason) sub.queue;
-    Cleanup.protect
-      ~finally:(fun () ->
-        Cleanup.step sub.manager.connection.lane.io.cleanup Notify_waiters
-          sub.manager.changed)
-      (fun () ->
-        Option.iter
-          (fun lane ->
-            lane.subscribers <- List.filter (( != ) sub) lane.subscribers;
-            reclaim lane)
-          sub.lane))
+  sub.finalize (fun () ->
+      if sub.active then (
+        sub.active <- false;
+        sub.manager.count <- sub.manager.count - 1;
+        C.Budget.release sub.manager.connection.budget sub.capacity_bytes;
+        Queue.clear sub.queue;
+        sub.bytes <- 0;
+        if gap then
+          Queue.add
+            (Output.Gap { after = sub.delivered; lost_bytes; reason })
+            sub.queue;
+        Queue.add (Output.End reason) sub.queue;
+        Cleanup.protect
+          ~finally:(fun () ->
+            Cleanup.step sub.manager.connection.lane.io.cleanup Notify_waiters
+              sub.manager.changed)
+          (fun () ->
+            Option.iter
+              (fun lane ->
+                lane.subscribers <- List.filter (( != ) sub) lane.subscribers;
+                reclaim lane)
+              sub.lane)))
 
 let retire lane reason =
   List.iter (fun sub -> finish ~gap:true sub reason) lane.subscribers;
@@ -325,6 +327,7 @@ let subscribe ?session ?(capacity_bytes = 1_048_576) ?(capacity_events = 1024)
       bytes = 0;
       offset = 0L;
       delivered = None;
+      finalize = c.lane.io.finalizer ();
     }
   in
   try

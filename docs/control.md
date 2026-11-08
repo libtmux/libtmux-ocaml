@@ -41,7 +41,8 @@ Eio `Client.close` rejects new command and subscription admission as soon as
 closing starts. Concurrent closes wait for the same teardown result. A later
 close retains an earlier teardown failure; the closed state alone does not
 prove resources were released. Inspect the client's `Cleanup` report for
-secondary failures.
+secondary failures. Internal connection teardown also retains one completion,
+so a concurrent failure path cannot skip cleanup already in progress.
 
 The [complete recovery example](recovery.md) cancels an active waiter, awaits
 the same retained operation and checks server state before its next mutation.

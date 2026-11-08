@@ -17,8 +17,94 @@ let cancel_wait op =
    with Eio.Cancel.Cancelled Stop_waiting -> cancelled := true);
   assert !cancelled
 
+let overlapping_connection_close ~sw ~process_mgr ~mono_clock ~binary endpoint =
+  let module Connection = Libtmux_unix__Connection in
+  List.iter
+    (fun fail_cleanup ->
+      let io =
+        Libtmux_eio__Runtime.create ~sw ~process_mgr ~mono_clock
+          ~cleanup:(Libtmux_unix.Cleanup.create ())
+      in
+      let connection = Connection.connect ~io ~binary endpoint in
+      let entered, publish = Eio.Promise.create () in
+      let release, resume = Eio.Promise.create () in
+      connection.on_close <-
+        (fun () ->
+          Eio.Promise.resolve publish ();
+          Eio.Promise.await release;
+          if fail_cleanup then raise Exit);
+      let close () =
+        Eio.Cancel.protect (fun () -> Connection.close connection)
+      in
+      let first = Eio.Fiber.fork_promise ~sw close in
+      Eio.Promise.await entered;
+      let second = Eio.Fiber.fork_promise ~sw close in
+      let returned_early = Eio.Promise.is_resolved second in
+      Eio.Promise.resolve resume ();
+      let first_result = Eio.Promise.await first
+      and second_result = Eio.Promise.await second in
+      if returned_early then
+        failwith "overlapping connection close returned early";
+      (match (fail_cleanup, first_result, second_result) with
+      | false, Ok (), Ok () | true, Error Exit, Error Exit -> ()
+      | _ -> failwith "connection close lost the retained cleanup result");
+      match (fail_cleanup, close ()) with
+      | false, () -> ()
+      | _ -> failwith "later connection close lost cleanup failure"
+      | exception Exit when fail_cleanup -> ())
+    [ false; true ]
+
 let () =
   Eio_main.run (fun env ->
+      Eio.Switch.run (fun sw ->
+          overlapping_connection_close ~sw
+            ~process_mgr:(Eio.Stdenv.process_mgr env)
+            ~mono_clock:(Eio.Stdenv.mono_clock env)
+            ~binary:Sys.argv.(1)
+            (Endpoint.socket_path Sys.argv.(2)));
+      Eio.Switch.run (fun sw ->
+          let client =
+            get
+              (C.connect ~sw
+                 ~process_mgr:(Eio.Stdenv.process_mgr env)
+                 ~mono_clock:(Eio.Stdenv.mono_clock env)
+                 ~binary:Sys.argv.(1)
+                 (Endpoint.socket_path Sys.argv.(2)))
+          in
+          Fun.protect
+            ~finally:(fun () -> get (C.close client))
+            (fun () ->
+              let snapshot = get (C.capture client) in
+              let pids snapshot =
+                Snapshot.clients snapshot |> Iarray.to_seq
+                |> Seq.map Client_observation.pid
+                |> List.of_seq
+              in
+              let before = pids snapshot in
+              let pane = Iarray.get (Snapshot.panes snapshot) 0 in
+              let subscription = get (C.subscribe client pane) in
+              let helper =
+                match
+                  pids (get (C.capture client))
+                  |> List.filter (fun pid -> not (List.mem pid before))
+                with
+                | [ pid ] -> pid
+                | _ -> failwith "expected one owned stream helper"
+              in
+              Unix.kill helper Sys.sigstop;
+              let first =
+                Eio.Fiber.fork_promise ~sw (fun () ->
+                    get (Libtmux_eio.Subscription.close subscription))
+              in
+              let result = Libtmux_eio.Subscription.close subscription in
+              let returned_before_reap =
+                Sys.file_exists (Printf.sprintf "/proc/%d" helper)
+              in
+              Eio.Promise.await_exn first;
+              get result;
+              if returned_before_reap then
+                failwith
+                  "second subscription close returned before helper reaping"));
       Eio.Switch.run (fun sw ->
           let client =
             get
