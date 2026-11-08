@@ -62,6 +62,56 @@ The largest graph has 256 panes. Each observation still uses batched graph
 acquisition. Allocation counters cover the OCaml heap during the capture loop;
 they do not measure process RSS or tmux's allocations.
 
+## Heap retained across captures
+
+Keeping one pane keeps its captured graph reachable. The
+[retention benchmark](../bench/retention.py) measures this with a blocking
+client and one session containing one pane per window. Each sample runs in a
+fresh process, warms the connection, then captures the same graph 100 times.
+It measures live OCaml heap after full major collection before capture, while
+retained values remain reachable, and after releasing them.
+
+On OCaml 5.5.2 and tmux 3.8, six samples per mode produced these live-heap
+increases in KiB. Every sample had the same retained-byte count:
+
+| Windows | Every snapshot | One pane per capture | Latest pane only | Evidence |
+| --- | --- | --- | --- | --- |
+| 1 | 115.6 | 117.9 | 1.1 | [Raw data](../bench/results/retention-3.8-1x1.json) |
+| 16 | 982.8 | 985.1 | 9.8 | [Raw data](../bench/results/retention-3.8-16x1.json) |
+| 64 | 3757.8 | 3760.1 | 37.6 | [Raw data](../bench/results/retention-3.8-64x1.json) |
+
+Retaining 100 detached `(id, command, path)` summaries used 13.2 KiB in each
+graph shape; 100 `Pane.target` values used 6.2 KiB. With 64 windows and
+[25 captures](../bench/results/retention-3.8-64x1-25-captures.json), retaining
+one pane per capture used 940.0 KiB, while retaining only the latest pane
+still used 37.6 KiB. Targets remain connection-bound; retaining one does not
+authorize a future connection.
+
+These are total live-heap differences, including list cells and projected
+values, not exact arena sizes. The discard control and every release phase
+returned 40 bytes below the warm baseline, a small baseline-overhead offset.
+This measurement does not cover process RSS, tmux memory, relationship-array
+allocation or a general leak guarantee. Mode order rotates across samples.
+The harness verifies topology, retained value counts, detached clients and
+owned daemon/pane teardown. Sample durations include the client-exit check;
+whole-command duration includes fixture setup and teardown.
+
+Build the benchmark:
+
+```console
+$ opam exec -- dune build bench/retention.exe
+```
+
+Run the 64-window case with a new output path:
+
+```console
+$ opam exec -- python3 bench/retention.py scratch/tmux/tmux-3.8/tmux \
+    --windows 64 \
+    --captures 100 \
+    --repeat 6 \
+    --output scratch/retention.json
+```
+
 ## Concurrent requests, streaming and cancellation
 
 The [Eio benchmark](../bench/concurrency.py) runs bounded concurrent option

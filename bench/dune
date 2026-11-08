@@ -12,3 +12,8 @@
  (name mixed)
  (modules mixed)
  (libraries libtmux libtmux-eio eio_main mtime yojson unix))
+
+(executable
+ (name retention)
+ (modules retention)
+ (libraries libtmux libtmux-unix yojson))

@@ -76,5 +76,7 @@ of those captures. Keep scalar summaries when navigation is unnecessary.
 `Pane.target` omits the graph but remains bound to its original connection
 generation; it is not a durable target for a future connection. Relationship
 traversal can allocate wrapper arrays even when a query stops testing early.
+The [retained-heap measurements](benchmarking.md#heap-retained-across-captures)
+compare these choices across repeated real captures.
 
 [Queries](queries.md) · [Recovery](control.md) · [API](api.md)

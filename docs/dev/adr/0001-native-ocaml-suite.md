@@ -142,8 +142,13 @@ Each entity retains the entire captured arena. Keeping one pane from each
 refresh keeps each corresponding graph alive. A detached scalar summary avoids
 that retention; a target also omits the graph but retains its source-generation
 restriction. Relationship traversal can allocate wrapper arrays before an
-expression stops testing children. Measure retained heap and traversal costs
-before introducing partial capture or caches.
+expression stops testing children. The
+[retained-heap measurements](../../benchmarking.md#heap-retained-across-captures)
+confirm this ownership cost: retaining one pane per refresh keeps approximately
+the same live heap as retaining each snapshot. Keeping only the latest pane,
+detached summaries or targets limits retention according to the caller's need.
+This supports keeping complete snapshots with explicit retention choices.
+Measure traversal costs separately before introducing partial capture or caches.
 
 Materialization can fail during concurrent graph changes. Its benefit is a
 complete local graph without per-object subprocesses or surprise refreshes.
