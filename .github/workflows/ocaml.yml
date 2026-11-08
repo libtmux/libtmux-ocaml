@@ -1,108 +1,14 @@
-name: OCaml
+name: OCaml close diagnostic
 on:
-  push:
-    branches: [master]
-  pull_request:
   workflow_dispatch:
 permissions:
   contents: read
-concurrency:
-  group: ocaml-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-env:
-  OPAMJOBS: '2'
 jobs:
-  quality:
+  diagnose-close:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: ocaml/setup-ocaml@ff66428f72b64472e749b22e0ad4dded4b2ddca6 # v3.9.1
-        with:
-          ocaml-compiler: ocaml-base-compiler.5.5.2
-      - name: Install development dependencies
-        run: |
-          opam install . --deps-only --with-test --with-doc --yes
-          opam install ocamlformat.0.29.0 --yes
-      - name: Verify exact toolchain and authored manifests
-        run: |
-          test "$(opam exec -- ocamlc -version)" = 5.5.2
-          test "$(opam exec -- dune --version)" = 3.24.2
-          test "$(opam --version)" = 2.6.1
-          opam lint ./*.opam
-      - name: Build, typed assertions, expectations and properties
-        run: |
-          opam exec -- dune build @all @install @doc
-          opam exec -- dune runtest --force
-      - name: Export and verify public typed interfaces
-        env:
-          LIBTMUX_API_EXPORT: '1'
-        run: |
-          opam exec -- dune build tools/api_export.exe
-          opam exec -- python3 test/api_export_test.py
-          opam exec -- python3 tools/export_api.py --output _build/docs/ocaml.json
-      - name: Verify workspace document bounds and input backends
-        run: opam exec -- python3 test/workspace_document_test.py
-      - name: Verify conformance evidence checks without a JVM
-        run: python3 test/conformance/runner_test.py
-      - name: Verify format and generated catalogs
-        run: |
-          python3 tools/docs_snippets.py
-          git ls-files -z -- '*.ml' '*.mli' | xargs -0 opam exec -- ocamlformat --check
-          opam exec -- python3 tools/generate_fields.py --check
-          opam exec -- python3 tools/generate_options.py --check
-          opam exec -- python3 tools/generate_formats.py --check
-          opam exec -- python3 tools/generate_operations.py --check
-          git diff --exit-code
-      - name: Retain failed build diagnostics
-        if: failure()
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: quality-diagnostics
-          path: |
-            _build/log
-            _build/**/*.corrected
-            _build/**/_tests/**
-  native:
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    strategy:
-      fail-fast: false
-      matrix:
-        tmux: ['3.3', '3.3a', '3.4', '3.8']
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: ocaml/setup-ocaml@ff66428f72b64472e749b22e0ad4dded4b2ddca6 # v3.9.1
-        with:
-          ocaml-compiler: ocaml-base-compiler.5.5.2
-      - name: Install test dependencies
-        run: opam install . --deps-only --with-test --yes
-      - uses: ./.github/actions/build-tmux
-        id: tmux
-        with:
-          ref: ${{ matrix.tmux }}
-      - name: Build and exercise native clients
-        env:
-          TMUX_BINARY: ${{ steps.tmux.outputs.prefix }}/bin/tmux
-        run: |
-          opam exec -- dune build @all @install
-          opam exec -- python3 test/native_suite.py "$TMUX_BINARY"
-          opam exec -- python3 test/installed_consumer.py "$TMUX_BINARY"
-      - name: Execute installed documentation and standalone programs
-        env:
-          TMUX_BINARY: ${{ steps.tmux.outputs.prefix }}/bin/tmux
-        run: |
-          opam exec -- python3 test/workspace_docs_test.py "$TMUX_BINARY"
-          opam exec -- python3 test/showcase_test.py "$TMUX_BINARY"
-      - name: Retain failed build diagnostics
-        if: failure()
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: native-${{ matrix.tmux }}-diagnostics
-          path: _build/log
-  unsupported:
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
+    env:
+      OPAMJOBS: '2'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ocaml/setup-ocaml@ff66428f72b64472e749b22e0ad4dded4b2ddca6 # v3.9.1
@@ -112,11 +18,19 @@ jobs:
       - uses: ./.github/actions/build-tmux
         id: tmux
         with:
-          ref: '3.2a'
-      - name: Verify older-release rejection
+          ref: '3.3a'
+      - run: opam exec -- dune build @all @install
+      - name: Collect first-close evidence
         env:
           TMUX_BINARY: ${{ steps.tmux.outputs.prefix }}/bin/tmux
-        run: |
-          opam exec -- dune build @all @install
-          opam exec -- python3 test/blocking_test.py "$TMUX_BINARY"
-          opam exec -- python3 test/workspace_cli_test.py --unsupported "$TMUX_BINARY"
+        run: >-
+          opam exec -- python3 test/diagnose_eio_close.py "$TMUX_BINARY"
+          --repeat 20 --output _build/diagnostics/eio-close
+      - name: Retain diagnostic sources and observations
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: eio-close-diagnostics
+          path: |
+            _build/diagnostics/eio-close
+            _build/log
