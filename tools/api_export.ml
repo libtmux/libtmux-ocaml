@@ -368,9 +368,13 @@ and walk_type unit owner env declaration =
         declaration.typ_kind = Ttype_abstract && declaration.typ_manifest = None
       in
       let normalized =
-        print
-          (Printtyp.type_declaration declaration.typ_id)
-          declaration.typ_type
+        (* Resolved paths can name Dune's private wrapper. Keep authored paths. *)
+        let mapper =
+          { Untypeast.default_mapper with attributes = (fun _ _ -> []) }
+        in
+        print Pprintast.signature_item
+          (Ast_helper.Sig.type_ Recursive
+             [ mapper.type_declaration mapper declaration ])
       in
       let kind =
         match declaration.typ_kind with
@@ -392,7 +396,9 @@ and walk_type unit owner env declaration =
           ~raw:
             (match declaration.typ_manifest with
             | None -> ""
-            | Some typ -> print Printtyp.type_scheme typ.ctyp_type)
+            | Some typ ->
+                let mapper = Untypeast.default_mapper in
+                print Pprintast.core_type (mapper.typ mapper typ))
           ~extra ()
       in
       match declaration.typ_kind with

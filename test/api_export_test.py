@@ -27,11 +27,18 @@ module Nested : sig
 end
 module Id : ID
 module Alias = Nested
+module Cleanup : sig
+  type t = Cleanup.t
+end
 '''
     (project / "public.mli").write_text(source)
     (project / "private.mli").write_text("val hidden : unit -> unit\n")
-    for name in ("public", "private"):
-        subprocess.run(["ocamlc", "-bin-annot", "-c", name + ".mli"], cwd=project, check=True)
+    (project / "implementation.mli").write_text("type t\n")
+    (project / "public__.ml").write_text("module Cleanup = Implementation\n")
+    for name in ("implementation.mli", "public__.ml", "private.mli"):
+        subprocess.run(["ocamlc", "-bin-annot", "-c", name], cwd=project, check=True)
+    compile_public = ["ocamlc", "-bin-annot", "-open", "Public__", "-c", "public.mli"]
+    subprocess.run(compile_public, cwd=project, check=True)
     manifest = {"modules": [{"module": "Public", "package": "fixture", "product": "core",
                               "submodules": {"Nested": "workspace"},
                               "source": "public.mli", "cmti": "public.cmti"}]}
@@ -50,6 +57,9 @@ module Alias = Nested
     opaque = symbols["Public.Nested.t"]
     assert opaque["kind"] == "typealias" and opaque["modifiers"] == ["opaque"]
     assert symbols["Public.Nested.alias"]["type"] == "t"
+    cleanup = symbols["Public.Cleanup.t"]
+    assert cleanup["type"] == "Cleanup.t", cleanup
+    assert cleanup["signatures"][0]["raw"] == "type t = Cleanup.t", cleanup
     assert symbols["Public.Alias"]["exportedFrom"] == "Public.Nested"
     assert "Public.Id.of_string" in symbols, "public module type was not expanded"
     run = symbols["Public.Nested.run"]
@@ -89,7 +99,7 @@ module Alias = Nested
     manifest["modules"][0]["cmti"] = "public.cmti"
     path.write_text(json.dumps(manifest))
     (project / "public.mli").write_text(source.replace("module Alias = Nested", "module Alias = Private"))
-    subprocess.run(["ocamlc", "-bin-annot", "-c", "public.mli"], cwd=project, check=True)
+    subprocess.run(compile_public, cwd=project, check=True)
     private = extract()
     assert private.returncode != 0 and "outside the public module manifest" in private.stderr
 print("PASS public cmti: opaque types, aliases, labels, results, docs, sources, freshness and private exclusion")
