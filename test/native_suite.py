@@ -25,7 +25,7 @@ subprocess.run([sys.executable, str(root / "test/workspace_cli_test.py"), binary
 # Eio's POSIX fallback reaps through switch-owned fibers rather than pidfd
 # completion. Exercise cancellation before those fibers' release hooks run.
 if os.environ.get("EIO_BACKEND") != "posix":
-    for name, arguments in [("eio", []), ("capture_cancel", []), ("streaming", []),
+    for name, arguments in [("eio", []), ("binding", []), ("capture_cancel", []), ("streaming", []),
                             ("bootstrap", []), ("workspace", ["--eio"])]:
         subprocess.run([sys.executable, str(root / "test" / f"{name}_test.py"),
                         *arguments, binary], cwd=root, check=True, timeout=5,

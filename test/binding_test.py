@@ -41,3 +41,24 @@ for binary in sys.argv[1:]:
             assert original.command("list-clients").stdout == b""
             assert replacement.command("list-clients").stdout == b""
             print(f"PASS {Path(binary).parent.name}: {backend}: bound stream replacement rejection, teardown")
+    for mode in ("eio-daemon-exit", "eio-daemon-exit-paused"):
+        with TmuxFixture(binary) as fixture:
+            process = subprocess.Popen([str(peer), fixture.binary, str(fixture.socket), mode],
+                                       env=fixture.environment, stdin=subprocess.DEVNULL,
+                                       stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            try:
+                with selectors.DefaultSelector() as ready:
+                    ready.register(process.stdout, selectors.EVENT_READ)
+                    assert ready.select(1), "daemon-exit peer not ready"
+                assert process.stdout.readline() == b"READY_EXIT\n"
+                fixture.command("kill-server")
+                stdout, stderr = process.communicate(timeout=1)
+                assert process.returncode == 0, (stdout, stderr)
+                assert stdout == b"RETAIN daemon disconnection\n" and stderr == b"", (stdout, stderr)
+            finally:
+                if process.poll() is None:
+                    process.kill()
+                    process.wait(timeout=1)
+                process.stdout.close()
+                process.stderr.close()
+            print(f"PASS {Path(binary).parent.name}: {mode}: daemon-exit cause and retained outcome")

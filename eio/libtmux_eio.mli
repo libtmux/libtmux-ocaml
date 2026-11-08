@@ -61,7 +61,10 @@ module Operation : sig
     created : Libtmux.Created.t list;
   }
   (** [created] retains IDs reported before a later hook or completion failure.
-      It does not prove those resources still exist or authorize retry. *)
+      It does not prove those resources still exist or authorize retry. When the
+      daemon watcher retires an in-flight operation, [cause] retains
+      {!Libtmux.Error.Disconnected}. Idle-reader failures also retain their
+      library cause instead of becoming an explicit client-close reason. *)
 
   type 'a state =
     | Queued

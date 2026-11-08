@@ -139,7 +139,7 @@ module Client = struct
 
   exception Client_closed
 
-  let close_exn t =
+  let close_exn ?(cause = Error.Closed) t =
     C.owner t.engine.connection;
     Eio.Cancel.protect (fun () ->
         if not t.closing then (
@@ -147,6 +147,9 @@ module Client = struct
           let report = t.engine.connection.lane.io.cleanup in
           let result =
             try
+              (* Cleanup can yield to a cancelled operation worker. Retain the
+                 initiating cause before that worker can finish the handle. *)
+              Engine.retire ~cause t.engine;
               Cleanup_internal.run
                 (List.map
                    (fun context () ->
@@ -155,8 +158,13 @@ module Client = struct
                    t.contexts
                 @ [
                     (fun () ->
-                      Streaming.close_all t.streams Output.Client_closed);
-                    (fun () -> Engine.close t.engine);
+                      let reason =
+                        match cause with
+                        | Error.Closed -> Output.Client_closed
+                        | error -> Output.Transport_error error
+                      in
+                      Streaming.close_all t.streams reason);
+                    (fun () -> Engine.close ~cause t.engine);
                     (fun () ->
                       Cleanup_internal.step report Release_hook (fun () ->
                           Eio.Switch.remove_hook t.release));
@@ -260,7 +268,7 @@ module Client = struct
     t.release <- Eio.Switch.on_release_cancellable sw (fun () -> close_exn t);
     worker ~sw t (fun () ->
         Eio_unix.await_readable connection.pidfd;
-        close_exn t);
+        close_exn ~cause:(Error.Disconnected "bound daemon exited") t);
     worker ~sw t (fun () ->
         let rec pump () =
           if not t.closing then (
@@ -313,7 +321,9 @@ module Client = struct
                       events);
                 pump ())
         in
-        match protect pump with Ok () -> () | Error _ -> close_exn t);
+        match protect pump with
+        | Ok () -> ()
+        | Error error -> close_exn ~cause:error t);
     t
 
   let connect ?(cleanup = Cleanup.create ()) ?(binary = "tmux") ?timeout ~sw

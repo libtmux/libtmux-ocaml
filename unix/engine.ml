@@ -337,10 +337,14 @@ let take client =
       client.active <- job :: client.active;
       Some job
 
-let close client =
+let retire ?(cause = Error.Closed) client =
   C.owner client.connection;
+  client.connection.closed <- true;
   List.iter (fun (Pack op) -> cancel op) client.queue;
-  List.iter (fun (Pack op) -> finish op (Error Error.Closed)) client.active;
+  List.iter (fun (Pack op) -> finish op (Error cause)) client.active
+
+let close ?(cause = Error.Closed) client =
+  retire ~cause client;
   Cleanup.run
     [
       (fun () -> C.close client.connection);

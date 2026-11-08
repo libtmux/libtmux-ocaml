@@ -63,6 +63,11 @@ Expected failures use `result` and `Error.t`. Backend cancellation propagates
 as cancellation. An uncertain result retains reported creation IDs and unresolved
 owned buffers; it never becomes an instruction to retry the mutation.
 
+When Eio's daemon watcher closes a connection, an in-flight operation retains
+`Error.Disconnected` as its cause. An idle-reader failure retains its library
+error. Explicit client closure uses `Error.Closed`. Inspect the retained receipt
+to distinguish these reasons; each can leave an admitted mutation uncertain.
+
 `Client.cleanup` retains process and descriptor cleanup diagnostics after
 closure. Supply a `Cleanup.create ()` report through `~cleanup` before connecting
 when diagnostics must survive failed setup or cancellation. The same option is
