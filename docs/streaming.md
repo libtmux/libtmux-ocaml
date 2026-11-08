@@ -41,6 +41,8 @@ subscribers, and eight total client lanes including command/wait lanes. Reuse
 one verified lane per covered session. Admission reserves bytes against the
 shared 32 MiB budget. A full queue produces Gap then End rather than blocking
 another subscriber or an independent command. Unknown loss has no byte count.
+These limits apply together; [plan shared capacity](#plan-shared-capacity)
+before combining many observers with captures and reads.
 
 Coverage uses an observed session/window context and revalidates it during
 admission. Layout or membership changes end continuity conservatively. Detaching
@@ -64,6 +66,74 @@ that subscription; it does not cancel an already admitted command.
 
 Neither interface establishes an atomic capture/stream barrier or reconstructs
 terminal history. An immutable snapshot remains a separate captured value.
+
+## Plan shared capacity
+
+Every client has its own bounded payload budget and process-slot pool. The
+blocking and Eio clients use the same accounting. An individually valid queue
+or command can still return `Error.Capacity` when another reservation consumes
+the available headroom:
+
+| Resource | Current limit or reservation |
+| --- | --- |
+| Aggregate client payload | 32 MiB shared by queues, commands and operation scratch space |
+| Admitted commands | 64; encoded payload accounting remains charged until completion or cancellation before writing |
+| Admitted command bytes | 1 MiB shared across admitted operations; submission also temporarily reserves 2 MiB |
+| Client process slots | 8, including the primary control client; each auxiliary slot reserves 128 KiB |
+| Subscriptions | 16 active per client, sharing a verified stream lane per covered session |
+| Subscriber queue | 1 MiB / 1024 events by default; reserve the full configured byte capacity even when empty |
+| Graph or rendered capture | 16 MiB operation scratch reservation plus an 8 MiB control exchange |
+| Option, environment or hook read | 16 MiB scratch reservation plus a temporary process slot |
+
+The payload budget tracks library reservations. Caller-retained snapshots,
+completed operation handles, receipts and exception payloads have their own
+lifetimes, alongside runtime overhead, child-process memory and tmux's
+allocations. See [observation retention](graph.md).
+
+For example, sixteen default queues on one covered session reserve 16 MiB
+plus that session's auxiliary slot. A subsequent capture or read cannot obtain
+its scratch reservation. Even eight default queues leave insufficient room for
+the capture's nested control exchange. Closing subscriptions releases their
+reservations; the client remains usable after a capacity error.
+
+| Empty queues, one covered session | Capture | Option read |
+| --- | --- | --- |
+| 16 × 1 MiB | `Capacity` | `Capacity` |
+| 8 × 1 MiB | `Capacity` | Fits the reservation budget |
+| 7 × 1 MiB | Fits the reservation budget | Fits the reservation budget |
+| 16 × 256 KiB | Fits the reservation budget | Fits the reservation budget |
+
+These examples describe reservation accounting on a fixed one-pane graph.
+Additional lanes, admitted commands and concurrent work consume more headroom.
+A budget that fits still needs valid targets, available data and a responsive
+daemon.
+
+The [complete watcher](../examples/native_watch.ml) chooses its queue explicitly:
+
+<!-- example: examples/native_watch.ml#bounded-subscription -->
+
+```ocaml
+let subscription =
+  get
+    (Client.subscribe ~capacity_bytes:(256 * 1024) ~capacity_events:256 client
+       pane)
+```
+
+Its full program includes the client, pane acquisition, result handling, Eio
+switch and cleanup. Choose a capacity for the burst your application can
+consume; a smaller queue reaches `Gap Overflow` sooner when its reader stalls.
+
+Slots need their own headroom. The primary client and seven distinct covered
+sessions fill all eight slots, leaving none for a read process or `wait_for`.
+If an application needs those operations, it can cap distinct covered sessions
+at six while keeping one slot for service, accounting for any waits already
+using slots. The library currently reserves no slot exclusively for service.
+Several panes in the same session can share its stream lane.
+
+Reducing queue capacities does not free process slots. Closing the last active
+subscriber for a covered session releases its lane after owned-helper cleanup.
+A separate client has its own budget and slots, but also its own source
+generation: acquire observations on that client before using its targets.
 
 ## Recover after a gap
 

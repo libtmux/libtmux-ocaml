@@ -470,6 +470,22 @@ reads and waits, so observers can exhaust their capacity. Raising a per-object
 limit cannot bypass aggregate reservation. These limits bound library-owned
 payloads, not caller-retained snapshots, process RSS or tmux's own allocations.
 
+The [capacity guide](../../streaming.md#plan-shared-capacity) makes the joint
+budget explicit: empty subscription queues retain their configured reservation,
+while capture and read operations need temporary headroom. The shared
+[`Budget`](https://github.com/libtmux/libtmux-ocaml/blob/462f04e800ce7a0a35d74e6ea36806ae071661bf/unix/connection.ml#L5-L19)
+also accounts for each auxiliary slot's payload reservation; the connection
+separately counts process slots. Six covered sessions can leave one slot for a
+read or wait beside the primary client; seven consume all slots.
+Other active waits and queued work still affect admission.
+
+Keep the existing per-subscriber capacity controls and shared limits for now.
+Reserving a service slot would trade observer coverage for availability without
+solving payload contention. A public limits record would need validation of
+joint operation reservations, queue costs and process counts. Revisit either
+choice when a caller needs a defined concurrent service profile; establish that
+profile and its aggregate bound before adding configuration or separate pools.
+
 Subscriptions start after an admission marker. They provide neither history
 nor an atomic capture/stream barrier. Membership and layout changes can end
 coverage conservatively. Recovery requires a fresh capture and subscription;

@@ -219,6 +219,12 @@ module Client : sig
       subscribers and eight client lanes including commands. Reserve payload
       against the shared 32 MiB budget before admission.
 
+      Queue capacities remain reserved while empty. Captures and reads need
+      additional scratch space; their admission can return
+      {!Libtmux.Error.Capacity} below the subscriber-count limit. See the
+      {{:https://github.com/libtmux/libtmux-ocaml/blob/master/docs/streaming.md#plan-shared-capacity}shared
+       capacity guide} for the combined reservations and process slots.
+
       Data starts after admission's marker. Layout/membership changes end
       continuity conservatively. Overflow emits Gap then End, without blocking
       another subscriber. Blocking delivery advances during Subscription.next.

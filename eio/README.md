@@ -86,7 +86,11 @@ let get = function
   | Error error -> failwith (Format.asprintf "%a" Error.pp error)
 
 let send_and_observe client pane ~text =
-  let subscription = get (Client.subscribe client pane) in
+  let subscription =
+    get
+      (Client.subscribe ~capacity_bytes:(256 * 1024) ~capacity_events:256 client
+         pane)
+  in
   Fun.protect
     ~finally:(fun () ->
       Eio.Cancel.protect (fun () -> get (Subscription.close subscription)))

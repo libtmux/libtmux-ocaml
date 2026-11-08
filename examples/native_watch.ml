@@ -8,7 +8,13 @@ let get = function
 
 (* docs:begin stream-and-wait *)
 let send_and_observe client pane ~text =
-  let subscription = get (Client.subscribe client pane) in
+  (* docs:begin bounded-subscription *)
+  let subscription =
+    get
+      (Client.subscribe ~capacity_bytes:(256 * 1024) ~capacity_events:256 client
+         pane)
+    (* docs:end bounded-subscription *)
+  in
   Fun.protect
     ~finally:(fun () ->
       Eio.Cancel.protect (fun () -> get (Subscription.close subscription)))

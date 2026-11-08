@@ -164,10 +164,16 @@ module Client : sig
       least observed session ID unless supplied. A client-owned reader delivers
       future bytes without application callbacks. Default queue bounds are 1
       MiB/1024 events; max 16 subscribers and eight total client lanes, sharing
-      the 32 MiB payload budget. Overflow or coverage/layout changes emit Gap
-      then End. Data starts after admission's marker, with no snapshot/history
-      barrier, automatic reconnect or silent cursor reuse. New admission returns
-      [Error Libtmux.Error.Closed] once {!close} starts. *)
+      the 32 MiB payload budget. Queue capacities remain reserved while empty;
+      captures and reads need additional scratch space and can return
+      {!Libtmux.Error.Capacity} below the subscriber-count limit. See the
+      {{:https://github.com/libtmux/libtmux-ocaml/blob/master/docs/streaming.md#plan-shared-capacity}shared
+       capacity guide} for combined reservations and process slots.
+
+      Overflow or coverage/layout changes emit Gap then End. Data starts after
+      admission's marker, with no snapshot/history barrier, automatic reconnect
+      or silent cursor reuse. New admission returns [Error Libtmux.Error.Closed]
+      once {!close} starts. *)
 
   val wait_for_text :
     ?timeout:float ->

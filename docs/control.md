@@ -37,6 +37,10 @@ cancellation tokens signalled from another domain or systhread.
 The blocking bound covers transport draining. Local scratch I/O must still
 finish before the call returns.
 
+Captures, reads and subscriptions share the client's payload budget and process
+slots. The [capacity guide](streaming.md#plan-shared-capacity) shows their combined
+reservations and how to leave headroom for service operations.
+
 Eio `Client.close` rejects new command and subscription admission as soon as
 closing starts. Concurrent closes wait for the same teardown result. A later
 close retains an earlier teardown failure; the closed state alone does not
