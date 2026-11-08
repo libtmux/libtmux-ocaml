@@ -237,8 +237,10 @@ module Client : sig
       coverage in the same binding. Maximum pattern: 64 KiB. Success returns a
       capture that contains the text. Transient text between captures may be
       missed. Check the deadline between bounded acquisitions; in-flight I/O
-      retains the client's exchange timeout. No capture/stream barrier exists.
-  *)
+      retains the client's exchange timeout. Release the temporary subscription
+      without replacing an earlier error or cancellation; inspect {!cleanup} for
+      secondary failures. Otherwise cleanup failure prevents success or renewed
+      coverage. No capture/stream barrier exists. *)
 
   val submit :
     t -> 'a Libtmux.Command.t -> ('a Operation.t, Libtmux.Error.t) result

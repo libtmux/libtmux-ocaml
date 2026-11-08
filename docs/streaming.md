@@ -19,6 +19,11 @@ disappears between captures may be missed. Deadlines are checked between
 acquisitions, whose in-flight I/O keeps the client's exchange timeout. A timed
 out wait does not prove that text was absent in the past.
 
+The wait releases its temporary subscription on every exit. An earlier error or
+cancellation remains the primary result; `Client.cleanup` retains secondary
+cleanup failures. If cleanup fails after a match or during gap recovery, the
+wait fails instead of reporting success or opening another subscription.
+
 Use `Client.subscribe` and `Subscription.next` for future output bytes. Data
 retains every byte, including NUL and invalid UTF-8. Its cursor records a local
 subscription generation and an observed byte offset. A cursor is neither a

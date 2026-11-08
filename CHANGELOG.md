@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Preserve rendered-wait errors and cancellation when subscription cleanup
+  fails; report cleanup failure before success or renewed coverage.
 - Retain connection and subscription cleanup results; overlapping Eio closes
   wait for the same helper cleanup instead of returning before reaping.
 - Reject new Eio command and subscription admission as soon as client close

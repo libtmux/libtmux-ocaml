@@ -33,9 +33,12 @@ let rendered ~connection ~capture ~capture_text ~subscribe ~next ~poll ~close
                  { kind = "pane"; id = Pane.Id.to_string (Pane.id pane) })
       in
       let current = ref pane and active = ref None in
-      Fun.protect
-        ~finally:(fun () -> Option.iter (fun sub -> ignore (close sub)) !active)
-        (fun () ->
+      let release () =
+        let sub = !active in
+        active := None;
+        Option.iter (fun sub -> get (close sub)) sub
+      in
+      Cleanup.protect ~finally:release (fun () ->
           let attach () =
             check ();
             active := Some (get (subscribe !current))
@@ -57,8 +60,7 @@ let rendered ~connection ~capture ~capture_text ~subscribe ~next ~poll ~close
                   current := fresh ();
                   observe ()
               | Some (Gap { reason = Membership_changed | Overflow; _ }) ->
-                  ignore (close sub);
-                  active := None;
+                  release ();
                   current := fresh ();
                   attach ();
                   observe ()

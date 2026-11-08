@@ -361,6 +361,9 @@ Reports belong to their creating domain and are not immutable graph snapshots.
 Cleanup attempts independent finalizers before propagating its first failure;
 an existing primary exception retains its identity and backtrace instead.
 Native cancellation is not combined with or converted into a cleanup error.
+Rendered-text waits use the same rule for their temporary subscriptions. A
+cleanup failure after a match or during gap recovery prevents success or renewed
+coverage; it cannot replace an earlier acquisition error or native cancellation.
 After a failed KILL, only an already established exit permits reaping: an
 unconfirmed exit produces an `Unreaped_child` diagnostic instead of an
 unbounded await. Concurrent Eio client closes now share one completion result,

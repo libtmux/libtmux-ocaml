@@ -178,7 +178,10 @@ module Client : sig
       Maximum pattern: 64 KiB. Return captured rendered text containing it;
       transient text may be missed. Deadlines are checked between bounded
       acquisitions, whose I/O retains the client exchange timeout. Cancellation
-      propagates and releases the subscription. No history/barrier guarantee. *)
+      propagates and releases the subscription. A cleanup failure cannot replace
+      an earlier error or cancellation; inspect {!cleanup} for secondary
+      failures. Otherwise cleanup failure prevents success or renewed coverage.
+      No history/barrier guarantee. *)
 
   val submit :
     t -> 'a Libtmux.Command.t -> ('a Operation.t, Libtmux.Error.t) result
