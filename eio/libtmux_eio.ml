@@ -10,6 +10,20 @@ let protect f =
   try Io.protect f
   with Eio.Io _ as exn -> Error (Error.Disconnected (Printexc.to_string exn))
 
+let terminate process =
+  Eio.Cancel.protect (fun () ->
+      Io.shutdown
+        ~signal:(Eio.Process.signal process)
+        ~await:(fun () -> ignore (Eio.Process.await process))
+        ~await_grace:(fun seconds ->
+          Eio.Fiber.first
+            (fun () ->
+              ignore (Eio.Process.await process);
+              true)
+            (fun () ->
+              Eio_unix.sleep seconds;
+              false)))
+
 module Terminal = struct
   let attach_current ?(binary = "tmux") ?(read_only = false)
       ?(update_environment = false) ?stdin ?stdout ?stderr ~process_mgr endpoint
@@ -32,10 +46,7 @@ module Terminal = struct
                 arguments
             in
             Fun.protect
-              ~finally:(fun () ->
-                Eio.Cancel.protect (fun () ->
-                    Eio.Process.signal process Sys.sigterm;
-                    ignore (Eio.Process.await process)))
+              ~finally:(fun () -> terminate process)
               (fun () ->
                 match Eio.Process.await process with
                 | `Exited code -> Terminal.exited code
@@ -71,9 +82,8 @@ let io ~sw ~process_mgr ~mono_clock =
         Eio.Cancel.protect (fun () ->
             if not !stopped then (
               stopped := true;
-              Eio.Process.signal process Sys.sigterm;
               Fun.protect
-                ~finally:(fun () -> ignore (Eio.Process.await process))
+                ~finally:(fun () -> terminate process)
                 (fun () -> List.iter (fun close -> close ()) !closers)))
       in
       stop_child := Some stop;

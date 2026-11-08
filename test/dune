@@ -133,6 +133,11 @@
  (libraries libtmux libtmux-unix libtmux-eio eio_main unix))
 
 (executable
+ (name shutdown_peer)
+ (modules shutdown_peer)
+ (libraries libtmux libtmux-unix libtmux-eio eio_main unix))
+
+(executable
  (name streaming_peer)
  (modules streaming_peer)
  (libraries libtmux libtmux-unix libtmux-eio eio_main unix))

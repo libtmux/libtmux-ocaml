@@ -43,14 +43,21 @@ every release. Ready I/O still checks its deadline; busy pipes cannot bypass
 the timeout. These results remain evidence for those tested cases.
 MCP integration is outside this port's scope.
 
-Owned-child shutdown remains an open lifecycle defect. Cleanup
-sends TERM and waits without escalation, so a stopped helper or one
-that survives TERM and input closure can prevent close or cancellation cleanup
-from returning. Both blocking and Eio cleanup reproduced that behavior with
-owned helper processes. This does not establish a hang in a supported tmux
-daemon. Blocking readiness now uses `poll`; ready reads, ready writes and
-deadlines work above descriptor 1100. Terminal attachment and cancellation
-also exercise high-numbered descriptors on all four exact releases. See the
+Owned-child cleanup sends TERM, allows a 200 ms cooperative grace, then sends
+KILL if necessary and reaps the child. The policy covers control, read-process
+and terminal helpers; it never sends these signals to the daemon. Eio waits
+allow other fibers to progress. The grace applies per helper, not to the whole
+client, and cannot bound uninterruptible kernel work or scratch-file completion.
+Cleanup-error retention and Eio descriptor ownership still require separate
+lifecycle qualification.
+
+The shutdown regression checks stopped helpers and helpers that survive TERM
+and input closure, while keeping the parent and its Eio switch alive to verify
+reaping. These are injected helper failures, not naturally reproduced hangs in
+a supported tmux daemon. Blocking readiness uses `poll`; ready reads, ready
+writes and deadlines work above descriptor 1100. Terminal attachment and
+cancellation also exercise high-numbered descriptors on all four exact
+releases. See the
 [architecture's cleanup boundary](dev/adr/0001-native-ocaml-suite.md#share-protocol-semantics-while-preserving-each-runtimes-cancellation).
 
 The near-limit [mixed workload](benchmarking.md#mixed-commands-stream-pressure-and-membership-changes)
@@ -68,7 +75,7 @@ the daemon running.
 The blocking client accepts a scoped `Cancellation` token that another domain
 or systhread can cancel. It drains admitted work before raising
 `Cancellation.Cancelled`. The drain has at most one exchange timeout from
-detection; that timeout does not bound subsequent owned-child cleanup.
+detection; subsequent owned-child cleanup has its separate cooperative grace.
 The operation handle retains success, failure or uncertainty. Eio cancellation
 releases the waiter immediately while a client-owned fiber drains the work.
 Local scratch I/O must finish in either case; Eio performs it on a system

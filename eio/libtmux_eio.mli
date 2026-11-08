@@ -36,7 +36,9 @@ module Terminal : sig
 
       Environment updates and read-only mode default to false. Clear inherited
       [TMUX] and [TMUX_PANE]. Cancellation propagates after terminating and
-      reaping this client; it does not stop the daemon. Success proves terminal
+      reaping this client; it does not stop the daemon. Cooperative TERM gets
+      200 ms of grace before forced termination, while other fibers can run.
+      Scheduling and kernel completion can add time. Success proves terminal
       client exit. Diagnostics go to [stderr]; borrowed flows stay open. *)
 end
 
@@ -557,8 +559,11 @@ module Client : sig
 
   val close : t -> (unit, Libtmux.Error.t) result
   (** Retire the generation and close owned control clients and descriptors.
-      tmux's [exit-unattached] and [exit-empty] policies can end the daemon
-      after its clients or sessions disappear. *)
+      Each helper gets 200 ms of TERM grace, followed by KILL if needed and
+      reaping. Other fibers can run during that wait. The grace is per helper;
+      it does not bound scheduling, filesystem or uninterruptible kernel work.
+      No signal targets the daemon. tmux's [exit-unattached] and [exit-empty]
+      policies can end the daemon after its clients or sessions disappear. *)
 end
 
 (** Apply workspace plans through Eio while retaining journals across caller

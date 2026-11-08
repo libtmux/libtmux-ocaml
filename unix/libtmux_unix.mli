@@ -53,7 +53,9 @@ module Terminal : sig
       caller-owned. [stdin] must be a terminal. Environment updates and
       read-only mode are disabled by default; inherited [TMUX] and [TMUX_PANE]
       are removed. Cancellation terminates and reaps this terminal client,
-      leaves the daemon running, then raises [Cancellation.Cancelled]. *)
+      leaves the daemon running, then raises {!Cancellation.Cancelled}. TERM
+      gets 200 ms of cooperative grace before KILL and reaping. Scheduling and
+      uninterruptible kernel work can add time. *)
 end
 
 (** A retained admitted command. A cancelled waiter does not erase its eventual
@@ -193,8 +195,9 @@ module Client : sig
       drains admitted work before raising [Cancellation.Cancelled]. The handle
       retains its outcome. Draining has at most one exchange timeout from
       detection; local scratch filesystem I/O and owned-child cleanup must also
-      finish. Owned-child cleanup is not yet time-bounded. No background
-      scheduler or worker is started. *)
+      finish. Each owned child gets 200 ms of TERM grace before forced
+      termination and reaping; scheduling and kernel completion can add time. No
+      background scheduler or worker is started. *)
 
   val run :
     ?cancel:Cancellation.t ->
@@ -687,8 +690,11 @@ module Client : sig
 
   val close : t -> (unit, Libtmux.Error.t) result
   (** Close owned control clients and descriptors. Idempotent on the owning
-      domain. tmux's [exit-unattached] and [exit-empty] policies can end the
-      daemon after its clients or sessions disappear. *)
+      domain. Each owned helper gets 200 ms of TERM grace, followed by KILL if
+      needed and reaping. This is not a whole-client deadline or a bound on
+      uninterruptible kernel work. No signal targets the daemon. tmux's
+      [exit-unattached] and [exit-empty] policies can end the daemon after its
+      clients or sessions disappear. *)
 end
 
 (** Apply validated plans with blocking I/O and scoped cancellation tokens.

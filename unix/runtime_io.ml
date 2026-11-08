@@ -57,14 +57,46 @@ let rec wait ~read ~write ~deadline =
 let close_fd fd =
   try Unix.close fd with Unix.Unix_error (Unix.EBADF, _, _) -> ()
 
+let shutdown_grace = 0.2
+
+let shutdown ~signal ~await_grace ~await =
+  let exited = ref false in
+  Fun.protect
+    ~finally:(fun () ->
+      if not !exited then signal Sys.sigkill;
+      await ())
+    (fun () ->
+      signal Sys.sigterm;
+      exited := await_grace shutdown_grace)
+
 let terminate pid =
-  (* An unreaped child PID cannot refer to another process. *)
-  (try Unix.kill pid Sys.sigterm with Unix.Unix_error (Unix.ESRCH, _, _) -> ());
+  (* Only the creator reaps this child, so its PID cannot be reused here. *)
+  let signal value =
+    try Unix.kill pid value with Unix.Unix_error (Unix.ESRCH, _, _) -> ()
+  in
   let rec reap () =
     try ignore (Unix.waitpid [] pid)
     with Unix.Unix_error (Unix.EINTR, _, _) -> reap ()
   in
-  reap ()
+  let descriptor =
+    try Some (Linux.pidfd_open pid) with Unix.Unix_error _ -> None
+  in
+  Fun.protect
+    ~finally:(fun () -> Option.iter close_fd descriptor)
+    (fun () ->
+      shutdown ~signal ~await:reap ~await_grace:(fun seconds ->
+          match descriptor with
+          (* A failed pidfd acquisition must not leave an unbounded TERM wait. *)
+          | None -> false
+          | Some pidfd -> (
+              match
+                protect (fun () ->
+                    wait ~read:[ pidfd ] ~write:[]
+                      ~deadline:(Linux.now () +. seconds))
+              with
+              | Ok () -> true
+              | Error Error.Deadline_exceeded -> false
+              | Error error -> fail error)))
 
 let spawn arguments =
   let owned = ref [] in

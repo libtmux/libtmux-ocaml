@@ -322,12 +322,22 @@ Eio cleanup can therefore wait indefinitely. Its blocking readiness also uses
 `Unix.select`, whose
 [descriptor check](https://github.com/ocaml/ocaml/blob/5.5.2/otherlibs/unix/select_unix.c#L35-L44)
 rejects descriptors outside `FD_SETSIZE`. Blocking readiness now uses a shared
-private `poll` binding for protocol work and terminal attachment. Owned-child
-shutdown remains open: the required correction is finite cooperative grace,
-forced termination and reaping of owned helpers. Exchange deadlines,
-owned-child grace and filesystem completion
-need separate contracts. No library deadline bounds uninterruptible kernel
-work; the daemon remains outside helper termination policy.
+private `poll` binding for protocol work and terminal attachment.
+
+Owned-child shutdown now uses one private policy across both adapters and
+terminal helpers: send TERM, allow 200 ms of cooperative grace, then force
+termination if needed and reap. Eio uses its process handle and asynchronous
+monotonic timer; the blocking adapter waits on the owned child's pidfd. Failed
+pidfd acquisition skips the grace and proceeds to forced termination. The
+daemon remains outside this policy. Grace is per child, not a whole-client
+deadline. Exchange deadlines, owned-child grace and filesystem completion are
+separate bounds; no library deadline bounds uninterruptible kernel work.
+
+The lifecycle gate remains open for cleanup-error retention and the descriptor
+ownership audit. A secondary cleanup exception can still replace a primary
+failure in existing cleanup paths. Cancellation must retain its native form;
+separately inspectable cleanup evidence needs an explicit lifetime that also
+covers failed setup and terminal calls without a returned client.
 
 Expected failures use `result` and typed variants. Eio cancellation and blocking
 cancellation keep their native exception behavior. Catch-all exception
