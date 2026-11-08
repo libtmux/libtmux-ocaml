@@ -199,9 +199,12 @@ let () = Eio_main.run (fun env -> Eio.Switch.run (fun sw ->
             fixture.command("link-window", "-d", "-s", "@0", "-t", "$1:7")
             fixture.track_panes()
             def run_example(name, *arguments):
-                return subprocess.run([str(runtime / f"_build/default/{name}.exe"),
-                                       fixture.binary, str(fixture.socket), *arguments],
-                                      cwd=runtime, env=environment, capture_output=True, timeout=1, check=True)
+                try:
+                    return subprocess.run([str(runtime / f"_build/default/{name}.exe"),
+                                           fixture.binary, str(fixture.socket), *arguments],
+                                          cwd=runtime, env=environment, capture_output=True, timeout=1, check=True)
+                except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as error:
+                    raise AssertionError((name, error, error.stdout, error.stderr)) from error
             result = run_example("native_graph")
             assert result.stderr == b"", result
             graph = result.stdout.decode()

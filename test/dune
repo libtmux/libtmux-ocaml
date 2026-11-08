@@ -32,6 +32,12 @@
  (action
   (run python3 %{dep:type_test.py} %{ocamlc} %{lib:libtmux:libtmux.cmi})))
 
+(rule
+ (alias runtest)
+ (deps installed_consumer_diagnostics_test.py installed_consumer.py)
+ (action
+  (run python3 %{dep:installed_consumer_diagnostics_test.py})))
+
 (test
  (name json_test)
  (modules json_test)

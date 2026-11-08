@@ -29,7 +29,7 @@ records the exercised fixtures, not every possible cleanup path.
 | Versioned format availability and generated APIs | PASS | PASS |
 | Native operation inventory | PASS | PASS |
 | Data/Gap/End, stream limits and recovery | PASS | PASS |
-| Installed stream-gap walkthrough | FAIL | PASS |
+| Installed stream-gap walkthrough | FAIL | FAIL |
 | Rendered waits and future-byte matching | PASS | PASS |
 | Blocking/Eio workspace preconditions and compensation | PASS | PASS |
 | Public workspace bootstrap on fresh/existing daemons | PASS | PASS |
@@ -43,6 +43,16 @@ unknown operation outcome after its recovery output on tmux 3.3a in
 A bounded diagnostic reproduced the failure with the owned daemon no longer
 alive. Its exit cause remains unresolved. Earlier component passes do not
 establish that the affected workload is safe.
+
+On tmux 3.8, the same walkthrough exited with status 2 in
+[hosted run 42533145236](https://github.com/libtmux/libtmux-ocaml/actions/runs/42533145236).
+Its harness captured but did not include the program's output in the raised
+exception, so the failure's cause is unestablished. That run passed the ordinary
+native component suite before failing the installed example. Keep this result
+separate from the earlier 3.3a daemon-exit evidence; it does not prove the same
+cause. The example runner now includes captured output and the original cause
+when a program fails or times out. Later passing runs do not close either
+finding.
 
 The current matrix uses only OCaml 5.5.2 and tmux 3.3a/3.8. Pure assertions
 check version rejection and catalog availability across the supported range.
