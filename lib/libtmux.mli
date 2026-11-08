@@ -1154,8 +1154,8 @@ module Operations : sig
   (** Acquire one bounded option table, excluding hooks. The default includes
       only local entries. Inherited table enumeration includes built-ins;
       inherited user options require [read_option] with their explicit name.
-      Built-in descriptors are qualified on tmux 3.3, 3.3a, 3.4 and 3.8; other
-      versions return [Unsupported]. *)
+      Built-in descriptors cover every supported release from tmux 3.3a through
+      3.8; other versions return {!Error.Unsupported}. *)
 
   val read_option :
     ?include_inherited:bool ->

@@ -20,9 +20,10 @@ query it locally, and observe output through Eio or a blocking client.
 [Examples](docs/showcases.md) · [Compatibility](docs/compatibility.md) ·
 [CI](https://github.com/libtmux/libtmux-ocaml/actions/workflows/ocaml.yml)
 
-Targets **OCaml 5.5.2 on Linux**. Native checks cover tmux 3.3, 3.3a, 3.4 and
-3.8. Connections require Linux pidfds and the daemon's PID namespace and local
-filesystem. The pure model and queries use the standard library.
+Targets **OCaml 5.5.2 on Linux** and supports **tmux 3.3a–3.8**, including
+intermediate releases. CI tests the two endpoints. Connections require Linux
+pidfds, the daemon's PID namespace and a shared local filesystem. The pure model
+and queries use the standard library.
 
 ## Install from source
 

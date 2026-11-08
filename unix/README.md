@@ -38,7 +38,7 @@ Copy the example as `native_graph.ml` and use this `dune` file:
  (libraries libtmux libtmux-unix))
 ```
 
-Native connections require Linux pidfds, tmux 3.3 or newer, and the daemon's
+Native connections require Linux pidfds, tmux 3.3a–3.8, and the daemon's
 PID namespace and local filesystem. Ordinary `Client.connect` attaches to an
 existing daemon; [workspace bootstrap](../docs/workspaces.md) creates a missing
 endpoint explicitly. See the compatibility guide for exact tested releases and

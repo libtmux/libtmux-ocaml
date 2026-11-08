@@ -38,7 +38,7 @@ type t = {
   finished_at_ns : int64;
 }
 
-let known_version version = List.mem version [ "3.3"; "3.3a"; "3.4"; "3.8" ]
+let known_version version = List.mem version Option_catalog.versions
 
 let catalog ~version =
   if not (known_version version) then

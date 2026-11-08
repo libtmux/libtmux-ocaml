@@ -12,7 +12,9 @@ import urllib.request
 
 
 PINNED = tomllib.loads((Path(__file__).resolve().parents[1] / ".github/tmux-releases.toml").read_text())["releases"]
-VERSIONS = ("3.2a", "3.3", "3.3a", "3.4", "3.8")
+VERSIONS = tuple(PINNED)
+SUPPORT = json.loads((Path(__file__).resolve().parents[1] / "catalog/releases.json").read_text())
+MATRIX_VERSIONS = (SUPPORT["minimum"], SUPPORT["maximum"])
 
 
 def setup(versions):
@@ -60,5 +62,5 @@ def setup(versions):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("versions", nargs="*", choices=VERSIONS, default=list(VERSIONS))
+    parser.add_argument("versions", nargs="*", choices=VERSIONS, default=list(MATRIX_VERSIONS))
     setup(parser.parse_args().versions)

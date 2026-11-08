@@ -42,7 +42,7 @@ try:
                 child.terminate()
                 child.wait(timeout=1)
             pid = child.pid + (1 if mode == "changed-pid" and identities == 2 else 0)
-            frame(f"{pid}|3.3=\n".encode())
+            frame(f"{pid}|3.3a=\n".encode())
         else:
             marker = re.search(rb"libtmux-ocaml-[0-9a-f]{64}", command)
             assert marker is not None, command

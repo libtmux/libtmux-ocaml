@@ -283,12 +283,15 @@ validation, acquisition timestamps and explicit race failures for grouped
 acquisition too. Command-list and flags behavior are versioned implementation
 dependencies, not timeless protocol guarantees.
 
-Version admission currently accepts tmux 3.3 and later. The required exact
-qualification cells are 3.3, 3.3a, 3.4 and 3.8, with 3.2a rejection tested
-separately. Admission does not imply catalog availability or qualification of
-every intermediate or future release. Ordinary component passes do not qualify
-intensive observation: the recorded 3.4 mixed-workload failure and unexplained
-earlier 3.3 observer failure remain open in
+Support includes every published tmux release from 3.3a through 3.8. Required
+runtime qualification uses only the latest stable OCaml compiler and the tmux
+endpoints: currently OCaml 5.5.2 with tmux 3.3a/3.8. Option and format catalogs
+cover the entire supported range; pure assertions check their availability and
+reject releases outside it. Intermediate releases remain supported without
+separate runtime CI cells. Historical results remain evidence for their tested
+workloads. Ordinary component passes do not qualify intensive observation: the
+recorded 3.4 mixed-workload failure, 3.3a stream-gap daemon exit and earlier
+3.3 observer failure remain open in
 [compatibility](../../compatibility.md).
 
 ### Share protocol semantics while preserving each runtime's cancellation

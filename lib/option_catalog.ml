@@ -12,6 +12,22 @@ type descriptor = {
   versions : string list;
 }
 
+let versions =
+  [
+    "3.3a";
+    "3.4";
+    "3.5";
+    "3.5a";
+    "3.6";
+    "3.6a";
+    "3.6b";
+    "3.7";
+    "3.7a";
+    "3.7b";
+    "3.7c";
+    "3.8";
+  ]
+
 let entries =
   Iarray.of_list
     [
@@ -21,7 +37,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "after-bind-key";
@@ -29,7 +59,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "after-capture-pane";
@@ -37,7 +81,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "after-copy-mode";
@@ -45,7 +103,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "after-display-message";
@@ -53,7 +125,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "after-display-panes";
@@ -61,7 +147,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "after-kill-pane";
@@ -69,7 +169,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "after-list-buffers";
@@ -77,7 +191,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "after-list-clients";
@@ -85,7 +213,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "after-list-keys";
@@ -93,7 +235,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "after-list-panes";
@@ -101,7 +257,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "after-list-sessions";
@@ -109,7 +279,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "after-list-windows";
@@ -117,7 +301,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "after-load-buffer";
@@ -125,7 +323,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "after-lock-server";
@@ -133,7 +345,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "after-new-session";
@@ -141,7 +367,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "after-new-window";
@@ -149,7 +389,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "after-paste-buffer";
@@ -157,7 +411,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "after-pipe-pane";
@@ -165,7 +433,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "after-queue";
@@ -173,7 +455,20 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+          ];
       };
       {
         name = "after-refresh-client";
@@ -181,7 +476,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "after-rename-session";
@@ -189,7 +498,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "after-rename-window";
@@ -197,7 +520,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "after-resize-pane";
@@ -205,7 +542,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "after-resize-window";
@@ -213,7 +564,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "after-save-buffer";
@@ -221,7 +586,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "after-select-layout";
@@ -229,7 +608,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "after-select-pane";
@@ -237,7 +630,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "after-select-window";
@@ -245,7 +652,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "after-send-keys";
@@ -253,7 +674,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "after-set-buffer";
@@ -261,7 +696,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "after-set-environment";
@@ -269,7 +718,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "after-set-hook";
@@ -277,7 +740,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "after-set-option";
@@ -285,7 +762,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "after-show-environment";
@@ -293,7 +784,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "after-show-messages";
@@ -301,7 +806,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "after-show-options";
@@ -309,7 +828,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "after-split-window";
@@ -317,7 +850,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "after-swap-window";
@@ -333,7 +880,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "aggressive-resize";
@@ -341,7 +902,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "alert-activity";
@@ -349,7 +924,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "alert-bell";
@@ -357,7 +946,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "alert-silence";
@@ -365,7 +968,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "allow-passthrough";
@@ -373,7 +990,7 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window; `Pane ];
-        versions = [ "3.3"; "3.3a" ];
+        versions = [ "3.3a" ];
       };
       {
         name = "allow-passthrough";
@@ -381,7 +998,20 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window; `Pane ];
-        versions = [ "3.4"; "3.8" ];
+        versions =
+          [
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "allow-rename";
@@ -389,7 +1019,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window; `Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "allow-set-title";
@@ -397,7 +1041,19 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window; `Pane ];
-        versions = [ "3.8" ];
+        versions =
+          [
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "alternate-screen";
@@ -405,7 +1061,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window; `Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "assume-paste-time";
@@ -413,7 +1083,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "automatic-rename";
@@ -421,7 +1105,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "automatic-rename-format";
@@ -429,7 +1127,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "backspace";
@@ -437,7 +1149,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Server ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "base-index";
@@ -445,7 +1171,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "bell-action";
@@ -453,7 +1193,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "buffer-limit";
@@ -461,7 +1215,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Server ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "clear-on-attach";
@@ -477,7 +1245,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "client-attached";
@@ -485,7 +1267,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "client-closed";
@@ -509,7 +1305,8 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.8" ];
+        versions =
+          [ "3.6"; "3.6a"; "3.6b"; "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "client-detached";
@@ -517,7 +1314,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "client-focus-in";
@@ -525,7 +1336,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "client-focus-out";
@@ -533,7 +1358,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "client-light-theme";
@@ -541,7 +1380,8 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.8" ];
+        versions =
+          [ "3.6"; "3.6a"; "3.6b"; "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "client-resized";
@@ -549,7 +1389,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "client-session-changed";
@@ -557,7 +1411,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "clock-mode-colour";
@@ -565,7 +1433,20 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.3"; "3.3a"; "3.4" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+          ];
       };
       {
         name = "clock-mode-colour";
@@ -581,7 +1462,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "codepoint-widths";
@@ -589,7 +1484,8 @@ let entries =
         array = true;
         hook = false;
         scopes = [ `Server ];
-        versions = [ "3.8" ];
+        versions =
+          [ "3.6"; "3.6a"; "3.6b"; "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "command-alias";
@@ -597,7 +1493,21 @@ let entries =
         array = true;
         hook = false;
         scopes = [ `Server ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "command-error";
@@ -605,7 +1515,19 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.8" ];
+        versions =
+          [
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "copy-command";
@@ -613,7 +1535,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Server ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "copy-mode-current-line-number-style";
@@ -621,7 +1557,7 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.8" ];
+        versions = [ "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "copy-mode-current-line-style";
@@ -637,7 +1573,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "copy-mode-line-number-style";
@@ -645,7 +1595,7 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.8" ];
+        versions = [ "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "copy-mode-line-numbers";
@@ -653,7 +1603,7 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.8" ];
+        versions = [ "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "copy-mode-mark-style";
@@ -661,7 +1611,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "copy-mode-match-style";
@@ -669,7 +1633,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "copy-mode-position-format";
@@ -677,7 +1655,8 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window; `Pane ];
-        versions = [ "3.8" ];
+        versions =
+          [ "3.6"; "3.6a"; "3.6b"; "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "copy-mode-position-style";
@@ -685,7 +1664,8 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.8" ];
+        versions =
+          [ "3.6"; "3.6a"; "3.6b"; "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "copy-mode-selection-style";
@@ -693,7 +1673,8 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.8" ];
+        versions =
+          [ "3.6"; "3.6a"; "3.6b"; "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "cursor-colour";
@@ -701,7 +1682,20 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window; `Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+          ];
       };
       {
         name = "cursor-colour";
@@ -717,7 +1711,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window; `Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "dark-theme-black";
@@ -805,7 +1813,8 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Server ];
-        versions = [ "3.8" ];
+        versions =
+          [ "3.6"; "3.6a"; "3.6b"; "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "default-command";
@@ -813,7 +1822,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "default-shell";
@@ -821,7 +1844,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "default-size";
@@ -829,7 +1866,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "default-terminal";
@@ -837,7 +1888,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Server ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "destroy-unattached";
@@ -845,7 +1910,7 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a" ];
+        versions = [ "3.3a" ];
       };
       {
         name = "destroy-unattached";
@@ -853,7 +1918,20 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.4"; "3.8" ];
+        versions =
+          [
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "detach-on-destroy";
@@ -861,7 +1939,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "display-panes-active-colour";
@@ -869,7 +1961,20 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+          ];
       };
       {
         name = "display-panes-active-colour";
@@ -893,7 +1998,20 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+          ];
       };
       {
         name = "display-panes-colour";
@@ -917,7 +2035,20 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+          ];
       };
       {
         name = "display-panes-time";
@@ -933,7 +2064,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "editor";
@@ -941,7 +2086,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Server ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "escape-time";
@@ -949,7 +2108,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Server ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "exit-empty";
@@ -957,7 +2130,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Server ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "exit-unattached";
@@ -965,7 +2152,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Server ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "extended-keys";
@@ -973,7 +2174,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Server ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "extended-keys-format";
@@ -981,7 +2196,19 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Server ];
-        versions = [ "3.8" ];
+        versions =
+          [
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "fill-character";
@@ -989,7 +2216,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "focus-events";
@@ -997,7 +2238,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Server ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "focus-follows-mouse";
@@ -1005,7 +2260,7 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.8" ];
+        versions = [ "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "get-clipboard";
@@ -1013,7 +2268,7 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Server ];
-        versions = [ "3.8" ];
+        versions = [ "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "history-file";
@@ -1021,7 +2276,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Server ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "history-limit";
@@ -1029,7 +2298,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "initial-repeat-time";
@@ -1037,7 +2320,8 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.8" ];
+        versions =
+          [ "3.6"; "3.6a"; "3.6b"; "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "input-buffer-size";
@@ -1045,7 +2329,8 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Server ];
-        versions = [ "3.8" ];
+        versions =
+          [ "3.6"; "3.6a"; "3.6b"; "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "key-table";
@@ -1053,7 +2338,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "light-theme-black";
@@ -1141,7 +2440,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "lock-command";
@@ -1149,7 +2462,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "main-pane-height";
@@ -1157,7 +2484,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "main-pane-width";
@@ -1165,7 +2506,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "marked-pane-changed";
@@ -1181,7 +2536,20 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.4"; "3.8" ];
+        versions =
+          [
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "menu-border-style";
@@ -1189,7 +2557,20 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.4"; "3.8" ];
+        versions =
+          [
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "menu-selected-style";
@@ -1197,7 +2578,20 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.4"; "3.8" ];
+        versions =
+          [
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "menu-style";
@@ -1205,7 +2599,20 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.4"; "3.8" ];
+        versions =
+          [
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "message-command-style";
@@ -1213,7 +2620,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "message-format";
@@ -1221,7 +2642,7 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.8" ];
+        versions = [ "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "message-limit";
@@ -1229,7 +2650,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Server ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "message-line";
@@ -1237,7 +2672,20 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.4"; "3.8" ];
+        versions =
+          [
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "message-style";
@@ -1245,7 +2693,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "mode-keys";
@@ -1253,7 +2715,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "mode-style";
@@ -1261,7 +2737,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "monitor-activity";
@@ -1269,7 +2759,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "monitor-bell";
@@ -1277,7 +2781,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "monitor-silence";
@@ -1285,7 +2803,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "mouse";
@@ -1293,7 +2825,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "other-pane-height";
@@ -1301,7 +2847,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "other-pane-width";
@@ -1309,7 +2869,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane-active-border-style";
@@ -1317,7 +2891,7 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.3"; "3.3a"; "3.4" ];
+        versions = [ "3.3a"; "3.4"; "3.5"; "3.5a"; "3.6"; "3.6a"; "3.6b" ];
       };
       {
         name = "pane-active-border-style";
@@ -1325,7 +2899,7 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window; `Pane ];
-        versions = [ "3.8" ];
+        versions = [ "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "pane-activity";
@@ -1341,7 +2915,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane-bell";
@@ -1357,7 +2945,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window; `Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane-border-indicators";
@@ -1365,7 +2967,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane-border-lines";
@@ -1373,7 +2989,20 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.3"; "3.3a"; "3.4" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+          ];
       };
       {
         name = "pane-border-lines";
@@ -1389,7 +3018,20 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.3"; "3.3a"; "3.4" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+          ];
       };
       {
         name = "pane-border-status";
@@ -1405,7 +3047,7 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.3"; "3.3a"; "3.4" ];
+        versions = [ "3.3a"; "3.4"; "3.5"; "3.5a"; "3.6"; "3.6a"; "3.6b" ];
       };
       {
         name = "pane-border-style";
@@ -1413,7 +3055,7 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window; `Pane ];
-        versions = [ "3.8" ];
+        versions = [ "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "pane-colours";
@@ -1421,7 +3063,21 @@ let entries =
         array = true;
         hook = false;
         scopes = [ `Window; `Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane-command-finished";
@@ -1453,7 +3109,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Window; `Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane-exited";
@@ -1461,7 +3131,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Window; `Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane-focus-in";
@@ -1469,7 +3153,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Window; `Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane-focus-out";
@@ -1477,7 +3175,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Window; `Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane-mode-changed";
@@ -1485,7 +3197,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Window; `Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane-mode-entered";
@@ -1541,7 +3267,8 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.8" ];
+        versions =
+          [ "3.6"; "3.6a"; "3.6b"; "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "pane-scrollbars-position";
@@ -1549,7 +3276,8 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.8" ];
+        versions =
+          [ "3.6"; "3.6a"; "3.6b"; "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "pane-scrollbars-style";
@@ -1557,7 +3285,8 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window; `Pane ];
-        versions = [ "3.8" ];
+        versions =
+          [ "3.6"; "3.6a"; "3.6b"; "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "pane-scrollbars-timeout";
@@ -1573,7 +3302,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Window; `Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane-shell-prompt";
@@ -1589,7 +3332,8 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.8" ];
+        versions =
+          [ "3.6"; "3.6a"; "3.6b"; "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "pane-status-style";
@@ -1597,7 +3341,8 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.8" ];
+        versions =
+          [ "3.6"; "3.6a"; "3.6b"; "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "pane-title-changed";
@@ -1605,7 +3350,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Window; `Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "popup-border-lines";
@@ -1613,7 +3372,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "popup-border-style";
@@ -1621,7 +3394,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "popup-style";
@@ -1629,7 +3416,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "prefix";
@@ -1637,7 +3438,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "prefix-timeout";
@@ -1645,7 +3460,19 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Server ];
-        versions = [ "3.8" ];
+        versions =
+          [
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "prefix2";
@@ -1653,7 +3480,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "prompt-command-cursor-colour";
@@ -1669,7 +3510,15 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.8" ];
+        versions = [ "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
+      };
+      {
+        name = "prompt-cursor-colour";
+        kind = Kind.Colour;
+        array = false;
+        hook = false;
+        scopes = [ `Session ];
+        versions = [ "3.6"; "3.6a"; "3.6b"; "3.7"; "3.7a"; "3.7b"; "3.7c" ];
       };
       {
         name = "prompt-cursor-colour";
@@ -1685,7 +3534,8 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.8" ];
+        versions =
+          [ "3.6"; "3.6a"; "3.6b"; "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "prompt-history-limit";
@@ -1693,7 +3543,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Server ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "remain-on-exit";
@@ -1701,7 +3565,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window; `Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "remain-on-exit-format";
@@ -1709,7 +3587,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window; `Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "renumber-windows";
@@ -1717,7 +3609,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "repeat-time";
@@ -1725,7 +3631,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "scroll-on-clear";
@@ -1733,7 +3653,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window; `Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "session-added-to-group";
@@ -1749,7 +3683,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "session-created";
@@ -1757,7 +3705,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "session-removed-from-group";
@@ -1773,7 +3735,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "session-status-current-style";
@@ -1781,7 +3757,8 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.8" ];
+        versions =
+          [ "3.6"; "3.6a"; "3.6b"; "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "session-status-style";
@@ -1789,7 +3766,8 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.8" ];
+        versions =
+          [ "3.6"; "3.6a"; "3.6b"; "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "session-window-changed";
@@ -1797,7 +3775,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "set-clipboard";
@@ -1805,7 +3797,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Server ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "set-titles";
@@ -1813,7 +3819,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "set-titles-string";
@@ -1821,7 +3841,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "silence-action";
@@ -1829,7 +3863,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "status";
@@ -1837,7 +3885,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "status-bg";
@@ -1845,7 +3907,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "status-fg";
@@ -1853,7 +3929,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "status-format";
@@ -1861,7 +3951,21 @@ let entries =
         array = true;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "status-interval";
@@ -1869,7 +3973,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "status-justify";
@@ -1877,7 +3995,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "status-keys";
@@ -1885,7 +4017,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "status-left";
@@ -1893,7 +4039,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "status-left-length";
@@ -1901,7 +4061,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "status-left-style";
@@ -1909,7 +4083,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "status-position";
@@ -1917,7 +4105,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "status-right";
@@ -1925,7 +4127,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "status-right-length";
@@ -1933,7 +4149,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "status-right-style";
@@ -1941,7 +4171,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "status-style";
@@ -1949,7 +4193,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "switch-mode-match-style";
@@ -1965,7 +4223,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window; `Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "terminal-features";
@@ -1973,7 +4245,21 @@ let entries =
         array = true;
         hook = false;
         scopes = [ `Server ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "terminal-overrides";
@@ -1981,7 +4267,21 @@ let entries =
         array = true;
         hook = false;
         scopes = [ `Server ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "theme";
@@ -1997,7 +4297,8 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.8" ];
+        versions =
+          [ "3.6"; "3.6a"; "3.6b"; "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "tree-mode-border-style";
@@ -2013,7 +4314,7 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window; `Pane ];
-        versions = [ "3.8" ];
+        versions = [ "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "tree-mode-preview-style";
@@ -2021,7 +4322,7 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.8" ];
+        versions = [ "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "tree-mode-selection-style";
@@ -2037,7 +4338,21 @@ let entries =
         array = true;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "user-keys";
@@ -2045,7 +4360,21 @@ let entries =
         array = true;
         hook = false;
         scopes = [ `Server ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "variation-selector-always-wide";
@@ -2053,7 +4382,8 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Server ];
-        versions = [ "3.8" ];
+        versions =
+          [ "3.6"; "3.6a"; "3.6b"; "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "visual-activity";
@@ -2061,7 +4391,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "visual-bell";
@@ -2069,7 +4413,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "visual-silence";
@@ -2077,7 +4435,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window-active-style";
@@ -2085,7 +4457,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window; `Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window-closed";
@@ -2109,7 +4495,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window-linked";
@@ -2117,7 +4517,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window-pane-changed";
@@ -2125,7 +4539,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window-pane-current-status-format";
@@ -2133,7 +4561,7 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.8" ];
+        versions = [ "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "window-pane-status-format";
@@ -2141,7 +4569,7 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.8" ];
+        versions = [ "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "window-renamed";
@@ -2149,7 +4577,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window-resized";
@@ -2157,7 +4599,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window-size";
@@ -2165,7 +4621,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window-status-activity-style";
@@ -2173,7 +4643,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window-status-bell-style";
@@ -2181,7 +4665,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window-status-current-format";
@@ -2189,7 +4687,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window-status-current-style";
@@ -2197,7 +4709,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window-status-format";
@@ -2205,7 +4731,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window-status-last-style";
@@ -2213,7 +4753,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window-status-separator";
@@ -2221,7 +4775,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window-status-style";
@@ -2229,7 +4797,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window-style";
@@ -2237,7 +4819,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window; `Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window-unlinked";
@@ -2245,7 +4841,21 @@ let entries =
         array = true;
         hook = true;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window-unzoomed";
@@ -2269,7 +4879,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "wrap-search";
@@ -2277,7 +4901,21 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "xterm-keys";
@@ -2285,6 +4923,20 @@ let entries =
         array = false;
         hook = false;
         scopes = [ `Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
     ]

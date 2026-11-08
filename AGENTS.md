@@ -27,6 +27,11 @@ Each guide owns its subject. `CLAUDE.md` is a relative symlink to this file.
   before replacing the exact compiler pin in `libtmux.opam`. Do not add
   backports, compatibility shims, or older-compiler test matrices unless
   explicitly requested.
+- Support every tmux release from 3.3a through 3.8. Test only the latest stable
+  OCaml compiler and the two tmux endpoints, 3.3a and 3.8. Verify upstream before
+  advancing either current pin. Intermediate releases remain supported without
+  extra runtime CI cells. Preserve historical results and pure assertions for
+  version boundaries and catalog availability across the supported range.
 - Keep `libtmux.opam` authored directly; it is not generated from Dune.
 - Prefer the OCaml standard library. Keep the core and pure workspace library
   free of third-party runtime dependencies. Put JSON, concurrency and command-line

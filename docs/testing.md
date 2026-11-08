@@ -42,10 +42,13 @@ $ opam exec -- python3 test/native_suite.py /path/to/tmux
 
 The [CI workflow](../.github/workflows/ocaml.yml) uses exactly OCaml 5.5.2,
 Alcotest 1.9.1, `ppx_expect` v0.17.3 and QCheck 0.91. It checks authored manifests,
-builds/odoc, generated files, formatting, unit/expect/property cases, four native
-release cells and separate 3.2a rejection. Each native cell installs the packages
-into a temporary prefix and runs a consumer outside the checkout. Consumer
-features still in development need their own later acceptance gates.
+builds/odoc, generated files, formatting, unit/expect/property cases, and two
+native release cells: tmux 3.3a (oldest supported) and 3.8 (newest stable).
+Every intermediate release remains supported. Pure assertions check version
+boundaries and catalog availability throughout the range. Each native cell
+installs the packages into a temporary prefix and runs a consumer outside the
+checkout. Consumer features still in development need their own later
+acceptance gates.
 
 The [Java/OCaml conformance procedure](../test/conformance/README.md) prepares a
 pinned Java peer separately, verifies artifact hashes and runs both evaluators

@@ -4,43 +4,56 @@ The compiler target is **OCaml 5.5.2**, exactly pinned. Older compilers are
 outside this implementation's scope. The development tools are Dune 3.24.2
 and opam 2.6.1.
 
-The implementation targets Linux and tmux 3.3 or newer. Current evidence covers
-specific components; final suite qualification has a separate acceptance gate.
-The table records the exercised fixtures, not every possible cleanup path.
-The additional lifecycle cases described below reopen that qualification.
+The implementation supports Linux and **tmux 3.3a–3.8**, including every
+intermediate release. CI tests only the two endpoints, 3.3a and 3.8. Option and
+format catalogs cover the entire range. Current evidence covers specific
+components; final suite qualification has a separate acceptance gate. The table
+records the exercised fixtures, not every possible cleanup path.
 
-| Component | 3.3 | 3.3a | 3.4 | 3.8 |
-| --- | --- | --- | --- | --- |
-| Owned fixture teardown | PASS | PASS | PASS | PASS |
-| Exact Boolean pane filters | PASS | PASS | PASS | PASS |
-| Argument and metadata byte codecs | PASS | PASS | PASS | PASS |
-| Split control framing and command groups | PASS | PASS | PASS | PASS |
-| Bound graph capture and ordinary client teardown | PASS | PASS | PASS | PASS |
-| Replacement-daemon rejection | PASS | PASS | PASS | PASS |
-| Private-file capture and failed-save callbacks | PASS | PASS | PASS | PASS |
-| Eio waiter cancellation and retained outcomes | PASS | PASS | PASS | PASS |
-| Blocking cancellation and bounded drain | PASS | PASS | PASS | PASS |
-| Command and lane admission limits | PASS | PASS | PASS | PASS |
-| Environment bytes, scopes and read-process lifecycle | PASS | PASS | PASS | PASS |
-| Scoped options and built-in hook execution | PASS | PASS | PASS | PASS |
-| Current client names and detach-request semantics | PASS | PASS | PASS | PASS |
-| Interactive attachment, cancellation and child exit | PASS | PASS | PASS | PASS |
-| Versioned format availability and generated APIs | PASS | PASS | PASS | PASS |
-| Native operation inventory | PASS | PASS | PASS | PASS |
-| Data/Gap/End, stream limits and recovery | PASS | PASS | PASS | PASS |
-| Rendered waits and future-byte matching | PASS | PASS | PASS | PASS |
-| Blocking/Eio workspace preconditions and compensation | PASS | PASS | PASS | PASS |
-| Public workspace bootstrap on fresh/existing daemons | PASS | PASS | PASS | PASS |
-| Installed workspace CLI, receipts, interruption and output faults | PASS | PASS | PASS | PASS |
-| Literal workspace guide and owned teardown | PASS | PASS | PASS | PASS |
-| Final suite qualification | UNVERIFIED | UNVERIFIED | UNVERIFIED | UNVERIFIED |
+| Component | 3.3a | 3.8 |
+| --- | --- | --- |
+| Owned fixture teardown | PASS | PASS |
+| Exact Boolean pane filters | PASS | PASS |
+| Argument and metadata byte codecs | PASS | PASS |
+| Split control framing and command groups | PASS | PASS |
+| Bound graph capture and ordinary client teardown | PASS | PASS |
+| Replacement-daemon rejection | PASS | PASS |
+| Private-file capture and failed-save callbacks | PASS | PASS |
+| Eio waiter cancellation and retained outcomes | PASS | PASS |
+| Blocking cancellation and bounded drain | PASS | PASS |
+| Command and lane admission limits | PASS | PASS |
+| Environment bytes, scopes and read-process lifecycle | PASS | PASS |
+| Scoped options and built-in hook execution | PASS | PASS |
+| Current client names and detach-request semantics | PASS | PASS |
+| Interactive attachment, cancellation and child exit | PASS | PASS |
+| Versioned format availability and generated APIs | PASS | PASS |
+| Native operation inventory | PASS | PASS |
+| Data/Gap/End, stream limits and recovery | PASS | PASS |
+| Installed stream-gap walkthrough | FAIL | PASS |
+| Rendered waits and future-byte matching | PASS | PASS |
+| Blocking/Eio workspace preconditions and compensation | PASS | PASS |
+| Public workspace bootstrap on fresh/existing daemons | PASS | PASS |
+| Installed workspace CLI, receipts, interruption and output faults | PASS | PASS |
+| Literal workspace guide and owned teardown | PASS | PASS |
+| Final suite qualification | UNVERIFIED | UNVERIFIED |
 
-The blocking client and workspace CLI reject 3.2a. Development tmux 3.8a does
-not replace the published 3.8 cell. PID-acquisition races and malformed replies after writing
-pass deterministic fault checks with real Linux child processes. Cancellation
-at each capture transfer step and unresolved-buffer receipts also pass on
-every release. Ready I/O still checks its deadline; busy pipes cannot bypass
-the timeout. These results remain evidence for those tested cases.
+The [stream-gap walkthrough](streaming.md#recover-after-a-gap) reported an
+unknown operation outcome after its recovery output on tmux 3.3a in
+[hosted run 42516374421](https://github.com/libtmux/libtmux-ocaml/actions/runs/42516374421).
+A bounded diagnostic reproduced the failure with the owned daemon no longer
+alive. Its exit cause remains unresolved. Earlier component passes do not
+establish that the affected workload is safe.
+
+The current matrix uses only OCaml 5.5.2 and tmux 3.3a/3.8. Pure assertions
+check version rejection and catalog availability across the supported range.
+Intermediate releases remain supported without separate runtime CI cells;
+earlier runtime results remain evidence for their tested workloads. Development
+tmux 3.8a does not replace the published 3.8 cell. PID-acquisition races and
+malformed replies after writing pass deterministic fault checks with real Linux
+child processes. Cancellation at each capture transfer step and unresolved-buffer
+receipts also pass on the
+recorded release fixtures. Ready I/O still checks its deadline; busy pipes
+cannot bypass the timeout. These results remain evidence for those tested cases.
 MCP integration is outside this port's scope.
 
 Owned-child cleanup sends TERM, allows a 200 ms cooperative grace, then sends
@@ -67,8 +80,8 @@ and input closure, while keeping the parent and its Eio switch alive to verify
 reaping. These are injected helper failures, not naturally reproduced hangs in
 a supported tmux daemon. Blocking readiness uses `poll`; ready reads, ready
 writes and deadlines work above descriptor 1100. Terminal attachment and
-cancellation also exercise high-numbered descriptors on all four exact
-releases. See the
+cancellation also have high-descriptor evidence on the previously tested
+3.3/3.3a/3.4/3.8 fixtures. See the
 [architecture's cleanup boundary](dev/adr/0001-native-ocaml-suite.md#share-protocol-semantics-while-preserving-each-runtimes-cancellation).
 
 The near-limit [mixed workload](benchmarking.md#mixed-commands-stream-pressure-and-membership-changes)
@@ -134,8 +147,8 @@ mutations or reconnect the primary lane.
 Scoped options preserve scalar types, sparse array indexes and local versus
 inherited entries. Bulk inherited enumeration follows tmux and includes only
 built-ins; `read_option` resolves a named inherited user option. Descriptors are
-qualified for the exact releases in the [option catalog](options.md). tmux fills
-the lowest unused indexes when appending array elements.
+recorded for every supported release in the [option catalog](options.md). tmux
+fills the lowest unused indexes when appending array elements.
 
 Hook commands keep names and arguments separate. Built-in hook arrays report
 synchronous failures; earlier effects remain after a later command fails. Named

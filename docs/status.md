@@ -1,8 +1,9 @@
 # Current capabilities and adoption gaps
 
 The immutable model, typed queries, native Linux clients and output observation
-have real-tmux evidence on 3.3, 3.3a, 3.4 and 3.8. The installed workspace CLI
-also passes those cells. The final suite review remains unfinished.
+have real-tmux evidence at the active tmux endpoints, 3.3a and 3.8. Intermediate
+releases remain supported throughout 3.3a–3.8. The installed
+workspace CLI also passes those cells. The final suite review remains unfinished.
 No package or hosted-documentation release has been published.
 
 ## What an application can use
@@ -24,6 +25,7 @@ input, streaming, rendered waits and client teardown.
 | Area | Required evidence before complete-suite adoption |
 | --- | --- |
 | Documentation site | Qualify the final hosted reference and verify its deployed links; public `.cmti` export and local rendering are implemented |
+| Known runtime findings | Account for the [recorded daemon-exit and observer failures](compatibility.md) when choosing a deployment workload |
 | Final qualification | Rerun every required component and exact release cell on the final source revision |
 | Package adoption | Obtain an independent caller-task review and resolve material findings |
 

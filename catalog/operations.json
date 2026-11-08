@@ -168,7 +168,7 @@
       "scope"
     ],
     "signature": "?include_inherited:bool -> Options.scope -> Options.t Command.t",
-    "documentation": "(** Acquire one bounded option table, excluding hooks. The default includes\n      only local entries. Inherited table enumeration includes built-ins;\n      inherited user options require [read_option] with their explicit name.\n      Built-in descriptors are qualified on tmux 3.3, 3.3a, 3.4 and 3.8; other\n      versions return [Unsupported]. *)",
+    "documentation": "(** Acquire one bounded option table, excluding hooks. The default includes\n      only local entries. Inherited table enumeration includes built-ins;\n      inherited user options require [read_option] with their explicit name.\n      Built-in descriptors cover every supported release from tmux 3.3a through\n      3.8; other versions return {!Error.Unsupported}. *)",
     "convenience": "generated"
   },
   {

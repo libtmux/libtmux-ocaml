@@ -130,7 +130,7 @@ let format_availability () =
     get (make ~panes:[ { first with pid = None; current_command = "" } ] ())
   in
   let pane = Iarray.get (Snapshot.panes captured) 0 in
-  let read name = get (Formats.lookup ~version:"3.3" (Pane pane) name) in
+  let read name = get (Formats.lookup ~version:"3.3a" (Pane pane) name) in
   assert (read "pane_pid" = Formats.Missing);
   assert (read "pane_current_command" = Formats.Value (Text ""));
   assert (read "pane_width" = Formats.Value (Int 120));
@@ -148,14 +148,14 @@ let format_availability () =
     (fun i expected ->
       assert (
         get
-          (Formats.lookup ~version:"3.3"
+          (Formats.lookup ~version:"3.3a"
              (Window_link (Iarray.get links i))
              "window_index")
         = Formats.Value (Int expected)))
     [ 2; 7; 0 ];
   assert (
     get
-      (Formats.lookup ~version:"3.3"
+      (Formats.lookup ~version:"3.3a"
          (Window_link (Iarray.get links 2))
          "session_name")
     = Formats.Value (Text "also-work"))

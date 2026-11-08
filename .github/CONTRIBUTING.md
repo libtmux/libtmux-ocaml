@@ -160,21 +160,22 @@ under one hour; reduce workloads when necessary.
 Build the exact Linux release fixtures outside validation loops:
 
 ```console
-$ python3 tools/setup_tmux.py 3.3 3.3a 3.4 3.8 3.2a
+$ python3 tools/setup_tmux.py 3.3a 3.8
 ```
 
 Verify fixture cleanup after success, failure and cancellation:
 
 ```console
 $ /usr/bin/time -p python3 test/fixture_test.py \
-    scratch/tmux/tmux-3.3/tmux \
     scratch/tmux/tmux-3.3a/tmux \
-    scratch/tmux/tmux-3.4/tmux \
     scratch/tmux/tmux-3.8/tmux
 ```
 
-The 3.2a binary is retained for unsupported-version checks. Fixture success
-alone does not establish library compatibility on any release.
+Supported tmux releases span 3.3a–3.8, including intermediate releases. The
+active matrix uses only OCaml 5.5.2 and the tmux endpoints, 3.3a and 3.8.
+Pure unit assertions check version boundaries and catalog availability across
+the supported range. Historical evidence remains available; fixture success
+alone does not establish library compatibility.
 
 Every test or probe must use a unique owned socket and temporary directory,
 with a `libtmux-ocaml-` prefix. Clear inherited `TMUX` and `TMUX_PANE` for child

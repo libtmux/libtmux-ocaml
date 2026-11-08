@@ -1,6 +1,6 @@
 {
   "schema": "libtmux.showcase/1",
-  "tmux_floor": "3.3",
+  "tmux_floor": "3.3a",
   "ci": {
     "workflow": ".github/workflows/ocaml.yml",
     "job": "native",

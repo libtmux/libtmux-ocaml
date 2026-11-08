@@ -270,8 +270,9 @@ qualify this mixed benchmark separately from the existing native runtime tests.
 The three 3.4 cores identify the same upstream write path. A later
 [tmux correction](https://github.com/tmux/tmux/commit/93169e2e6231853c61c33432bceebf4ffc91015b)
 guards null control state; that guard is present in the exact 3.8 source.
-The precise triggering sequence remains unproved. The required 3.3 floor stays
-in place, and the 3.4 mixed workload remains a failed qualification.
+The precise triggering sequence remains unproved. The supported range is
+3.3a–3.8; the 3.3 measurements above are historical evidence. The 3.4 mixed
+workload remains a failed qualification.
 
 Benchmarks are a separate tier. Correctness gates and test-loop timings are
 listed in [testing](testing.md), not used as throughput measurements. Keep a

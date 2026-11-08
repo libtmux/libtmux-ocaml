@@ -138,16 +138,47 @@ let boundaries () =
   List.iter
     (fun text -> reject (P.Output.decode text))
     [ "\\"; "\\12"; "\\888"; "\\777" ];
+  reject (P.Version.parse "next-3.8")
+
+let supported_releases () =
   List.iter
     (fun version ->
       Alcotest.(check bool)
-        "literal floor" true
+        ("admission " ^ version) true
+        (P.Version.supported (get (P.Version.parse version)));
+      Alcotest.(check bool)
+        ("option catalog " ^ version)
+        true
+        (match Libtmux.Options.describe ~version "base-index" with
+        | Ok descriptor -> descriptor.name = "base-index"
+        | _ -> false);
+      Alcotest.(check bool)
+        ("format catalog " ^ version)
+        true
+        (match Libtmux.Formats.describe ~version "pane_id" with
+        | Ok (Some _) -> true
+        | _ -> false))
+    [
+      "3.3a";
+      "3.4";
+      "3.5";
+      "3.5a";
+      "3.6";
+      "3.6a";
+      "3.6b";
+      "3.7";
+      "3.7a";
+      "3.7b";
+      "3.7c";
+      "3.8";
+    ];
+  List.iter
+    (fun version ->
+      Alcotest.(check bool)
+        ("outside supported range " ^ version)
+        false
         (P.Version.supported (get (P.Version.parse version))))
-    [ "3.3"; "3.3a"; "tmux 3.4"; "3.8" ];
-  Alcotest.(check bool)
-    "older version rejected" false
-    (P.Version.supported (get (P.Version.parse "3.2a")));
-  reject (P.Version.parse "next-3.8")
+    [ "3.2a"; "3.3"; "3.8a"; "3.9"; "4.0" ]
 
 let () =
   Alcotest.run "protocol codecs"
@@ -159,5 +190,7 @@ let () =
           Alcotest.test_case "group attribution and completion" `Quick groups;
           Alcotest.test_case "distinct command and output boundaries" `Quick
             boundaries;
+          Alcotest.test_case "supported release catalogs" `Quick
+            supported_releases;
         ] );
     ]

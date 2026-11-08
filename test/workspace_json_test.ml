@@ -94,7 +94,7 @@ let output_contract () =
   in
   let endpoint = Endpoint.socket_path "/tmp/libtmux-ocaml-wire" in
   let plan =
-    Result.get_ok (P.make ~endpoint ~version:"3.3" ~observed:None config)
+    Result.get_ok (P.make ~endpoint ~version:"3.3a" ~observed:None config)
   in
   let preview = get (W.encode_plan plan) in
   Alcotest.(check string)

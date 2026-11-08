@@ -74,8 +74,8 @@ Split a window and apply an even horizontal layout:
 $ opam exec -- dune exec examples/showcase_layout.exe -- tmux
 ```
 
-These examples require tmux 3.3 or newer on the qualified Linux environment.
-The native CI job executes their real entry points on 3.3, 3.3a, 3.4 and 3.8,
+These examples support tmux 3.3a–3.8 on the qualified Linux environment.
+The native CI job executes their real entry points on 3.3a and 3.8,
 using a separate installation and Dune project. A nonzero exit, missing exact
 outcome line, leftover directory or surviving owned process fails the run.
 [`showcase.json`](../examples/showcase.json) records the whole files, commands,

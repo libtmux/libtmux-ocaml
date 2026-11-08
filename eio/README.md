@@ -39,7 +39,7 @@ Copy the example as `native_watch.ml` and use this `dune` file:
 ```
 
 The source installation includes Eio 1.6 and the application's `eio_main`
-entry point. Native connections require Linux pidfds, tmux 3.3 or newer, and
+entry point. Native connections require Linux pidfds, tmux 3.3a–3.8, and
 the daemon's PID namespace and local filesystem. See compatibility for exact
 qualified releases and the remaining intensive-observation limits.
 

@@ -35,10 +35,10 @@ module Version = struct
             { major = number major; minor = number digits; patch }
         | _ -> malformed "invalid tmux version")
 
-  let supported value = value.major > 3 || (value.major = 3 && value.minor >= 3)
-
   let to_string value =
     Printf.sprintf "%d.%d%s" value.major value.minor value.patch
+
+  let supported value = List.mem (to_string value) Option_catalog.versions
 end
 
 module Command = struct

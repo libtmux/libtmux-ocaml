@@ -1,6 +1,6 @@
 # Captured fields
 
-All fields below are acquired by the core snapshot schema on tmux 3.3+.
+All fields below are acquired by the core snapshot schema on supported tmux releases.
 Text operations compare bytes without normalization or case folding.
 
 | OCaml field | Value | tmux format |

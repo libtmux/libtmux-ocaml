@@ -20,7 +20,21 @@ type descriptor = {
   versions : string list;
 }
 
-let versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ]
+let versions =
+  [
+    "3.3a";
+    "3.4";
+    "3.5";
+    "3.5a";
+    "3.6";
+    "3.6a";
+    "3.6b";
+    "3.7";
+    "3.7a";
+    "3.7b";
+    "3.7c";
+    "3.8";
+  ]
 
 let entries =
   Iarray.of_list
@@ -29,85 +43,254 @@ let entries =
         name = "active_window_index";
         kind = Text;
         contexts = [ Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "alternate_on";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "alternate_saved_x";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "alternate_saved_y";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "bracket_paste_flag";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.8" ];
+        versions = [ "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "buffer_created";
         kind = Timestamp;
         contexts = [ Buffer ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "buffer_full";
         kind = Text;
         contexts = [ Buffer ];
-        versions = [ "3.8" ];
+        versions =
+          [ "3.6"; "3.6a"; "3.6b"; "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "buffer_mode_format";
         kind = Text;
         contexts = [ Server ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "buffer_name";
         kind = Text;
         contexts = [ Buffer ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "buffer_sample";
         kind = Text;
         contexts = [ Buffer ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "buffer_size";
         kind = Text;
         contexts = [ Buffer ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "client_activity";
         kind = Timestamp;
         contexts = [ Client ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "client_cell_height";
         kind = Text;
         contexts = [ Client ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "client_cell_width";
         kind = Text;
         contexts = [ Client ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "client_colours";
@@ -119,193 +302,576 @@ let entries =
         name = "client_control_mode";
         kind = Text;
         contexts = [ Client ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "client_created";
         kind = Timestamp;
         contexts = [ Client ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "client_discarded";
         kind = Text;
         contexts = [ Client ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "client_flags";
         kind = Text;
         contexts = [ Client ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "client_height";
         kind = Text;
         contexts = [ Client ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "client_key_table";
         kind = Text;
         contexts = [ Client ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "client_last_session";
         kind = Text;
         contexts = [ Client ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "client_mode_format";
         kind = Text;
         contexts = [ Server ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "client_name";
         kind = Text;
         contexts = [ Client ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "client_pid";
         kind = Text;
         contexts = [ Client ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "client_prefix";
         kind = Text;
         contexts = [ Client ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "client_readonly";
         kind = Text;
         contexts = [ Client ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "client_session";
         kind = Text;
         contexts = [ Client ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "client_termfeatures";
         kind = Text;
         contexts = [ Client ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "client_termname";
         kind = Text;
         contexts = [ Client ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "client_termtype";
         kind = Text;
         contexts = [ Client ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "client_theme";
         kind = Text;
         contexts = [ Client ];
-        versions = [ "3.8" ];
+        versions =
+          [ "3.6"; "3.6a"; "3.6b"; "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "client_tty";
         kind = Text;
         contexts = [ Client ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "client_uid";
         kind = Text;
         contexts = [ Client ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "client_user";
         kind = Text;
         contexts = [ Client ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "client_utf8";
         kind = Text;
         contexts = [ Client ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "client_width";
         kind = Text;
         contexts = [ Client ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "client_written";
         kind = Text;
         contexts = [ Client ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "config_files";
         kind = Text;
         contexts = [ Server ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "cursor_blinking";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.8" ];
+        versions =
+          [ "3.6"; "3.6a"; "3.6b"; "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "cursor_character";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "cursor_colour";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.8" ];
+        versions =
+          [ "3.6"; "3.6a"; "3.6b"; "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "cursor_flag";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "cursor_shape";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.8" ];
+        versions =
+          [ "3.6"; "3.6a"; "3.6b"; "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "cursor_very_visible";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.8" ];
+        versions =
+          [ "3.6"; "3.6a"; "3.6b"; "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "cursor_x";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "cursor_y";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "history_added";
@@ -317,13 +883,41 @@ let entries =
         name = "history_all_bytes";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "history_bytes";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "history_collected";
@@ -341,187 +935,624 @@ let entries =
         name = "history_limit";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "history_size";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "host";
         kind = Text;
         contexts = [ Server ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "host_short";
         kind = Text;
         contexts = [ Server ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "insert_flag";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "keypad_cursor_flag";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "keypad_flag";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "last_window_index";
         kind = Text;
         contexts = [ Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
+      };
+      {
+        name = "loop_last_flag";
+        kind = Text;
+        contexts = [ Server ];
+        versions = [ "3.6"; "3.6a"; "3.6b"; "3.7"; "3.7a"; "3.7b"; "3.7c" ];
       };
       {
         name = "mouse_all_flag";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "mouse_any_flag";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "mouse_button_flag";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "mouse_hyperlink";
         kind = Text;
         contexts = [ Mouse ];
-        versions = [ "3.4"; "3.8" ];
+        versions =
+          [
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "mouse_line";
         kind = Text;
         contexts = [ Mouse ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "mouse_pane";
         kind = Text;
         contexts = [ Mouse ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "mouse_sgr_flag";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "mouse_standard_flag";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "mouse_status_line";
         kind = Text;
         contexts = [ Client; Mouse ];
-        versions = [ "3.4"; "3.8" ];
+        versions =
+          [
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "mouse_status_range";
         kind = Text;
         contexts = [ Client; Mouse ];
-        versions = [ "3.4"; "3.8" ];
+        versions =
+          [
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "mouse_utf8_flag";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "mouse_word";
         kind = Text;
         contexts = [ Mouse ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "mouse_x";
         kind = Text;
         contexts = [ Client; Mouse ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "mouse_y";
         kind = Text;
         contexts = [ Client; Mouse ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "next_session_id";
         kind = Text;
         contexts = [ Server ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "origin_flag";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane_active";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane_at_bottom";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane_at_left";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane_at_right";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane_at_top";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane_bg";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane_bottom";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane_command_duration";
@@ -557,103 +1588,311 @@ let entries =
         name = "pane_current_command";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane_current_path";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane_dead";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane_dead_signal";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane_dead_status";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane_dead_time";
         kind = Timestamp;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane_fg";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane_flags";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.8" ];
+        versions = [ "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "pane_floating_flag";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.8" ];
+        versions = [ "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "pane_format";
         kind = Text;
         contexts = [ Server ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane_height";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane_id";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane_in_mode";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane_index";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane_input_off";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane_key_mode";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.8" ];
+        versions =
+          [
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane_last";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane_last_output_time";
@@ -671,19 +1910,61 @@ let entries =
         name = "pane_left";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane_marked";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane_marked_set";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane_modal_flag";
@@ -695,7 +1976,21 @@ let entries =
         name = "pane_mode";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane_output_generation";
@@ -707,37 +2002,79 @@ let entries =
         name = "pane_path";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane_pb_progress";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.8" ];
+        versions = [ "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "pane_pb_state";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.8" ];
+        versions = [ "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "pane_pid";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane_pipe";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane_pipe_pid";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.8" ];
+        versions = [ "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "pane_private_modes";
@@ -749,19 +2086,61 @@ let entries =
         name = "pane_right";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane_search_string";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane_start_command";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane_start_command_list";
@@ -773,43 +2152,140 @@ let entries =
         name = "pane_start_path";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane_synchronized";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane_tabs";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane_title";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane_top";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane_tty";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane_unseen_changes";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.4"; "3.8" ];
+        versions =
+          [
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane_unzoomed_height";
@@ -827,67 +2303,157 @@ let entries =
         name = "pane_width";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "pane_x";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.8" ];
+        versions = [ "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "pane_y";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.8" ];
+        versions = [ "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "pane_z";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.8" ];
+        versions = [ "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "pane_zoomed_flag";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.8" ];
+        versions = [ "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "pid";
         kind = Text;
         contexts = [ Server ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "scroll_region_lower";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "scroll_region_upper";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "server_sessions";
         kind = Text;
         contexts = [ Server ];
-        versions = [ "3.4"; "3.8" ];
+        versions =
+          [
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "session_active";
         kind = Text;
         contexts = [ Client; Session ];
-        versions = [ "3.8" ];
+        versions =
+          [ "3.6"; "3.6a"; "3.6b"; "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "session_activity";
         kind = Timestamp;
         contexts = [ Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
+      };
+      {
+        name = "session_activity_flag";
+        kind = Text;
+        contexts = [ Session; Window_link ];
+        versions = [ "3.6"; "3.6a"; "3.6b"; "3.7"; "3.7a"; "3.7b"; "3.7c" ];
       };
       {
         name = "session_activity_flag";
@@ -899,121 +2465,381 @@ let entries =
         name = "session_alert";
         kind = Text;
         contexts = [ Session ];
-        versions = [ "3.8" ];
+        versions =
+          [ "3.6"; "3.6a"; "3.6b"; "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "session_alerts";
         kind = Text;
         contexts = [ Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "session_attached";
         kind = Text;
         contexts = [ Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "session_attached_list";
         kind = Text;
         contexts = [ Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "session_bell_flag";
         kind = Text;
         contexts = [ Session ];
-        versions = [ "3.8" ];
+        versions =
+          [ "3.6"; "3.6a"; "3.6b"; "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "session_created";
         kind = Timestamp;
         contexts = [ Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "session_format";
         kind = Text;
         contexts = [ Server ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "session_group";
         kind = Text;
         contexts = [ Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "session_group_attached";
         kind = Text;
         contexts = [ Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "session_group_attached_list";
         kind = Text;
         contexts = [ Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "session_group_list";
         kind = Text;
         contexts = [ Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "session_group_many_attached";
         kind = Text;
         contexts = [ Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "session_group_size";
         kind = Text;
         contexts = [ Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "session_grouped";
         kind = Text;
         contexts = [ Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "session_id";
         kind = Text;
         contexts = [ Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "session_last_attached";
         kind = Timestamp;
         contexts = [ Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "session_many_attached";
         kind = Text;
         contexts = [ Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "session_marked";
         kind = Text;
         contexts = [ Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "session_name";
         kind = Text;
         contexts = [ Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "session_path";
         kind = Text;
         contexts = [ Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
+      };
+      {
+        name = "session_silence_flag";
+        kind = Text;
+        contexts = [ Session; Window_link ];
+        versions = [ "3.6"; "3.6a"; "3.6b"; "3.7"; "3.7a"; "3.7b"; "3.7c" ];
       };
       {
         name = "session_silence_flag";
@@ -1025,175 +2851,553 @@ let entries =
         name = "session_stack";
         kind = Text;
         contexts = [ Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "session_windows";
         kind = Text;
         contexts = [ Session ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "sixel_support";
         kind = Text;
         contexts = [ Server ];
-        versions = [ "3.8" ];
+        versions =
+          [ "3.6"; "3.6a"; "3.6b"; "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "socket_path";
         kind = Text;
         contexts = [ Server ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "start_time";
         kind = Timestamp;
         contexts = [ Server ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "synchronized_output_flag";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.8" ];
+        versions = [ "3.7"; "3.7a"; "3.7b"; "3.7c"; "3.8" ];
       };
       {
         name = "tree_mode_format";
         kind = Text;
         contexts = [ Server ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "uid";
         kind = Text;
         contexts = [ Server ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "user";
         kind = Text;
         contexts = [ Server ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "version";
         kind = Text;
         contexts = [ Server ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window_active";
         kind = Text;
         contexts = [ Window_link ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window_active_clients";
         kind = Text;
         contexts = [ Window_link ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window_active_clients_list";
         kind = Text;
         contexts = [ Window_link ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window_active_sessions";
         kind = Text;
         contexts = [ Window_link ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window_active_sessions_list";
         kind = Text;
         contexts = [ Window_link ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window_activity";
         kind = Timestamp;
         contexts = [ Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window_activity_flag";
         kind = Text;
         contexts = [ Window_link ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window_bell_flag";
         kind = Text;
         contexts = [ Window_link ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window_bigger";
         kind = Text;
         contexts = [ Client ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window_cell_height";
         kind = Text;
         contexts = [ Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window_cell_width";
         kind = Text;
         contexts = [ Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window_end_flag";
         kind = Text;
         contexts = [ Window_link ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window_flags";
         kind = Text;
         contexts = [ Window_link ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window_format";
         kind = Text;
         contexts = [ Server ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window_height";
         kind = Text;
         contexts = [ Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window_id";
         kind = Text;
         contexts = [ Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window_index";
         kind = Text;
         contexts = [ Window_link ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window_last_flag";
         kind = Text;
         contexts = [ Window_link ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window_layout";
         kind = Text;
         contexts = [ Window ];
-        versions = [ "3.3"; "3.3a"; "3.4" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+          ];
       };
       {
         name = "window_layout";
@@ -1205,19 +3409,61 @@ let entries =
         name = "window_linked";
         kind = Text;
         contexts = [ Window_link ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window_linked_sessions";
         kind = Text;
         contexts = [ Window_link ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window_linked_sessions_list";
         kind = Text;
         contexts = [ Window_link ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window_manual_height";
@@ -1235,7 +3481,21 @@ let entries =
         name = "window_marked_flag";
         kind = Text;
         contexts = [ Window_link ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window_modal_pane";
@@ -1247,55 +3507,180 @@ let entries =
         name = "window_name";
         kind = Text;
         contexts = [ Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window_offset_x";
         kind = Text;
         contexts = [ Client ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window_offset_y";
         kind = Text;
         contexts = [ Client ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window_panes";
         kind = Text;
         contexts = [ Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window_raw_flags";
         kind = Text;
         contexts = [ Window_link ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window_silence_flag";
         kind = Text;
         contexts = [ Window_link ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window_stack_index";
         kind = Text;
         contexts = [ Window_link ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window_start_flag";
         kind = Text;
         contexts = [ Window_link ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window_visible_layout";
         kind = Text;
         contexts = [ Window ];
-        versions = [ "3.3"; "3.3a"; "3.4" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+          ];
       };
       {
         name = "window_visible_layout";
@@ -1307,18 +3692,60 @@ let entries =
         name = "window_width";
         kind = Text;
         contexts = [ Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "window_zoomed_flag";
         kind = Text;
         contexts = [ Window ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
       {
         name = "wrap_flag";
         kind = Text;
         contexts = [ Pane ];
-        versions = [ "3.3"; "3.3a"; "3.4"; "3.8" ];
+        versions =
+          [
+            "3.3a";
+            "3.4";
+            "3.5";
+            "3.5a";
+            "3.6";
+            "3.6a";
+            "3.6b";
+            "3.7";
+            "3.7a";
+            "3.7b";
+            "3.7c";
+            "3.8";
+          ];
       };
     ]

@@ -226,7 +226,7 @@ let environment_records () =
 
 let option_records () =
   let decode =
-    Libtmux_unix__Options_io.decode ~version:"3.3"
+    Libtmux_unix__Options_io.decode ~version:"3.3a"
       ~dialect:Libtmux__Protocol.Metadata.Raw
   in
   List.iter

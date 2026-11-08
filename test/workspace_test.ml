@@ -153,7 +153,7 @@ let plan_shape () =
   in
   let endpoint = Endpoint.named_socket "fixture" in
   let make ?server_policy ?collision_policy observed config =
-    Plan.make ?server_policy ?collision_policy ~endpoint ~version:"3.3"
+    Plan.make ?server_policy ?collision_policy ~endpoint ~version:"3.3a"
       ~observed config
   in
   let plan = get_plan (make None config) in
@@ -202,7 +202,7 @@ let plan_shape () =
     (unit_result
        (Plan.make
           ~endpoint:(Endpoint.named_socket "other")
-          ~version:"3.3" ~observed:(Some observed) collision))
+          ~version:"3.3a" ~observed:(Some observed) collision))
 
 let admission_bounds () =
   let environment = List.init 256 (fun i -> ("V" ^ Int.to_string i, "v")) in
@@ -248,7 +248,7 @@ let plan_limit () =
     (unit_result
        (Plan.make
           ~endpoint:(Endpoint.named_socket "fixture")
-          ~version:"3.3" ~observed:None config))
+          ~version:"3.3a" ~observed:None config))
 
 let () =
   Alcotest.run "workspace"
