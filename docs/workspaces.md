@@ -166,6 +166,13 @@ retains proven creations instead. Cleanup failures and creations whose IDs
 could not be bound remain explicit. Never rerun an uncertain mutation solely
 because its caller was interrupted.
 
+The [native recovery example](recovery.md) demonstrates the cancellation,
+inspection and fresh-postcondition sequence for a retained operation. Workspace
+callers use the same discipline with `Workspace.inspect`: read the available
+journal, identify proven effects, then choose compensation or another explicit
+action. A saved JSON receipt describes observations; it is not an executable
+target or a transaction to replay.
+
 | Exit | Meaning |
 | --- | --- |
 | 0 | Validation, planning or apply succeeded |

@@ -48,6 +48,10 @@ when a subscriber stalls. The blocking backend advances all stream lanes during
 propagates through the backend's cancellation mechanism. Client close releases
 all owned lanes and retains terminal events; it leaves the daemon alive.
 
+The [recovery program](recovery.md) shows how to cancel one operation waiter
+while keeping its retained outcome available. Cancelling a subscription closes
+that subscription; it does not cancel an already admitted command.
+
 Neither interface establishes an atomic capture/stream barrier or reconstructs
 terminal history. An immutable snapshot remains a separate captured value.
 

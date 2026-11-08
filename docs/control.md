@@ -27,6 +27,19 @@ reading. A cancelled waiter does not abandon a written request. Local scratch
 filesystem work runs on a system thread. The blocking backend supports scoped
 cancellation tokens signalled from another domain or systhread.
 
+| Recovery concern | Eio | Blocking Unix |
+| --- | --- | --- |
+| Cancel one caller | Eio cancellation scope around `Client.await` | `Cancellation.with_` token passed to `Client.await` |
+| Return after cancellation | The waiter raises while a client-owned fiber drains admitted work | The call drains before raising; one exchange timeout after detection bounds transport work |
+| Inspect an outcome | `Operation.inspect`, on the connecting domain | `Operation.inspect`, on the connecting domain |
+| Release resources | Close the client inside its application-owned switch | Close the client after the call returns |
+
+The blocking bound covers transport draining. Local scratch I/O must still
+finish before the call returns.
+
+The [complete recovery example](recovery.md) cancels an active waiter, awaits
+the same retained operation and checks server state before its next mutation.
+
 ## Distinguish acknowledgement from completion
 
 `submit` validates and reserves capacity without writing. Retain the operation
@@ -54,6 +67,9 @@ Partial effects can remain after a later hook or command failure. Inspect the
 retained receipt and current server state. Compensate only resources whose
 creation is proven. A snapshot is an observation over an interval, and a
 selection followed by mutation is not an atomic transaction.
+
+Use the [recovery walkthrough](recovery.md) to follow this sequence through a
+complete installed program, including cleanup of its own pane.
 
 See [streaming](streaming.md) for Data/Gap/End and bounded queues, and
 [compatibility](compatibility.md) for hook, PID-namespace and scratch-file

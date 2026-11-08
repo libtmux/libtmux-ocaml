@@ -1,4 +1,4 @@
-"""Execute the README's literal demo commands using installed example programs."""
+"""Execute literal documentation commands using installed example programs."""
 import ctypes
 import os
 from pathlib import Path
@@ -28,23 +28,33 @@ def prepare(root, temporary, environment):
     return project
 
 
-def run(root, project, binary, environment):
+def run(root, project, binary, environment, document="README.md"):
     libc = ctypes.CDLL(None, use_errno=True)
     if libc.prctl(36, 1, 0, 0, 0):
         raise OSError(ctypes.get_errno(), "PR_SET_CHILD_SUBREAPER")
+    child_file = Path(f"/proc/self/task/{os.getpid()}/children")
+    previous_children = set(map(int, child_file.read_text().split()))
+    variable, directory_prefix, expected_output = {
+        "README.md": ("LIBTMUX_DEMO_DIR", "libtmux-ocaml-demo.",
+                      [b'session $0 "demo"', b"active=%0\nroomy=%0\nsessions=demo\n",
+                       b"session=$1\n", b"rendered_pane=%0\n"]),
+        "docs/recovery.md": ("LIBTMUX_RECOVERY_DIR", "libtmux-ocaml-recovery.",
+                             [b"waiter=cancelled; operation=retained\n",
+                              b"operation=finished; postcondition=recovery-complete\n"]),
+    }[document]
     commands = []
     active = False
-    for block in re.findall(r"```console\n(.*?)```", (root / "README.md").read_text(), re.DOTALL):
-        if block.startswith('$ export LIBTMUX_DEMO_DIR='):
+    for block in re.findall(r"```console\n(.*?)```", (root / document).read_text(), re.DOTALL):
+        if block.startswith(f'$ export {variable}='):
             active = True
         if active:
             if not block.startswith("$ ") or "\n$ " in block:
-                raise ValueError("README blocks must contain one command")
+                raise ValueError(f"{document} blocks must contain one command")
             commands.append(block[2:].rstrip())
-        if active and block.startswith('$ rmdir "$LIBTMUX_DEMO_DIR"'):
+        if active and block.startswith(f'$ rmdir "${variable}"'):
             break
     if not commands or not commands[-1].startswith("rmdir"):
-        raise ValueError("README demo has no complete setup/cleanup route")
+        raise ValueError(f"{document} has no complete setup/cleanup route")
     bindir = project / "bin"
     bindir.mkdir(exist_ok=True)
     wrapper = bindir / "tmux"
@@ -58,8 +68,8 @@ def run(root, project, binary, environment):
             script += ["printf 'BEFORE_CLEANUP\\n'", "read answer"]
             cleanup_inserted = True
         script.append(command)
-        if command.startswith("export LIBTMUX_DEMO_DIR="):
-            script += ["printf 'DIRECTORY %s\\n' \"$LIBTMUX_DEMO_DIR\"", "read answer"]
+        if command.startswith(f"export {variable}="):
+            script += [f"printf 'DIRECTORY %s\\n' \"${variable}\"", "read answer"]
         if "new-session" in command:
             script += ["printf 'SERVER_READY\\n'", "read answer"]
     child_environment = {key:value for key,value in environment.items() if key not in {"TMUX", "TMUX_PANE"}}
@@ -90,14 +100,14 @@ def run(root, project, binary, environment):
             ready.register(process.stdout, selectors.EVENT_READ)
             while True:
                 if not ready.select(1):
-                    raise TimeoutError("README walkthrough stopped progressing")
+                    raise TimeoutError(f"{document} walkthrough stopped progressing")
                 line = process.stdout.readline()
                 if not line:
                     break
                 output.append(line)
                 if line.startswith(b"DIRECTORY "):
                     directory = Path(os.fsdecode(line[len(b"DIRECTORY "):].strip()))
-                    if not directory.name.startswith("libtmux-ocaml-demo.") or directory.stat().st_mode & 0o077:
+                    if not directory.name.startswith(directory_prefix) or directory.stat().st_mode & 0o077:
                         raise RuntimeError("demo did not create a private owned directory")
                     process.stdin.write(b"continue\n")
                 elif line in {b"SERVER_READY\n", b"BEFORE_CLEANUP\n"}:
@@ -109,20 +119,33 @@ def run(root, project, binary, environment):
         if process.returncode or error:
             raise RuntimeError((process.returncode, b"".join(output), error))
         text = b"".join(output)
-        for expected in [b'session $0 "demo"', b"active=%0\nroomy=%0\nsessions=demo\n",
-                         b"session=$1\n", b"rendered_pane=%0\n"]:
+        for expected in expected_output:
             if expected not in text:
-                raise RuntimeError(("missing README result", expected, text))
+                raise RuntimeError(("missing documentation result", expected, text))
         if directory.exists():
-            raise RuntimeError("README cleanup left its directory")
+            raise RuntimeError(f"{document} cleanup left its directory")
         for descriptor in pidfds.values():
             with selectors.DefaultSelector() as exited:
                 exited.register(descriptor, selectors.EVENT_READ)
                 if not exited.select(1):
-                    raise RuntimeError("README cleanup left an owned process alive")
+                    raise RuntimeError(f"{document} cleanup left an owned process alive")
         os.waitpid(daemon, 0)
         daemon = None
-        print(f"literal README demo commands: PASS ({Path(binary).parent.name})")
+        for pid in set(map(int, child_file.read_text().split())) - previous_children:
+            try:
+                descriptor = os.pidfd_open(pid)
+            except ProcessLookupError:
+                continue
+            try:
+                with selectors.DefaultSelector() as exited:
+                    exited.register(descriptor, selectors.EVENT_READ)
+                    if not exited.select(1):
+                        signal.pidfd_send_signal(descriptor, signal.SIGKILL)
+                        raise RuntimeError(f"{document} left an owned descendant alive")
+                os.waitpid(pid, 0)
+            finally:
+                os.close(descriptor)
+        print(f"literal {document} demo commands: PASS ({Path(binary).parent.name})")
     finally:
         if process.poll() is None:
             process.kill()

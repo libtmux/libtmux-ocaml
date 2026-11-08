@@ -25,8 +25,14 @@ with tempfile.TemporaryDirectory(prefix="libtmux-ocaml-consumer-") as directory:
     (consumer / "model_fixture.ml").write_text((root / "test/model_fixture.ml").read_text())
     examples = [snippet(f"examples/native_query.ml#{region}")
                 for region in ["native-filter", "typed-filter", "relationship-filter"]]
+    examples.append(snippet("examples/native_recovery.ml#preserve-primary"))
     (consumer / "main.ml").write_text("open Libtmux\n" + "\n".join(examples) + '''
 let () =
+  assert (try ignore (protect ~finally:(fun () -> raise Exit)
+      (fun () -> failwith "retained primary")); false
+    with Failure message when message = "retained primary" -> true);
+  assert (try ignore (protect ~finally:(fun () -> raise Exit) (fun () -> ())); false
+    with Exit -> true);
   let endpoint = Endpoint.named_socket "installed-consumer" in
   assert (Endpoint.equal endpoint (Endpoint.named_socket "installed-consumer"));
   assert (Query.exactly_one (List.to_seq [42]) = Ok 42);
@@ -74,12 +80,13 @@ let () =
 (executable (name native_wait) (modules native_wait) (libraries libtmux libtmux-eio eio_main))
 (executables (names native_graph native_query native_build) (modules native_graph native_query native_build) (libraries libtmux libtmux-unix))
 (executable (name native_watch) (modules native_watch) (libraries libtmux libtmux-eio eio_main))
+(executable (name native_recovery) (modules native_recovery) (libraries libtmux libtmux-eio eio_main))
 (executable (name configuration_unix) (modules configuration_unix) (libraries libtmux libtmux-workspace libtmux-json libtmux-unix yojson))
 (executable (name configuration_eio) (modules configuration_eio) (libraries libtmux libtmux-workspace libtmux-json libtmux-eio yojson eio_main))
 ''')
     (runtime / "native_capture.ml").write_bytes((root / "examples/native_capture.ml").read_bytes())
     (runtime / "native_wait.ml").write_bytes((root / "examples/native_wait.ml").read_bytes())
-    for name in ["native_graph", "native_query", "native_build", "native_watch"]:
+    for name in ["native_graph", "native_query", "native_build", "native_watch", "native_recovery"]:
         (runtime / f"{name}.ml").write_bytes((root / "examples" / f"{name}.ml").read_bytes())
     common = '''
 let get = function Ok value -> value | Error error -> failwith (Format.asprintf "%a" Error.pp error)
@@ -183,6 +190,13 @@ let () = Eio_main.run (fun env -> Eio.Switch.run (fun sw ->
             assert re.fullmatch(rb"future_match_offset=[1-9][0-9]*\nrendered_pane=%0\n", result.stdout), result
             assert result.stderr == b"", result
             assert fixture.command("list-clients").stdout == b""
+            before_recovery = fixture.command("list-panes", "-a", "-F", "#{pane_id}:#{window_id}:#{window_name}").stdout
+            result = run_example("native_recovery", "$0")
+            assert result.stdout == (b"waiter=cancelled; operation=retained\n"
+                                     b"operation=finished; postcondition=recovery-complete\n"), result
+            assert result.stderr == b"", result
+            assert fixture.command("list-clients").stdout == b""
+            assert fixture.command("list-panes", "-a", "-F", "#{pane_id}:#{window_id}:#{window_name}").stdout == before_recovery
             result = run_example("native_build", "project", fixture.directory.name)
             created = dict(line.split("=", 1) for line in result.stdout.decode().splitlines())
             assert set(created) == {"session", "editor", "right", "logs"}, created
@@ -197,7 +211,9 @@ let () = Eio_main.run (fun env -> Eio.Switch.run (fun sw ->
             assert paths == [fixture.directory.name.encode()] * 3, paths
             assert fixture.command("list-clients").stdout == b""
         readme_walkthrough.run(root, walkthrough, binary, environment)
+        readme_walkthrough.run(root, walkthrough, binary, environment, "docs/recovery.md")
     print(f"installed Eio native capture example: PASS on {len(binaries)} releases")
     print(f"installed Unix/Eio generated conveniences: PASS on {len(binaries)} releases")
     print(f"installed rendered-wait example: PASS on {len(binaries)} releases")
     print(f"installed graph/query/build/Eio-stream examples: PASS on {len(binaries)} releases")
+    print(f"installed cancellation/recovery example and preserved panes: PASS on {len(binaries)} releases")
