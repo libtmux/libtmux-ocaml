@@ -15,11 +15,10 @@ that occasionally runs a tmux command needs.
 
 ## Status
 
-Reviewed record of the implemented architecture, dated 2026-11-08. The design
-remains adopted for implementation. Independent assessment recommends retaining
-it; final record acceptance remains open. This does not establish complete-suite
-adoption, a package release or
-hosted-documentation qualification. [Current status](../../status.md) and
+Accepted architecture record, reviewed 2026-11-09. Independent architecture-only
+review accepts the implemented design and this overview. Complete-suite
+adoption, a package release and hosted-documentation qualification remain open.
+[Current status](../../status.md) and
 [compatibility](../../compatibility.md) own those changing results.
 
 The original review examined
