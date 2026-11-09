@@ -2,6 +2,7 @@
 
 import os
 import re
+import selectors
 from pathlib import Path
 import subprocess
 import sys
@@ -42,6 +43,84 @@ def run_hook_recovery(runtime, binary, environment):
             fixture.command("kill-window", "-t", window)
             assert fixture.command("list-windows", "-a", "-F", "#{window_id}:#{window_index}:#{window_name}:#{window_panes}").stdout == before
         print(f"installed hook recovery, retained IDs after close and no retry: PASS ({Path(binary).parent.name})")
+
+
+def run_workspace_recovery(runtime, binary, environment, *, preserve_foreign=False):
+    environment = {key: value for key, value in environment.items() if key not in {"TMUX", "TMUX_PANE"}}
+    with TmuxFixture(binary) as fixture:
+        before = fixture.command("list-panes", "-a", "-F", "#{session_id}:#{window_id}:#{pane_id}").stdout
+        fixture.command("set-hook", "-g", "after-new-session",
+                        "wait-for -S consumer-ready ; wait-for consumer-release ; "
+                        "wait-for -S libtmux-workspace-ready ; wait-for libtmux-workspace-release")
+        process = subprocess.Popen([str(runtime / "_build/default/native_workspace_recovery.exe"),
+                                    fixture.binary, str(fixture.socket)],
+                                   cwd=runtime, env=environment, stdin=subprocess.DEVNULL,
+                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        failure = None
+        try:
+            fixture.command("wait-for", "consumer-ready")
+            previous = set(fixture.pane_pidfds)
+            fixture.track_panes()
+            created = set(fixture.pane_pidfds) - previous
+            assert len(created) == 1, created
+            if preserve_foreign:
+                fixture.command("link-window", "-d", "-s", "@0", "-t", "$1:9")
+                fixture.command("rename-session", "-t", "$1", "renamed-partial")
+            fixture.command("wait-for", "-S", "consumer-release")
+            output, error = process.communicate(timeout=1)
+            if preserve_foreign:
+                sessions = fixture.command("list-sessions", "-F", "#{session_id}:#{session_name}").stdout
+                assert sessions == b"$0:fixture\n$1:renamed-partial\n", sessions
+                for session in ("$0", "$1"):
+                    assert fixture.command("list-panes", "-s", "-t", session, "-F", "#{pane_id}").stdout == b"%0\n"
+                assert process.returncode == 2 and b"created workspace session remains present" in error, (process.returncode, output, error, sessions)
+                assert b"postcondition=created-session-absent" not in output, output
+                assert output == (b"waiter=cancelled\njournal=interrupted\ncompensated-pane=%1\n"
+                                  b"cleanup-issues=0; omitted=0\n"), output
+            else:
+                assert process.returncode == 0 and not error, (process.returncode, output, error)
+                assert output == (b"waiter=cancelled\npostcondition=created-session-absent\n"
+                                  b"journal=interrupted\ncompensated-pane=%1\ncleanup-issues=0; omitted=0\n"), output
+                assert fixture.command("list-panes", "-a", "-F", "#{session_id}:#{window_id}:#{pane_id}").stdout == before
+            assert fixture.command("list-clients").stdout == b""
+            assert fixture.server.poll() is None, "workspace cleanup stopped the borrowed daemon"
+            for pid in created:
+                with selectors.DefaultSelector() as exited:
+                    exited.register(fixture.pane_pidfds[pid], selectors.EVENT_READ)
+                    assert exited.select(1), "compensated pane remained alive"
+        except BaseException as error:
+            failure = error
+            error.add_note(f"workspace failure stdout={getattr(error, 'stdout', None)!r}; "
+                           f"stderr={getattr(error, 'stderr', None)!r}; "
+                           f"daemon_status={fixture.server.poll()!r}; consumer_status={process.poll()!r}")
+            raise
+        finally:
+            cleanup_failures = []
+            try:
+                if process.poll() is None:
+                    process.kill()
+                    process.wait(timeout=1)
+                if failure is not None:
+                    output, error = process.communicate(timeout=1)
+                    failure.add_note(f"workspace consumer stdout={output!r}; stderr={error!r}")
+            except (OSError, subprocess.TimeoutExpired) as cleanup:
+                cleanup_failures.append(cleanup)
+            finally:
+                for stream in (process.stdout, process.stderr):
+                    try:
+                        stream.close()
+                    except OSError as cleanup:
+                        cleanup_failures.append(cleanup)
+            primary = failure or (cleanup_failures[0] if cleanup_failures else None)
+            for cleanup in cleanup_failures:
+                if cleanup is not primary:
+                    primary.add_note(f"consumer cleanup failed: {cleanup!r}; "
+                                     f"stdout={getattr(cleanup, 'stdout', None)!r}; "
+                                     f"stderr={getattr(cleanup, 'stderr', None)!r}")
+            if failure is None and primary is not None:
+                raise primary
+        outcome = "surviving renamed session and foreign link" if preserve_foreign else "retained journal and compensation"
+        print(f"installed workspace interruption, {outcome}: PASS ({Path(binary).parent.name})")
 
 
 with tempfile.TemporaryDirectory(prefix="libtmux-ocaml-consumer-") as directory:
@@ -135,12 +214,13 @@ let () =
 (executable (name native_watch) (modules native_watch) (libraries libtmux libtmux-eio eio_main))
 (executable (name native_recovery) (modules native_recovery) (libraries libtmux libtmux-eio eio_main))
 (executable (name native_stream_recovery) (modules native_stream_recovery) (libraries libtmux libtmux-eio eio_main))
+(executable (name native_workspace_recovery) (modules native_workspace_recovery) (libraries libtmux libtmux-workspace libtmux-eio eio_main))
 (executable (name configuration_unix) (modules configuration_unix) (libraries libtmux libtmux-workspace libtmux-json libtmux-unix yojson))
 (executable (name configuration_eio) (modules configuration_eio) (libraries libtmux libtmux-workspace libtmux-json libtmux-eio yojson eio_main))
 ''')
     (runtime / "native_capture.ml").write_bytes((root / "examples/native_capture.ml").read_bytes())
     (runtime / "native_wait.ml").write_bytes((root / "examples/native_wait.ml").read_bytes())
-    for name in ["native_graph", "native_query", "native_build", "native_hook_recovery", "native_watch", "native_recovery", "native_stream_recovery"]:
+    for name in ["native_graph", "native_query", "native_build", "native_hook_recovery", "native_workspace_recovery", "native_watch", "native_recovery", "native_stream_recovery"]:
         (runtime / f"{name}.ml").write_bytes((root / "examples" / f"{name}.ml").read_bytes())
     common = '''
 let get = function Ok value -> value | Error error -> failwith (Format.asprintf "%a" Error.pp error)
@@ -203,6 +283,8 @@ let () = Eio_main.run (fun env -> Eio.Switch.run (fun sw ->
     binaries = sys.argv[1:] or [root / f"scratch/tmux/tmux-{version}/tmux" for version in ["3.3a", "3.8"]]
     for binary in binaries:
         run_hook_recovery(runtime, binary, environment)
+        run_workspace_recovery(runtime, binary, environment)
+        run_workspace_recovery(runtime, binary, environment, preserve_foreign=True)
         for document in ("unix/README.md", "eio/README.md"):
             readme_walkthrough.run(root, walkthrough, binary, environment, document)
         with TmuxFixture(binary) as fixture:
@@ -280,6 +362,7 @@ let () = Eio_main.run (fun env -> Eio.Switch.run (fun sw ->
         readme_walkthrough.run(root, walkthrough, binary, environment)
         readme_walkthrough.run(root, walkthrough, binary, environment, "docs/recovery.md")
         readme_walkthrough.run(root, walkthrough, binary, environment, "docs/hook-recovery.md")
+        readme_walkthrough.run(root, walkthrough, binary, environment, "docs/workspace-recovery.md")
         readme_walkthrough.run(root, walkthrough, binary, environment, "docs/streaming.md")
     print(f"installed Eio native capture example: PASS on {len(binaries)} releases")
     print(f"installed Unix/Eio generated conveniences: PASS on {len(binaries)} releases")

@@ -35,6 +35,7 @@ records the exercised fixtures, not every possible cleanup path.
 | Public workspace bootstrap on fresh/existing daemons | PASS | PASS |
 | Installed workspace CLI, receipts, interruption and output faults | PASS | PASS |
 | Literal workspace guide and owned teardown | PASS | PASS |
+| Native workspace interruption caller and guide | PARTIAL | PASS |
 | Final suite qualification | UNVERIFIED | UNVERIFIED |
 
 The [stream-gap walkthrough](streaming.md#recover-after-a-gap) reported an
@@ -53,6 +54,17 @@ separate from the earlier 3.3a daemon-exit evidence; it does not prove the same
 cause. The example runner now includes captured output and the original cause
 when a program fails or times out. Later passing runs do not close either
 finding.
+
+The [workspace interruption caller](workspace-recovery.md) passes installed
+compensation and foreign-link preservation checks on both endpoints. Its literal
+guide also passes. An earlier tmux 3.3a consumer-harness readiness command exited
+with status 1 before releasing the creation hook. That failure did not retain
+the command's captured output, so its cause remains unestablished. The current
+runner retains command, consumer and cleanup diagnostics. Later passing cases
+do not close the earlier readiness finding; the 3.3a cell remains partial.
+Installed checks verify compensated pane exit, seed topology and client counts.
+The foreign-link control renames the created session and requires the ID-based
+postcondition to report failure while preserving foreign content.
 
 The current matrix uses only OCaml 5.5.2 and tmux 3.3a/3.8. Pure assertions
 check version rejection and catalog availability across the supported range.

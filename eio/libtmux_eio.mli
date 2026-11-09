@@ -627,14 +627,20 @@ module Workspace : sig
     ?compensate_on_failure:bool ->
     t ->
     (Libtmux_workspace.Execution.receipt, Libtmux.Error.t) result
-  (** Apply once. Expected failures return a retained journal. Eio cancellation
+  (** Apply steps at most once per execution handle. Expected failures return a
+      retained journal. On initial application, [compensate_on_failure] defaults
+      to [true], attempting removal of proven newly created panes after failure
+      or cancellation. Passing [false] skips that compensation. Eio cancellation
       propagates after progress is recorded and at most 500 ms of protected
       compensation. Admitted commands can still complete under client ownership;
-      inspect the receipt before attempting manual recovery. *)
+      use {!inspect} before manual recovery. *)
 
   val inspect :
     t -> (Libtmux_workspace.Execution.receipt, Libtmux.Error.t) result
-  (** Read a journal copy without I/O, including any late retained outcome. *)
+  (** Copy the retained {!type:Libtmux_workspace.Execution.receipt} without I/O,
+      on the owning domain, including after execution or client closure. Pending
+      steps can settle as the client progresses; earlier receipts keep their own
+      step and cleanup arrays. *)
 
   val client : t -> Client.t option
   (** Borrow the existing or bootstrapped {!Client.t} without I/O for subsequent

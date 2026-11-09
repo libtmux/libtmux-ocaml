@@ -167,12 +167,12 @@ retains proven creations instead. Cleanup failures and creations whose IDs
 could not be bound remain explicit. Never rerun an uncertain mutation solely
 because its caller was interrupted.
 
-The [native recovery example](recovery.md) demonstrates the cancellation,
-inspection and fresh-postcondition sequence for a retained operation. Workspace
-callers use the same discipline with `Workspace.inspect`: read the available
-journal, identify proven effects, then choose compensation or another explicit
-action. A saved JSON receipt describes observations; it is not an executable
-target or a transaction to replay.
+The [retained-operation example](recovery.md) demonstrates waiter recovery.
+The [native workspace example](workspace-recovery.md) interrupts an apply,
+inspects its journal after client cleanup and verifies compensation. Read the
+available journal, identify proven effects, then choose another explicit action.
+A saved JSON receipt describes observations; it is not an executable target or
+a transaction to replay.
 
 The execution journal is retained in process memory. `await` initiates steps
 only once for a particular execution handle; a new handle or CLI invocation

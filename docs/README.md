@@ -19,6 +19,7 @@ and filter them locally, then perform an explicit action with a bound target.
 | Recover coverage after a stream gap | [Gap recovery](streaming.md#recover-after-a-gap) | [Recapture and resubscribe](../examples/native_stream_recovery.ml) |
 | Wait for text already on screen | [Rendered waits](streaming.md) | [Wait](../examples/native_wait.ml) |
 | Validate, preview and apply a JSON workspace | [Workspaces](workspaces.md) | [Project configuration](../examples/workspace/project.json) |
+| Interrupt a native workspace and inspect compensation | [Workspace recovery](workspace-recovery.md) | [Retained journal](../examples/native_workspace_recovery.ml) |
 | Compare measured capture workloads | [Benchmarks](benchmarking.md) | [Capture harness](../bench/capture.py) |
 | Browse modules and signatures | [API documentation](api.md) | Public `.mli` sources |
 | Review package-wide design choices | [Architecture decisions](dev/adr/README.md) | [Implemented architecture](dev/adr/0001-native-ocaml-suite.md) |
