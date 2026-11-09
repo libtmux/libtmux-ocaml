@@ -93,14 +93,17 @@ cancels the workspace waiter and releases the hook. That release lets the
 written creation settle and compensation proceed. The hook coordinates tmux
 commands; define pane-program readiness separately.
 
-The application owns `Eio_main` and its switch. The switch closes both clients.
-Closing the borrowed workspace handle leaves its client available for the
-postcondition capture. The outer finalizer inspects the journal after those
-client cleanup scopes, preserving the primary exception if reporting also fails.
+The application owns [`Eio_main`][eio-main] and its switch. The switch closes
+both clients. Closing the borrowed workspace handle leaves its client available
+for the postcondition capture. The outer finalizer inspects the journal after
+those client cleanup scopes, preserving the primary exception if reporting also
+fails.
 
 If a foreign window is linked into the new session, compensation leaves that
 window intact. The program's ID-based check reports a surviving session even
 if another client renamed it.
+
+[eio-main]: https://ocaml-multicore.github.io/eio/eio_main/Eio_main/index.html
 
 <!-- example: examples/native_workspace_recovery.ml -->
 
