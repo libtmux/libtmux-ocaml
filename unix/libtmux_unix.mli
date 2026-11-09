@@ -107,8 +107,12 @@ module Terminal : sig
       to retain secondary failures after cancellation. *)
 end
 
-(** A retained admitted command. A cancelled waiter does not erase its eventual
-    success, failure or uncertainty. *)
+(** Retained outcomes remain inspectable after client closure, on the owning
+    domain. Keep the handle from {!Client.submit} before {!Client.await}, then
+    read {!Operation.inspect}. The
+    {{:https://github.com/libtmux/libtmux-ocaml/blob/master/docs/hook-recovery.md}hook
+     recovery walkthrough} shows creation evidence after a later hook failure.
+*)
 module Operation : sig
   type 'a t
 

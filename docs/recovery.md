@@ -1,5 +1,9 @@
 # Recover an operation after cancelling its waiter
 
+For a creation followed by a failing tmux hook, see
+[retained creation evidence](hook-recovery.md). That walkthrough inspects the
+reported IDs after closing its client.
+
 Retain the operation handle before awaiting it. Cancelling one Eio waiter leaves
 admitted work under the client's ownership. Inspect that handle, await its
 outcome and check the relevant server state before choosing another mutation.

@@ -14,6 +14,7 @@ and filter them locally, then perform an explicit action with a bound target.
 | Exchange scalar query JSON | [Wire subset](query-interchange.md) | [Decode and encode](../examples/query_json.ml) |
 | Create layouts, set options and handle outcomes | [Control and recovery](control.md) | [Build layout](../examples/native_build.ml) |
 | Cancel a waiter and recover its operation | [Recovery walkthrough](recovery.md) | [Retained outcome](../examples/native_recovery.ml) |
+| Inspect creation evidence after a failing hook | [Hook recovery](hook-recovery.md) | [Retained creation](../examples/native_hook_recovery.ml) |
 | Concurrent literal send and output observation | [Streaming](streaming.md) | [Eio send and observe](../examples/native_watch.ml) |
 | Recover coverage after a stream gap | [Gap recovery](streaming.md#recover-after-a-gap) | [Recapture and resubscribe](../examples/native_stream_recovery.ml) |
 | Wait for text already on screen | [Rendered waits](streaming.md) | [Wait](../examples/native_wait.ml) |

@@ -13,6 +13,37 @@ from support import readme_walkthrough
 root = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(root))
 from tools.docs_snippets import snippet
+
+
+def run_hook_recovery(runtime, binary, environment):
+    environment = {key: value for key, value in environment.items() if key not in {"TMUX", "TMUX_PANE"}}
+    with TmuxFixture(binary) as fixture:
+        fixture.command("rename-window", "-t", "@0", "hook-seed")
+        before = fixture.command("list-windows", "-a", "-F", "#{window_id}:#{window_index}:#{window_name}:#{window_panes}").stdout
+        for fails in (False, True):
+            if fails:
+                fixture.command("set-hook", "-g", "after-new-window", "select-pane -t %4294967294")
+            result = subprocess.run([str(runtime / "_build/default/native_hook_recovery.exe"),
+                                     fixture.binary, str(fixture.socket), "$0"],
+                                    cwd=runtime, env=environment, capture_output=True, timeout=1)
+            assert result.returncode == 0 and not result.stderr, (result.returncode, result.stdout, result.stderr)
+            expected = b"operation=unknown\n" if fails else b"operation=finished\n"
+            assert result.stdout.startswith(expected), result.stdout
+            assert (b"hook failed or emitted output" in result.stdout) == fails, result.stdout
+            reported = re.findall(rb"^reported-window=(@[0-9]+); reported-pane=(%[0-9]+)$", result.stdout, re.MULTILINE)
+            assert len(reported) == 1, result.stdout
+            window, pane = reported[0]
+            assert result.stdout.endswith(b"cleanup-issues=0; omitted=0\n"), result.stdout
+            after = fixture.command("list-windows", "-a", "-F", "#{window_id}:#{window_index}:#{window_name}:#{window_panes}").stdout
+            assert after == before + window + b":4:hook-created:1\n", after
+            assert fixture.command("list-panes", "-t", window, "-F", "#{pane_id}").stdout == pane + b"\n"
+            assert fixture.command("list-clients").stdout == b""
+            fixture.track_panes()
+            fixture.command("kill-window", "-t", window)
+            assert fixture.command("list-windows", "-a", "-F", "#{window_id}:#{window_index}:#{window_name}:#{window_panes}").stdout == before
+        print(f"installed hook recovery, retained IDs after close and no retry: PASS ({Path(binary).parent.name})")
+
+
 with tempfile.TemporaryDirectory(prefix="libtmux-ocaml-consumer-") as directory:
     temporary = Path(directory)
     prefix = temporary / "installed"
@@ -100,7 +131,7 @@ let () =
     (runtime / "dune").write_text('''
 (executable (name native_capture) (modules native_capture) (libraries libtmux libtmux-eio eio_main))
 (executable (name native_wait) (modules native_wait) (libraries libtmux libtmux-eio eio_main))
-(executables (names native_graph native_query native_build) (modules native_graph native_query native_build) (libraries libtmux libtmux-unix))
+(executables (names native_graph native_query native_build native_hook_recovery) (modules native_graph native_query native_build native_hook_recovery) (libraries libtmux libtmux-unix))
 (executable (name native_watch) (modules native_watch) (libraries libtmux libtmux-eio eio_main))
 (executable (name native_recovery) (modules native_recovery) (libraries libtmux libtmux-eio eio_main))
 (executable (name native_stream_recovery) (modules native_stream_recovery) (libraries libtmux libtmux-eio eio_main))
@@ -109,7 +140,7 @@ let () =
 ''')
     (runtime / "native_capture.ml").write_bytes((root / "examples/native_capture.ml").read_bytes())
     (runtime / "native_wait.ml").write_bytes((root / "examples/native_wait.ml").read_bytes())
-    for name in ["native_graph", "native_query", "native_build", "native_watch", "native_recovery", "native_stream_recovery"]:
+    for name in ["native_graph", "native_query", "native_build", "native_hook_recovery", "native_watch", "native_recovery", "native_stream_recovery"]:
         (runtime / f"{name}.ml").write_bytes((root / "examples" / f"{name}.ml").read_bytes())
     common = '''
 let get = function Ok value -> value | Error error -> failwith (Format.asprintf "%a" Error.pp error)
@@ -171,6 +202,7 @@ let () = Eio_main.run (fun env -> Eio.Switch.run (fun sw ->
     walkthrough = readme_walkthrough.prepare(root, temporary, environment)
     binaries = sys.argv[1:] or [root / f"scratch/tmux/tmux-{version}/tmux" for version in ["3.3a", "3.8"]]
     for binary in binaries:
+        run_hook_recovery(runtime, binary, environment)
         for document in ("unix/README.md", "eio/README.md"):
             readme_walkthrough.run(root, walkthrough, binary, environment, document)
         with TmuxFixture(binary) as fixture:
@@ -247,6 +279,7 @@ let () = Eio_main.run (fun env -> Eio.Switch.run (fun sw ->
             assert fixture.command("list-clients").stdout == b""
         readme_walkthrough.run(root, walkthrough, binary, environment)
         readme_walkthrough.run(root, walkthrough, binary, environment, "docs/recovery.md")
+        readme_walkthrough.run(root, walkthrough, binary, environment, "docs/hook-recovery.md")
         readme_walkthrough.run(root, walkthrough, binary, environment, "docs/streaming.md")
     print(f"installed Eio native capture example: PASS on {len(binaries)} releases")
     print(f"installed Unix/Eio generated conveniences: PASS on {len(binaries)} releases")

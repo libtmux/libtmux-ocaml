@@ -19,8 +19,8 @@
  (libraries libtmux libtmux-eio eio_main))
 
 (executables
- (names native_graph native_query native_build)
- (modules native_graph native_query native_build)
+ (names native_graph native_query native_build native_hook_recovery)
+ (modules native_graph native_query native_build native_hook_recovery)
  (libraries libtmux libtmux-unix))
 
 (executable
