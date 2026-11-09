@@ -38,6 +38,12 @@
  (action
   (run python3 %{dep:installed_consumer_diagnostics_test.py})))
 
+(rule
+ (alias runtest)
+ (deps fixture_diagnostics_test.py support/tmux_fixture.py)
+ (action
+  (run python3 %{dep:fixture_diagnostics_test.py})))
+
 (test
  (name json_test)
  (modules json_test)

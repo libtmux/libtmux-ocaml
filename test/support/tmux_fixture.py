@@ -67,8 +67,8 @@ class TmuxFixture:
                 raise RuntimeError("fixture requires a shared PID namespace")
             self.track_panes()
             return self
-        except BaseException:
-            self.close()
+        except BaseException as error:
+            self._close_preserving(error)
             raise
         finally:
             os.close(notification)
@@ -109,5 +109,17 @@ class TmuxFixture:
             self.log.close()
             self.directory.cleanup()
 
-    def __exit__(self, *_):
-        self.close()
+    def _close_preserving(self, primary):
+        try:
+            self.close()
+        except BaseException as cleanup:
+            if primary is None:
+                raise
+            primary.add_note(
+                f"fixture cleanup failed: {cleanup!r}; "
+                f"stdout={getattr(cleanup, 'stdout', None)!r}; "
+                f"stderr={getattr(cleanup, 'stderr', None)!r}"
+            )
+
+    def __exit__(self, _kind, error, _traceback):
+        self._close_preserving(error)
