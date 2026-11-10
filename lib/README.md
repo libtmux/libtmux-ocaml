@@ -142,4 +142,4 @@ Keep these contracts in mind:
   not execute those plans.
 
 [Run the full graph example](../README.md#read-a-real-tmux-graph) ·
-[Query JSON](../json/) · [Changelog](../CHANGELOG.md) · [MIT](../LICENSE)
+[Query JSON](../json/) · [Changelog](CHANGELOG.md) · [MIT](../LICENSE)

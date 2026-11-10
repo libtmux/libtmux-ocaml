@@ -68,7 +68,8 @@ def check():
     count = 0
     links = 0
     documents = [ROOT / "README.md", *sorted((ROOT / "docs").glob("*.md"))]
-    documents += [ROOT / package / "README.md" for package in ("lib", "unix", "eio", "json")]
+    packages = ("lib", "unix", "eio", "json", "workspace", "cli")
+    documents += [ROOT / package / "README.md" for package in packages]
     for document in documents:
         text = document.read_text()
         if text.count("<!-- example:") != len(INCLUDE.findall(text)):

@@ -19,6 +19,7 @@ query it locally, and observe output through Eio or a blocking client.
 [Guide](https://libtmux.org/en/ocaml/latest/) ·
 [API](https://libtmux.org/en/ocaml/latest/reference/) ·
 [Examples](https://libtmux.org/en/ocaml/latest/guides/showcases/) ·
+[Workspace CLI](cli/) ·
 [Compatibility](https://libtmux.org/en/ocaml/latest/guides/compatibility/) ·
 [CI](https://github.com/libtmux/libtmux-ocaml/actions/workflows/ocaml.yml)
 

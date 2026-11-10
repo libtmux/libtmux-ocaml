@@ -26,6 +26,13 @@ Keep one source-install route until a registry release has been verified.
 Support and performance claims refer to the exact checked source and workload.
 Do not infer a release policy from another port's warning text.
 
+Give every public package, including the workspace CLI, its own README in its
+source directory. State its purpose, installation, a working example, limits,
+and links to its API or command guide, changelog, license and companion packages.
+Reuse the approved core or workspace logo at the top through a relative asset
+path; keep the centered layout and avoid copying the image set. Include package
+READMEs in the documentation snippet and local-link checks.
+
 Keep API contracts beside their declarations and link to the guide that owns
 each concept. A task guide shows the common call before variations and failures.
 Explain completion, uncertainty, ownership and cleanup where they affect use.
