@@ -1,5 +1,8 @@
 # Browse the OCaml API
 
+Browse the [published API reference](https://libtmux.org/en/ocaml/latest/reference/)
+for public modules and their contracts.
+
 The public `.mli` files define the API. They document module roles, input and
 result types, local versus effectful operations, ownership, ordering, limits
 and failure behavior. Source examples are compiled against installed libraries.

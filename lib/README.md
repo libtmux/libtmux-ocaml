@@ -20,7 +20,8 @@ the OCaml standard library and performs no tmux I/O. Add a
 [blocking client](../unix/) or [Eio client](../eio/) when acquiring observations
 or changing the server.
 
-[API](libtmux.mli) · [Object graph](../docs/graph.md) ·
+[API](https://libtmux.org/en/ocaml/latest/reference/libtmux/) ·
+[Object graph](../docs/graph.md) ·
 [Queries](../docs/queries.md) · [Package boundaries](../docs/packages.md)
 
 ## Install and link

@@ -19,7 +19,8 @@ Use `Libtmux_eio` for concurrent commands, retained operation outcomes, and
 bounded future-output subscriptions. Your application supplies the Eio scheduler,
 switch, process manager and clock.
 
-[API](libtmux_eio.mli) · [Streaming](../docs/streaming.md) ·
+[API](https://libtmux.org/en/ocaml/latest/reference/libtmux_eio/) ·
+[Streaming](../docs/streaming.md) ·
 [Recovery](../docs/recovery.md) · [Compatibility](../docs/compatibility.md)
 
 ## Install and link

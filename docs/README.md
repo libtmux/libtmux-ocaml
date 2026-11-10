@@ -1,5 +1,7 @@
 # Use libtmux from OCaml
 
+Browse the [published guides and API](https://libtmux.org/en/ocaml/latest/).
+
 Start with an explicit tmux endpoint. Capture immutable observations, inspect
 and filter them locally, then perform an explicit action with a bound target.
 

@@ -19,7 +19,8 @@ Capture a tmux graph, run targeted commands, and retain operation outcomes with
 `Libtmux_unix`. Calls block the invoking thread. Scoped cancellation can be
 signalled from another domain or system thread.
 
-[API](libtmux_unix.mli) · [Operations and recovery](../docs/control.md) ·
+[API](https://libtmux.org/en/ocaml/latest/reference/libtmux_unix/) ·
+[Operations and recovery](../docs/control.md) ·
 [Compatibility](../docs/compatibility.md) · [Eio alternative](../eio/)
 
 ## Install and link

@@ -20,7 +20,8 @@ configuration with `Libtmux_json`. The codec performs no tmux or filesystem I/O.
 It depends on the [core](../lib/), the pure [workspace package](../workspace/),
 and Yojson.
 
-[API](libtmux_json.mli) · [Query semantics](../docs/queries.md) ·
+[API](https://libtmux.org/en/ocaml/latest/reference/libtmux_json/) ·
+[Query semantics](../docs/queries.md) ·
 [Workspaces](../docs/workspaces.md) · [Package boundaries](../docs/packages.md)
 
 ## Install and link
