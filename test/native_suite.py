@@ -12,7 +12,7 @@ binary = str(Path(sys.argv[1]).resolve(strict=True))
 for name in [
     "fixture", "plan", "protocol", "blocking", "binding", "capture", "eio",
     "capture_cancel", "read_process", "operations", "environment", "options",
-    "client_operations", "terminal", "shutdown", "streaming", "stream_fault", "bootstrap", "workspace",
+    "client_operations", "terminal", "shutdown", "streaming", "stream_fault", "stream_close", "bootstrap", "workspace",
 ]:
     started = time.monotonic()
     subprocess.run([sys.executable, str(root / "test" / f"{name}_test.py"), binary],

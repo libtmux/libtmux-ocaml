@@ -195,3 +195,8 @@
  (name workspace_pane_ready)
  (modules workspace_pane_ready)
  (libraries unix))
+
+(executable
+ (name stream_close_peer)
+ (modules stream_close_peer)
+ (libraries libtmux libtmux-unix unix))
