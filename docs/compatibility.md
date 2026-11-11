@@ -112,6 +112,18 @@ path. The exact 3.8 source includes the upstream null-state guard. An earlier
 3.3 observer-command failure remains unattributed. Passing ordinary client
 checks does not close either mixed-workload failure.
 
+tmux 3.2 through 3.8 also abort the daemon with `fatal: not enough data` when a
+control client leaves, or is set to ignore output, while a queued output block
+is unwritten and its pane prints again. `control_write_output` in `control.c`
+advances the client's offsets past the pending bytes, and `control_append_data`
+then finds fewer bytes than the block records. It is a race, so the failure
+rate depends on load: 20 of 20 and 19 of 20 runs of a 100-round
+close-while-echoing regression killed the daemon on 3.8 and 3.3a, and 8 of
+1200 runs of the stream-recovery walkthrough did under CPU load on 3.8. A
+subscription lane now pauses each pane it observed before closing; pausing
+discards the queued blocks. This guards the port only. Other control clients
+that disconnect mid-output can still trigger the abort.
+
 The I/O packages require Linux pidfds, the same PID namespace as the daemon,
 and shared local scratch storage. A socket pathname does not prove those
 conditions. Each connection has its own generation; a replacement daemon never
