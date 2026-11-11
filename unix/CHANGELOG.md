@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Pause observed panes before releasing a stream lane so tmux 3.2 through 3.8
+  do not abort when a subscription closes while its pane is still printing.
 - Preserve rendered-wait errors and cancellation when subscription cleanup
   fails; report cleanup failure before success or renewed coverage.
 - Retain connection and subscription cleanup results; overlapping Eio closes
