@@ -20,6 +20,7 @@ and lane = {
   control : C.lane;
   serial : serial;
   mutable subscribers : subscription list;
+  mutable observed : Pane.Id.t list;
   mutable pending : int;
   mutable retired : bool;
 }
@@ -41,11 +42,37 @@ and subscription = {
   finalize : (unit -> unit) -> unit;
 }
 
+(* tmux 3.2 through 3.8 abort the daemon ("not enough data") when a control
+   client that is exiting or ignoring output still holds a queued output block
+   and its pane prints again. Pausing each observed pane first discards those
+   blocks. The command is not awaited: tmux runs it before the exit that
+   follows, and the lane may already be broken. *)
+let quiesce lane =
+  let c = lane.manager.connection in
+  List.iter
+    (fun pane ->
+      match
+        protect (fun () ->
+            Runtime_io.write c.lane.io lane.control.process
+              ~pidfd:(Some c.pidfd)
+              ~deadline:(Linux.now () +. c.timeout)
+              (protocol
+                 (P.Command.render "refresh-client"
+                    [ "-A"; Pane.Id.to_string pane ^ ":pause" ])
+              ^ "\n"))
+      with
+      | Ok () | Error _ -> ())
+    lane.observed
+
+let release lane =
+  quiesce lane;
+  C.release_auxiliary lane.manager.connection lane.control
+
 let reclaim lane =
   if (not lane.retired) && lane.pending = 0 && lane.subscribers = [] then (
     lane.retired <- true;
     lane.manager.lanes <- List.filter (( != ) lane) lane.manager.lanes;
-    C.release_auxiliary lane.manager.connection lane.control)
+    release lane)
 
 let finish ?(gap = false) ?lost_bytes sub reason =
   sub.finalize (fun () ->
@@ -76,7 +103,7 @@ let retire lane reason =
   if not lane.retired then (
     lane.retired <- true;
     lane.manager.lanes <- List.filter (( != ) lane) lane.manager.lanes;
-    C.release_auxiliary lane.manager.connection lane.control)
+    release lane)
 
 let close_all manager reason =
   Cleanup.run (List.map (fun lane () -> retire lane reason) manager.lanes)
@@ -268,6 +295,7 @@ let open_lane manager session =
         control;
         serial = manager.make_serial ();
         subscribers = [];
+        observed = [];
         pending = 0;
         retired = false;
       }
@@ -392,7 +420,9 @@ let subscribe ?session ?(capacity_bytes = 1_048_576) ?(capacity_events = 1024)
             if !changed || lane.retired then
               fail
                 (Error.Capture_raced "pane coverage changed during admission");
-            lane.subscribers <- sub :: lane.subscribers));
+            lane.subscribers <- sub :: lane.subscribers;
+            if not (List.exists (Pane.Id.equal sub.pane) lane.observed) then
+              lane.observed <- sub.pane :: lane.observed));
     if fresh then manager.started lane;
     sub
   with exn ->
