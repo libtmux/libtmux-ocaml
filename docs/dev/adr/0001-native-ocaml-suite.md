@@ -79,10 +79,9 @@ generation equality and queue limits are identity and resource policies.
 Passing a workload on one tmux release is qualification evidence. None of
 those establishes that another release, workload or deployment is supported.
 
-MCP integration is excluded by project policy. The automation surfaces are
-native OCaml APIs and the workspace CLI. Remote transports, an embedded JVM,
-transparent reconnects and tmuxp configuration compatibility are outside this
-record's implemented scope.
+The automation surfaces are native OCaml APIs and the workspace CLI. Remote
+transports, an embedded JVM, transparent reconnects and tmuxp configuration
+compatibility are outside this record's implemented scope.
 
 ## Decisions
 

@@ -64,7 +64,5 @@ final qualification have open gates. Documentation
 quality cannot substitute for those results. [Testing](testing.md) describes
 current evidence and how examples are kept in sync with source.
 
-MCP integration is excluded by project policy. Its SDK, conformance and host
-integration are outside the adoption criteria. The supported automation
-surfaces are native OCaml APIs and the workspace CLI; see
-[package boundaries](packages.md).
+The supported automation surfaces are native OCaml APIs and the workspace CLI;
+see [package boundaries](packages.md).
