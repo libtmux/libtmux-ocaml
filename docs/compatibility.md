@@ -76,7 +76,6 @@ child processes. Cancellation at each capture transfer step and unresolved-buffe
 receipts also pass on the
 recorded release fixtures. Ready I/O still checks its deadline; busy pipes
 cannot bypass the timeout. These results remain evidence for those tested cases.
-MCP integration is outside this port's scope.
 
 Owned-child cleanup sends TERM, allows a 200 ms cooperative grace, then sends
 KILL if necessary and reaps the child. The policy covers control, read-process

@@ -267,8 +267,8 @@ complete configuration through validation, planning, apply and receipt inspectio
 
 The core and pure workspace library use the OCaml standard library. JSON and Eio
 stay in optional packages; [package boundaries](docs/packages.md) lists their
-dependencies. MCP integration is outside this port's scope. See
-[status and adoption gaps](docs/status.md) for remaining qualification work.
+dependencies. See [status and adoption gaps](docs/status.md) for remaining
+qualification work.
 macOS, Windows, remote-daemon binding and Java regex evaluation are outside the
 current support contract.
 

@@ -37,7 +37,5 @@ Prefer standard-library types and ordinary functions. Keep transport, JSON and
 CLI dependencies at their integration boundaries. Use the current stable OCaml
 compiler in 2026; older-compiler shims and compatibility matrices are excluded.
 
-MCP integration is outside this port's scope. The project does not ship or
-vendor an MCP SDK or server. Native OCaml APIs and the workspace CLI are its
-automation interfaces; MCP discovery and conformance are excluded from the
-project's adoption and completion criteria.
+Native OCaml APIs and the workspace CLI are the project's automation
+interfaces.
