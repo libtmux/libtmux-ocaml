@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.0.1
+
+- Publish the native graph and query model, blocking Linux and Eio clients,
+  optional JSON support, workspace libraries and `tmux-workspace` command.
+- Target OCaml 5.5.2 and tmux 3.3a through 3.8. See the
+  [current limits](docs/status.md) before adopting the native clients.
 - Pause observed panes before releasing a stream lane so tmux 3.2 through 3.8
   do not abort when a subscription closes while its pane is still printing.
 - Preserve rendered-wait errors and cancellation when subscription cleanup

@@ -1,0 +1,128 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish the selected existing release tag after verification
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: opam-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    uses: ./.github/workflows/ocaml.yml
+
+  publish:
+    needs: verify
+    if: >-
+      github.repository == 'libtmux/libtmux-ocaml' &&
+      (github.event_name == 'push' || inputs.publish)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: opam
+    permissions:
+      contents: write
+    env:
+      RELEASE_TAG: ${{ needs.verify.outputs.tag }}
+      RELEASE_VERSION: ${{ needs.verify.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Require an approved annotated tag
+        env:
+          REQUESTED_REF: ${{ github.ref_name }}
+        run: python3 .github/scripts/release.py check --tag "$REQUESTED_REF" --publish
+      - name: Require the opam publishing credential and its fork
+        id: publisher
+        env:
+          GH_TOKEN: ${{ secrets.OPAM_PUBLISH_TOKEN }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo 'Set OPAM_PUBLISH_TOKEN as described in .github/RELEASE.md.' >&2
+            exit 1
+          fi
+          publisher=$(gh api user --jq .login)
+          gh api "repos/$publisher/opam-repository" \
+            --jq '.fork and .parent.full_name == "ocaml/opam-repository"' | jq --exit-status .
+          echo "owner=$publisher" >> "$GITHUB_OUTPUT"
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: opam-release-${{ github.sha }}
+          path: dist
+      - name: Verify retained bytes against the tagged source
+        run: python3 .github/scripts/release.py verify --tag "$RELEASE_TAG" --publish
+      - name: Publish the fixed GitHub source archive
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          archive="libtmux-$RELEASE_TAG.tbz"
+          if gh release view "$RELEASE_TAG" --json isDraft,assets > "$RUNNER_TEMP/release.json"; then
+            jq --exit-status '.isDraft == false' "$RUNNER_TEMP/release.json"
+            if jq --exit-status --arg name "$archive" '.assets | any(.name == $name)' "$RUNNER_TEMP/release.json"; then
+              gh release download "$RELEASE_TAG" --pattern "$archive" --dir "$RUNNER_TEMP/published"
+              cmp "dist/$archive" "$RUNNER_TEMP/published/$archive"
+            else
+              gh release upload "$RELEASE_TAG" "dist/$archive"
+            fi
+          else
+            gh release create "$RELEASE_TAG" "dist/$archive" --verify-tag \
+              --title "$RELEASE_VERSION" --notes-file dist/RELEASE_NOTES.md
+          fi
+          curl --fail --silent --show-error --location \
+            "https://github.com/libtmux/libtmux-ocaml/releases/download/$RELEASE_TAG/$archive" \
+            --output "$RUNNER_TEMP/public.tbz"
+          cmp "dist/$archive" "$RUNNER_TEMP/public.tbz"
+      - name: Submit all package definitions to opam-repository
+        env:
+          GH_TOKEN: ${{ secrets.OPAM_PUBLISH_TOKEN }}
+          PUBLISHER: ${{ steps.publisher.outputs.owner }}
+        run: |
+          gh auth setup-git --hostname github.com
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          repository="$RUNNER_TEMP/opam-repository"
+          branch="release-libtmux-$RELEASE_TAG"
+          git clone --filter=blob:none --no-checkout --depth=1 \
+            "https://github.com/$PUBLISHER/opam-repository.git" "$repository"
+          git -C "$repository" sparse-checkout set \
+            packages/libtmux packages/libtmux-eio packages/libtmux-json \
+            packages/libtmux-unix packages/libtmux-workspace packages/libtmux-workspace-cli
+          git -C "$repository" fetch --depth=1 https://github.com/ocaml/opam-repository.git master
+          git -C "$repository" checkout -b "$branch" FETCH_HEAD
+          for package in libtmux libtmux-eio libtmux-json libtmux-unix libtmux-workspace libtmux-workspace-cli; do
+            destination="$repository/packages/$package/$package.$RELEASE_VERSION"
+            if [ -e "$destination/opam" ]; then
+              echo "$package.$RELEASE_VERSION already exists upstream; verify the accepted release." >&2
+              exit 1
+            fi
+            mkdir -p "$destination"
+            cp "dist/$package.$RELEASE_VERSION/opam" "$destination/opam"
+          done
+          git -C "$repository" add packages
+          git -C "$repository" commit -m "Release libtmux packages $RELEASE_VERSION"
+          previous=$(git -C "$repository" ls-remote origin "refs/heads/$branch" | cut -f1)
+          git -C "$repository" push --force-with-lease="refs/heads/$branch:$previous" \
+            origin "HEAD:refs/heads/$branch"
+          existing=$(gh pr list --repo ocaml/opam-repository --head "$branch" \
+            --state open --json url,headRepositoryOwner | \
+            jq -r --arg owner "$PUBLISHER" 'map(select(.headRepositoryOwner.login == $owner))[0].url // empty')
+          if [ -n "$existing" ]; then
+            echo "$existing"
+          else
+            gh pr create --repo ocaml/opam-repository --head "$PUBLISHER:$branch" \
+              --base master --title "[new release] libtmux packages ($RELEASE_VERSION)" \
+              --body-file dist/RELEASE_NOTES.md
+          fi
