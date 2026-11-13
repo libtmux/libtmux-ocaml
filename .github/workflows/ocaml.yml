@@ -177,7 +177,7 @@ jobs:
           cd "$consumer_dir"
           opam install "./libtmux-v$RELEASE_VERSION" --yes
           for package in libtmux libtmux-eio libtmux-json libtmux-unix libtmux-workspace libtmux-workspace-cli; do
-            test "$(opam show --installed --field=version "$package")" = "$RELEASE_VERSION"
+            test "$(opam var "$package:version")" = "$RELEASE_VERSION"
           done
           opam exec -- ocamlfind query libtmux libtmux-eio libtmux-json libtmux-unix libtmux-workspace
           opam exec -- tmux-workspace --help=plain

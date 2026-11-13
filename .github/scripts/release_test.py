@@ -22,7 +22,8 @@ class ReleaseTest(unittest.TestCase):
         self.root = Path(self.directory.name)
         (self.root / "dune-project").write_text("(name libtmux)\n(version 0.0.1)\n")
         (self.root / "CHANGELOG.md").write_text(
-            "# Changelog\n\n## Unreleased\n\n## 0.0.1\n\n- Initial native packages.\n"
+            "# Changelog\n\n## Unreleased\n\n## 0.0.1\n\n"
+            "- Initial native packages. See [limits](docs/status.md).\n"
         )
         for package in PACKAGES:
             (self.root / f"{package}.opam").write_text('opam-version: "2.0"\n')
@@ -54,6 +55,10 @@ class ReleaseTest(unittest.TestCase):
         self.assertEqual(metadata["tag"], "v0.0.1")
         self.assertEqual(metadata["packages"], list(PACKAGES))
         self.assertIn("Initial native packages.", metadata["notes"])
+        self.assertIn(
+            f"https://github.com/libtmux/libtmux-ocaml/blob/{self.git('rev-parse', 'HEAD')}/docs/status.md",
+            metadata["notes"],
+        )
         self.assertEqual(self.git("tag", "--list"), "")
 
     def test_rejects_a_tag_that_disagrees_with_the_package_version(self):

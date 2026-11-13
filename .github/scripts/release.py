@@ -50,9 +50,14 @@ def metadata(tag, publish):
             raise ValueError("release commit must already be merged into origin/master")
     if subprocess.run(["git", "diff", "--quiet", "HEAD", "--"]).returncode:
         raise ValueError("commit tracked changes before building the release")
+    notes = re.sub(
+        r"\]\((?![a-z]+:|#|/)([^)]+)\)",
+        lambda link: f"](https://github.com/libtmux/libtmux-ocaml/blob/{commit}/{link[1]})",
+        section[1].strip(),
+    )
     return {
         "version": version, "tag": expected_tag, "commit": commit,
-        "packages": packages, "notes": section[1].strip() + "\n",
+        "packages": packages, "notes": notes + "\n",
     }
 
 
