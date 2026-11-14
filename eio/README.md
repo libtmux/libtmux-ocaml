@@ -47,6 +47,8 @@ qualified releases and the remaining intensive-observation limits.
 
 ## Subscribe, send literal text, await output
 
+### [`Client.subscribe`][subscribe]: subscribe before sending input
+
 Create an isolated daemon with a `cat` pane. These commands address only the
 new private socket and clear inherited tmux context:
 

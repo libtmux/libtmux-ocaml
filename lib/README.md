@@ -43,6 +43,8 @@ Copy the example as `query_description.ml` and use this `dune` file:
 
 ## Build and inspect a query
 
+### [`Expr`][expr]: typed fields and operators
+
 This complete program needs no tmux server. [`Expr`][expr] combines typed
 fields and operators into inspectable data. [`Query.exactly_one`][exactly-one]
 counts duplicate entries rather than silently deduplicating them.
@@ -79,6 +81,8 @@ ambiguous: at least 2 entries
 
 ## Process a captured graph
 
+### [`Snapshot.t`][snapshot]: read captured values without tmux I/O
+
 A [`Snapshot.t`][snapshot] comes from a client capture or validated
 [`Snapshot.create`][snapshot-create] input.
 Use native predicates over its immutable arrays. This function is part of the
@@ -91,6 +95,8 @@ let active_ids snapshot =
   Snapshot.panes snapshot |> Iarray.to_seq |> Seq.filter Pane.active
   |> Seq.map Pane.id |> List.of_seq
 ```
+
+### [`Query.matching`][matching]: apply a typed predicate
 
 For inspectable filters, use [`Query.matching`][matching]. This selects active
 terminal panes at least 80 columns wide:

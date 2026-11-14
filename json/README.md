@@ -44,6 +44,8 @@ Copy the example as `query_json.ml` and use this `dune` file:
 
 ## Round-trip a query and locate invalid input
 
+### [`Expr.of_string`][decode]: validate a query document
+
 [`Expr.to_string`][encode] serializes a typed query;
 [`Expr.of_string`][decode] validates it against the same model witness.
 Invalid external data returns a [`Decode_error.t`][decode-error] with a JSON
