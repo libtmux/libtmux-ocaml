@@ -15,12 +15,14 @@
 
 </div>
 
-Decode query documents into typed `Libtmux.Expr.t` values and validate workspace
-configuration with `Libtmux_json`. The codec performs no tmux or filesystem I/O.
+Decode query documents into typed [`Libtmux.Expr.t`][expr] values and validate
+workspace configuration with [`Libtmux_json`][api]. The codec performs no tmux
+or filesystem I/O.
 It depends on the [core](../lib/), the pure [workspace package](../workspace/),
 and Yojson.
 
 [API](https://libtmux.org/en/ocaml/latest/reference/libtmux_json/) ·
+[Examples](#round-trip-a-query-and-locate-invalid-input) ·
 [Query semantics](../docs/queries.md) ·
 [Workspaces](../docs/workspaces.md) · [Package boundaries](../docs/packages.md)
 
@@ -42,8 +44,10 @@ Copy the example as `query_json.ml` and use this `dune` file:
 
 ## Round-trip a query and locate invalid input
 
-The model witness fixes the entity type. Invalid external data returns a
-`Decode_error.t` with a JSON pointer, category and message.
+[`Expr.to_string`][encode] serializes a typed query;
+[`Expr.of_string`][decode] validates it against the same model witness.
+Invalid external data returns a [`Decode_error.t`][decode-error] with a JSON
+pointer, category and message.
 
 <!-- example: examples/query_json.ml -->
 
@@ -80,8 +84,9 @@ The first line is the portable document:
 ```
 
 The second line is `invalid operand at /expr/value`. Apply the decoded expression
-to captured panes through `Query.matching` or `Expr.compile`; decoding itself
-neither acquires observations nor executes commands.
+to captured panes through [`Query.matching`][matching] or
+[`Expr.compile`][compile]; decoding itself neither acquires observations nor
+executes commands.
 
 ## Supported documents and limits
 
@@ -109,3 +114,11 @@ plans and receipts have a 4 MiB bound. See the [workspace guide](../docs/workspa
 for complete configuration, planning and execution examples.
 
 [Changelog](CHANGELOG.md) · [MIT](../LICENSE)
+
+[api]: https://libtmux.org/en/ocaml/latest/reference/libtmux_json/
+[expr]: https://libtmux.org/en/ocaml/latest/reference/libtmux-expr-t/
+[encode]: https://libtmux.org/en/ocaml/latest/reference/libtmux_json-expr-to_string/
+[decode]: https://libtmux.org/en/ocaml/latest/reference/libtmux_json-expr-of_string/
+[decode-error]: https://libtmux.org/en/ocaml/latest/reference/libtmux_json-decode_error-t/
+[matching]: https://libtmux.org/en/ocaml/latest/reference/libtmux-query-matching/
+[compile]: https://libtmux.org/en/ocaml/latest/reference/libtmux-expr-compile/

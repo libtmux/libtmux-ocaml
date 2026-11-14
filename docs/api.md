@@ -36,9 +36,10 @@ link to the public modules; module pages expose nested abstract types, labeled
 arguments, result values and cross-references. The `.mli` source links above
 remain usable directly from the repository.
 
-There is no published OCaml API site yet. Shared-site export and publication
-are separate acceptance gates; a successful local odoc build does not prove a
-remote deployment. See [current status](status.md).
+The hosted reference covers the [core and clients](https://libtmux.org/en/ocaml/latest/reference/)
+and the [workspace APIs](https://libtmux.org/en/ocaml/latest/workspace/reference/).
+The [current status](status.md) records the remaining adoption and qualification
+gates separately from documentation availability.
 
 ## Export public interfaces for the shared site
 

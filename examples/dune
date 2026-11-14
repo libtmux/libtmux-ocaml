@@ -9,6 +9,11 @@
  (libraries libtmux libtmux-json))
 
 (executable
+ (name workspace_plan)
+ (modules workspace_plan)
+ (libraries libtmux libtmux-workspace))
+
+(executable
  (name native_capture)
  (modules native_capture)
  (libraries libtmux libtmux-eio eio_main))
