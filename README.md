@@ -13,8 +13,9 @@
 
 </div>
 
-Drive tmux from OCaml: create sessions and panes, capture an immutable graph,
-query it locally, and observe output through Eio or a blocking client.
+Drive tmux from OCaml: create [sessions][session], [windows][window] and
+[panes][pane], capture an [immutable graph][snapshot], [query it locally][query],
+and observe output through an [Eio][eio-client] or [blocking client][unix-client].
 
 [Guide](https://libtmux.org/en/ocaml/latest/) ·
 [API](https://libtmux.org/en/ocaml/latest/reference/) ·
@@ -91,8 +92,10 @@ $ opam exec -- dune exec examples/native_graph.exe -- \
     tmux "$LIBTMUX_DEMO_DIR/server"
 ```
 
-This is the complete [program](examples/native_graph.ml). It closes the client
-before traversing the captured graph:
+This is the complete [program](examples/native_graph.ml).
+[`Client.connect`][unix-connect] opens the connection,
+[`Client.capture`][unix-capture] acquires the graph, and
+[`Client.close`][unix-close] releases the client before local traversal:
 
 <!-- example: examples/native_graph.ml -->
 
@@ -139,10 +142,10 @@ let () =
   print_graph snapshot
 ```
 
-A window can belong to several sessions. `Window_link.index` belongs to a
-session/window link; `Window.t` identifies the shared window. The
-[graph guide](docs/graph.md) demonstrates linking one window twice without
-losing either context.
+A window can belong to several sessions. [`Window_link.index`][window-index]
+belongs to a session/window link; [`Window.t`][window] identifies the shared
+window. The [graph guide](docs/graph.md) demonstrates linking one window twice
+without losing either context.
 
 ## Filter captured values
 
@@ -156,7 +159,8 @@ let active_ids snapshot =
   |> Seq.map Pane.id |> List.of_seq
 ```
 
-Use typed expressions when a query needs inspection, serialization or reuse:
+Use [`Expr`][expr] when a query needs inspection, serialization or reuse.
+[`Query.matching`][matching] applies the expression to captured panes:
 
 <!-- example: examples/native_query.ml#typed-filter -->
 
@@ -192,9 +196,11 @@ relations, exact cardinality and explicit acquisition with source filtering.
 
 ## Create a session and split its panes
 
-The [layout program](examples/native_build.ml) creates an `editor` window with
-two panes and a separate `logs` window. It sets a working directory, passes an
-environment value, and assigns an option and pane title:
+The [layout program](examples/native_build.ml) uses
+[`Client.create_session`][create-session], [`Client.split_pane`][split-pane]
+and [`Client.create_window`][create-window] to create an `editor` window with
+two panes and a separate `logs` window. [`Spawn.make`][spawn] supplies the
+working directory, command and environment:
 
 <!-- example: examples/native_build.ml#create-layout -->
 
@@ -233,8 +239,10 @@ explains acknowledgement, completion and uncertain outcomes.
 
 ## Send literal input and observe the reply with Eio
 
-The [Eio program](examples/native_watch.ml) subscribes before sending text,
-awaits future bytes concurrently with the send, then checks the rendered screen:
+The [Eio program](examples/native_watch.ml) calls
+[`Client.subscribe`][subscribe] before [`Client.send_text`][send-text],
+awaits future bytes concurrently with the send, then checks the screen with
+[`Client.wait_for_text`][wait-for-text]:
 
 ```console
 $ opam exec -- dune exec examples/native_watch.exe -- \
@@ -253,13 +261,14 @@ terminal history or an atomic capture/stream barrier. See
 
 ## Packages and current limits
 
-| Dune library | Module | Use |
-| --- | --- | --- |
-| [libtmux](lib/) | [Libtmux](lib/libtmux.mli) | Immutable graph, typed fields/relations, expressions and cardinality |
-| [libtmux-unix](unix/) | [Libtmux_unix](unix/libtmux_unix.mli) | Blocking Linux client and scoped cancellation |
-| [libtmux-eio](eio/) | [Libtmux_eio](eio/libtmux_eio.mli) | Eio client, retained operations and subscriptions |
-| [libtmux-json](json/) | [Libtmux_json](json/libtmux_json.mli) | Bounded query and workspace JSON decoding |
-| [libtmux-workspace](workspace/) | [Libtmux_workspace](workspace/libtmux_workspace.mli) | Validated workspace configuration, plans and execution journals |
+| Package | API or command guide | Use | Example |
+| --- | --- | --- | --- |
+| [libtmux](lib/) | [Libtmux][core-api] | Immutable graph and typed queries | [Describe a query](lib/README.md#build-and-inspect-a-query) |
+| [libtmux-unix](unix/) | [Libtmux_unix][unix-api] | Blocking Linux client and scoped cancellation | [Capture a graph](unix/README.md#capture-once-traverse-after-closing) |
+| [libtmux-eio](eio/) | [Libtmux_eio][eio-api] | Eio client, retained operations and subscriptions | [Send text and observe output](eio/README.md#subscribe-send-literal-text-await-output) |
+| [libtmux-json](json/) | [Libtmux_json][json-api] | Bounded query and workspace JSON decoding | [Round-trip a query](json/README.md#round-trip-a-query-and-locate-invalid-input) |
+| [libtmux-workspace](workspace/) | [Libtmux_workspace][workspace-api] | Configuration, plans and execution journals | [Preview a native workspace](workspace/README.md#preview-a-native-workspace) |
+| [libtmux-workspace-cli](cli/) | [Workspace commands](docs/workspaces.md) | Validate, preview and apply JSON workspaces | [Check a configuration](cli/README.md#install-and-validate) |
 
 The [libtmux-workspace-cli](cli/) package installs `tmux-workspace` to validate, preview
 and apply JSON workspaces. The [workspace guide](docs/workspaces.md) runs a
@@ -308,3 +317,29 @@ For development, read [CONTRIBUTING.md](.github/CONTRIBUTING.md).
 Licensed under [MIT](LICENSE).
 
 [Branding assets](docs/branding.md) include the logo, icons, and social cards.
+
+[core-api]: https://libtmux.org/en/ocaml/latest/reference/libtmux/
+[unix-api]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix/
+[eio-api]: https://libtmux.org/en/ocaml/latest/reference/libtmux_eio/
+[json-api]: https://libtmux.org/en/ocaml/latest/reference/libtmux_json/
+[workspace-api]: https://libtmux.org/en/ocaml/latest/workspace/reference/libtmux_workspace/
+[session]: https://libtmux.org/en/ocaml/latest/reference/libtmux-session/
+[window]: https://libtmux.org/en/ocaml/latest/reference/libtmux-window/
+[pane]: https://libtmux.org/en/ocaml/latest/reference/libtmux-pane/
+[snapshot]: https://libtmux.org/en/ocaml/latest/reference/libtmux-snapshot/
+[query]: https://libtmux.org/en/ocaml/latest/reference/libtmux-query/
+[expr]: https://libtmux.org/en/ocaml/latest/reference/libtmux-expr/
+[matching]: https://libtmux.org/en/ocaml/latest/reference/libtmux-query-matching/
+[window-index]: https://libtmux.org/en/ocaml/latest/reference/libtmux-window_link-index/
+[unix-client]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-t/
+[unix-connect]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-connect/
+[unix-capture]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-capture/
+[unix-close]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-close/
+[create-session]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-create_session/
+[split-pane]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-split_pane/
+[create-window]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-create_window/
+[spawn]: https://libtmux.org/en/ocaml/latest/reference/libtmux-spawn-make/
+[eio-client]: https://libtmux.org/en/ocaml/latest/reference/libtmux_eio-client-t/
+[subscribe]: https://libtmux.org/en/ocaml/latest/reference/libtmux_eio-client-subscribe/
+[send-text]: https://libtmux.org/en/ocaml/latest/reference/libtmux_eio-client-send_text/
+[wait-for-text]: https://libtmux.org/en/ocaml/latest/reference/libtmux_eio-client-wait_for_text/

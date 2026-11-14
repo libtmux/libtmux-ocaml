@@ -4,7 +4,8 @@ The immutable model, typed queries, native Linux clients and output observation
 have real-tmux evidence at the active tmux endpoints, 3.3a and 3.8. Intermediate
 releases remain supported throughout 3.3a–3.8. The installed
 workspace CLI also passes those cells. The final suite review remains unfinished.
-No package or hosted-documentation release has been published.
+The [guide and API reference](https://libtmux.org/en/ocaml/) are hosted under
+`latest`. No opam package release has been published.
 
 ## What an application can use
 

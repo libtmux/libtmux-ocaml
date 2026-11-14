@@ -4,7 +4,8 @@ description: "Pure workspace validation, explicit plans and retained execution j
 maintainer: "https://github.com/libtmux/libtmux-ocaml/issues"
 authors: "libtmux contributors"
 license: "MIT"
-homepage: "https://github.com/libtmux/libtmux-ocaml"
+homepage: "https://libtmux.org/en/ocaml/"
+doc: "https://libtmux.org/en/ocaml/latest/workspace/reference/libtmux_workspace/"
 bug-reports: "https://github.com/libtmux/libtmux-ocaml/issues"
 dev-repo: "git+https://github.com/libtmux/libtmux-ocaml.git"
 depends: [

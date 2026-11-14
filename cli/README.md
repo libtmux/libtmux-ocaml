@@ -21,6 +21,8 @@ application built on the [workspace library](../workspace/),
 [JSON codec](../json/) and native clients.
 
 [Command guide](../docs/workspaces.md) ·
+[Workspace API](https://libtmux.org/en/ocaml/latest/workspace/reference/) ·
+[Examples](#install-and-validate) ·
 [Configuration example](../examples/workspace/project.json) ·
 [Recovery](../docs/workspace-recovery.md) ·
 [Compatibility](../docs/compatibility.md)
@@ -52,6 +54,8 @@ $ opam exec -- tmux-workspace --help=plain
 The checked [project.json](../examples/workspace/project.json) describes two
 windows and three panes. Each pane runs `/bin/cat -u` through literal argv.
 Relative working directories resolve against the JSON file's directory.
+The CLI decodes this document through [`Libtmux_json.Workspace`][json-workspace],
+then uses [`Plan`][plan] and the [Eio workspace executor][eio-workspace] to apply it.
 
 <!-- example: examples/workspace/project.json -->
 
@@ -110,3 +114,7 @@ written, and a receipt does not provide crash-durable recovery or replay authori
 
 [Workspace library](../workspace/) · [JSON codec](../json/) ·
 [Changelog](CHANGELOG.md) · [MIT](../LICENSE)
+
+[json-workspace]: https://libtmux.org/en/ocaml/latest/workspace/reference/libtmux_json-workspace/
+[plan]: https://libtmux.org/en/ocaml/latest/workspace/reference/libtmux_workspace-plan/
+[eio-workspace]: https://libtmux.org/en/ocaml/latest/workspace/reference/libtmux_eio-workspace/
