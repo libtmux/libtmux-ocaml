@@ -48,6 +48,8 @@ workload limits.
 
 ## Capture once, traverse after closing
 
+### [`Client.capture`][capture]: sessions, window links and panes
+
 Create an isolated daemon with a `cat` pane. These commands address only the
 new private socket and clear inherited tmux context:
 
@@ -126,6 +128,8 @@ for windows shared between sessions and the [query guide](../docs/queries.md)
 for native predicates, typed expressions and exact cardinality.
 
 ## Cancellation and partial effects
+
+### [`Cancellation.with_`][cancellation]: cancel a blocking call
 
 Use [`Cancellation.with_`][cancellation] for scoped cancellation, passing its
 token to operations that accept `~cancel`. Cancellation raises

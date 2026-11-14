@@ -33,6 +33,8 @@ Follow the [source installation](../README.md#install-from-source) with
 **OCaml 5.5.2 on Linux**. `opam install .` includes the CLI; there is no opam
 release yet. Run the following commands from the repository root.
 
+### [`tmux-workspace check`](../docs/workspaces.md#validate-preview-and-apply): validate without contacting tmux
+
 Validate the shipped configuration without starting or contacting tmux:
 
 ```console
@@ -83,6 +85,8 @@ then uses [`Plan`][plan] and the [Eio workspace executor][eio-workspace] to appl
 ```
 
 ## Preview and apply explicitly
+
+### [`tmux-workspace apply`](../docs/workspaces.md#validate-preview-and-apply): execute a fresh plan
 
 | Command | Result | tmux effects |
 | --- | --- | --- |

@@ -37,6 +37,8 @@ Follow the [source installation](../README.md#install-from-source) with
 
 ## Preview a native workspace
 
+### [`Plan.make`][plan-make]: preview actions without tmux I/O
+
 [`Config.make`][config-make] validates the description; [`Plan.make`][plan-make]
 builds an ordered preview. This complete program performs no tmux or filesystem
 I/O. The absolute directory and socket paths describe a prospective endpoint;
@@ -108,6 +110,8 @@ client cleanup and checks compensation. The journal lives in process memory;
 a saved receipt does not resume a later execution or authorize a retry.
 
 ## Use from the command line
+
+### [`tmux-workspace check`](../docs/workspaces.md#validate-preview-and-apply): validate a JSON workspace
 
 The [libtmux-workspace-cli](../cli/) package installs `tmux-workspace` for JSON
 configurations. It uses this library for validation, plans and execution.

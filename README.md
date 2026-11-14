@@ -68,6 +68,8 @@ packages in a separate Dune project.
 
 ## Read a real tmux graph
 
+### [`Client.capture`][unix-capture]: sessions, window links and panes
+
 Create an isolated demonstration server. These commands clear inherited tmux
 context and use a private socket, so the examples do not select your usual server.
 
@@ -149,6 +151,8 @@ without losing either context.
 
 ## Filter captured values
 
+### [`Snapshot`][snapshot]: filter with native OCaml functions
+
 Use ordinary functions first. This performs no tmux I/O:
 
 <!-- example: examples/native_query.ml#native-filter -->
@@ -158,6 +162,8 @@ let active_ids snapshot =
   Snapshot.panes snapshot |> Iarray.to_seq |> Seq.filter Pane.active
   |> Seq.map Pane.id |> List.of_seq
 ```
+
+### [`Query.matching`][matching]: apply an inspectable expression
 
 Use [`Expr`][expr] when a query needs inspection, serialization or reuse.
 [`Query.matching`][matching] applies the expression to captured panes:
@@ -195,6 +201,8 @@ The [query guide](docs/queries.md) covers relationship quantifiers, empty
 relations, exact cardinality and explicit acquisition with source filtering.
 
 ## Create a session and split its panes
+
+### [`Client.create_session`][create-session]: start a session and build its layout
 
 The [layout program](examples/native_build.ml) uses
 [`Client.create_session`][create-session], [`Client.split_pane`][split-pane]
@@ -238,6 +246,8 @@ not make a later mutation atomic. [Operations and recovery](docs/control.md)
 explains acknowledgement, completion and uncertain outcomes.
 
 ## Send literal input and observe the reply with Eio
+
+### [`Client.subscribe`][subscribe]: subscribe before sending input
 
 The [Eio program](examples/native_watch.ml) calls
 [`Client.subscribe`][subscribe] before [`Client.send_text`][send-text],
