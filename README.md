@@ -272,6 +272,69 @@ socket=/tmp/libtmux-ocaml-showcase-0cd3a1/server
 layout: 3 horizontal panes
 ```
 
+## Send keys, read a pane and resize
+
+### [`Client.send_text`][unix-send-text]: type into a pane, read it back and resize
+
+[`Client.send_keys`][unix-send-keys] presses named keys,
+[`Client.capture_text`][unix-capture-text] reads rows, and
+[`Client.resize_pane`][unix-resize-pane] and
+[`Client.resize_window`][unix-resize-window] set sizes in cells. The
+[keys program](examples/showcase_send_keys.ml) splits a pane that prints
+`showcase ready` and uses all four:
+
+<!-- example: examples/showcase_send_keys.ml#pane-io -->
+
+```ocaml
+open Libtmux
+module Client = Libtmux_unix.Client
+
+let get = function
+  | Ok value -> value
+  | Error error -> failwith (Format.asprintf "%a" Error.pp error)
+
+let find client target =
+  Snapshot.find_pane (get (Client.capture client)) (Pane.Target.id target)
+  |> Option.get
+
+let wait client pane text =
+  ignore (get (Client.wait_for_text ~timeout:0.5 client pane ~text))
+
+let drive client (initial : Created.t) spawn =
+  let right =
+    get (Client.split_pane client initial.pane ~direction:Geometry.Right ~spawn)
+  in
+  let pane = find client right.pane in
+  wait client pane "showcase ready";
+  let text = "literal: $HOME; #{pane_id}" in
+  get (Client.send_text client right.pane ~text);
+  get (Client.send_keys client right.pane [ Key.Enter ]);
+  wait client pane text;
+  let screen = get (Client.capture_text client pane ~start:0 ~end_:1) in
+  Printf.printf "sent: %s\ncaptured: %S\n" text screen.bytes;
+  get (Client.resize_window client initial.window ~width:100 ~height:30);
+  get (Client.resize_pane client right.pane ~width:20);
+  let resized = find client right.pane in
+  Printf.printf "resized: %dx%d\n" (Pane.width resized) (Pane.height resized)
+```
+
+```console
+$ opam exec -- dune exec examples/showcase_send_keys.exe -- tmux
+```
+
+```text
+socket=/tmp/libtmux-ocaml-showcase-0cd3a1/server
+sent: literal: $HOME; #{pane_id}
+captured: "showcase ready\nliteral: $HOME; #{pane_id}\n"
+resized: 20x30
+```
+
+`send_text` presses no Enter, and `capture_text` reads visible rows, not
+scrollback. More: [operations](docs/operations.md), including
+[`kill_pane`][unix-kill-pane], [`kill_window`][unix-kill-window],
+[`kill_session`][unix-kill-session], [`read_option`][unix-read-option] and
+[`set_hook`][unix-set-hook].
+
 ## Send literal input and observe the reply with Eio
 
 ### [`Client.subscribe`][subscribe]: subscribe before sending input
@@ -393,3 +456,13 @@ Licensed under [MIT](LICENSE).
 [subscribe]: https://libtmux.org/en/ocaml/latest/reference/libtmux_eio-client-subscribe/
 [send-text]: https://libtmux.org/en/ocaml/latest/reference/libtmux_eio-client-send_text/
 [wait-for-text]: https://libtmux.org/en/ocaml/latest/reference/libtmux_eio-client-wait_for_text/
+[unix-send-text]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-send_text/
+[unix-send-keys]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-send_keys/
+[unix-capture-text]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-capture_text/
+[unix-resize-pane]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-resize_pane/
+[unix-resize-window]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-resize_window/
+[unix-kill-pane]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-kill_pane/
+[unix-kill-window]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-kill_window/
+[unix-kill-session]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-kill_session/
+[unix-read-option]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-read_option/
+[unix-set-hook]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-set_hook/
