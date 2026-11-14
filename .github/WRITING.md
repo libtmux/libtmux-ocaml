@@ -38,6 +38,21 @@ each concept. A task guide shows the common call before variations and failures.
 Explain completion, uncertainty, ownership and cleanup where they affect use.
 Keep development history and validation diaries out of product guides.
 
+## README shape
+
+A README is scanned, not read. Each line has to survive a glance.
+
+- A section is a task. Its `###` heading is the API, linked to its reference
+  page, then a colon and its job in plain words.
+- Under the heading: a line or two, the tested example, what it prints, at
+  most one note. Detail goes in a guide, linked with `More:`.
+- No paragraph over three lines. A list of facts is a bullet list.
+- No feature inventory. A section and its example show the feature.
+- State requirements as floors a reader can act on, such as "tmux 3.3a or
+  newer". Toolchain pins and CI matrices stay in their own files.
+- Cut what a reader would assume or never need: that examples are tested,
+  how the documentation is built, what the checks cover.
+
 ## Executable examples
 
 Edit source examples first. Derive snippets or check their exact source regions;
