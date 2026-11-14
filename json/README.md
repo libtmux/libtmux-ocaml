@@ -13,6 +13,8 @@
 
 **libtmux-json · bounded JSON interchange**
 
+[![libtmux.org](https://img.shields.io/badge/docs-libtmux.org-0b7285)](https://libtmux.org/en/ocaml/)
+
 </div>
 
 Decode query documents into typed [`Libtmux.Expr.t`][expr] values and validate

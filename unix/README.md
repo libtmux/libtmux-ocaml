@@ -13,6 +13,8 @@
 
 **libtmux-unix · blocking Linux client**
 
+[![libtmux.org](https://img.shields.io/badge/docs-libtmux.org-0b7285)](https://libtmux.org/en/ocaml/)
+
 </div>
 
 Capture a tmux graph, run targeted commands, and retain operation outcomes with

@@ -13,6 +13,8 @@
 
 **libtmux-eio · concurrent Linux client**
 
+[![libtmux.org](https://img.shields.io/badge/docs-libtmux.org-0b7285)](https://libtmux.org/en/ocaml/)
+
 </div>
 
 Use [`Libtmux_eio.Client.t`][client] for concurrent commands, retained operation

@@ -9,6 +9,8 @@
 
 **libtmux-workspace · native configuration and planning**
 
+[![libtmux.org](https://img.shields.io/badge/docs-libtmux.org-0b7285)](https://libtmux.org/en/ocaml/latest/workspace/)
+
 </div>
 <!-- /libtmux-logo -->
 

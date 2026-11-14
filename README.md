@@ -11,6 +11,10 @@
 
 # libtmux for OCaml
 
+[![OCaml](https://github.com/libtmux/libtmux-ocaml/actions/workflows/ocaml.yml/badge.svg)](https://github.com/libtmux/libtmux-ocaml/actions/workflows/ocaml.yml)
+[![libtmux.org](https://img.shields.io/badge/docs-libtmux.org-0b7285)](https://libtmux.org/en/ocaml/)
+[![license](https://img.shields.io/badge/license-MIT-blue)](https://github.com/libtmux/libtmux-ocaml/blob/master/LICENSE)
+
 </div>
 
 Drive tmux from OCaml: create [sessions][session], [windows][window] and
@@ -297,6 +301,55 @@ ppx_expect diagnostics, QCheck properties, installed examples and cached tmux
 builds. [Benchmarks](docs/benchmarking.md) include reproducible same-graph
 blocking/Eio capture data. [Compatibility](docs/compatibility.md) records
 component-level evidence.
+
+Each heading below links to the package's directory on GitHub, where its
+README lives.
+
+### [`libtmux`](https://github.com/libtmux/libtmux-ocaml/tree/master/lib): the immutable graph and typed queries
+
+[`Libtmux`][core-api] models captured sessions, window links and panes, and
+evaluates queries over them with the standard library alone.
+
+[API reference][core-api] · [Guides](https://libtmux.org/en/ocaml/latest/guides/) ·
+[README](lib/README.md)
+
+### [`libtmux-unix`](https://github.com/libtmux/libtmux-ocaml/tree/master/unix): the blocking Linux client
+
+[`Libtmux_unix`][unix-api] connects to a daemon, captures the graph and runs
+operations on the calling thread, with scoped cancellation.
+
+[API reference][unix-api] · [README](unix/README.md)
+
+### [`libtmux-eio`](https://github.com/libtmux/libtmux-ocaml/tree/master/eio): the Eio client
+
+[`Libtmux_eio`][eio-api] adds retained operations and output subscriptions on
+Eio.
+
+[API reference][eio-api] · [README](eio/README.md)
+
+### [`libtmux-json`](https://github.com/libtmux/libtmux-ocaml/tree/master/json): bounded JSON documents
+
+[`Libtmux_json`][json-api] decodes and encodes query and workspace documents
+within explicit bounds.
+
+[API reference][json-api] · [README](json/README.md)
+
+### [`libtmux-workspace`](https://github.com/libtmux/libtmux-ocaml/tree/master/workspace): configuration and plans
+
+[`Libtmux_workspace`][workspace-api] validates a workspace, plans it against a
+captured graph and journals its execution.
+
+[API reference][workspace-api] ·
+[Workspace docs](https://libtmux.org/en/ocaml/latest/workspace/) ·
+[README](workspace/README.md)
+
+### [`libtmux-workspace-cli`](https://github.com/libtmux/libtmux-ocaml/tree/master/cli): the `tmux-workspace` command
+
+`tmux-workspace` validates, previews and applies JSON workspaces from the
+shell.
+
+[Workspace docs](https://libtmux.org/en/ocaml/latest/workspace/) ·
+[Command guide](docs/workspaces.md) · [README](cli/README.md)
 
 ## Clean up the demo
 

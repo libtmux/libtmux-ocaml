@@ -13,6 +13,8 @@
 
 **libtmux · immutable model and typed queries**
 
+[![libtmux.org](https://img.shields.io/badge/docs-libtmux.org-0b7285)](https://libtmux.org/en/ocaml/)
+
 </div>
 
 Build [queries][query] and inspect [captured tmux graphs][snapshot] with

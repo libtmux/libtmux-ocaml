@@ -13,6 +13,8 @@
 
 **libtmux-workspace-cli · JSON workspace commands**
 
+[![libtmux.org](https://img.shields.io/badge/docs-libtmux.org-0b7285)](https://libtmux.org/en/ocaml/latest/workspace/)
+
 </div>
 
 Validate JSON workspace files, preview their plans and create tmux sessions,
