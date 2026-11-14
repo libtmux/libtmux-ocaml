@@ -49,30 +49,8 @@ More: [compatibility](../docs/compatibility.md).
 
 ### [`Client.capture`][capture]: sessions, window links and panes
 
-Start a private daemon with a `cat` pane, away from your own tmux server:
-
-```console
-$ export LIBTMUX_UNIX_DEMO_DIR="$(mktemp -d -t libtmux-ocaml-unix-demo.XXXXXX)"
-```
-
-```console
-$ env -u TMUX -u TMUX_PANE tmux \
-    -S "$LIBTMUX_UNIX_DEMO_DIR/server" \
-    -f /dev/null \
-    new-session \
-    -d \
-    -s demo \
-    -- "exec cat"
-```
-
-```console
-$ opam exec -- dune exec examples/native_graph.exe -- \
-    tmux "$LIBTMUX_UNIX_DEMO_DIR/server"
-```
-
-It prints `session $0 "demo"`, then its window link and pane `%0`. The program
-calls [`Client.capture`][capture], then [`Client.close`][close], then walks the
-snapshot:
+The program calls [`Client.capture`][capture], then [`Client.close`][close],
+then walks the snapshot. It takes a tmux binary and a socket path:
 
 <!-- example: examples/native_graph.ml -->
 
@@ -123,6 +101,21 @@ let () =
 [`Window.panes`][panes] and every other captured accessor do no I/O.
 More: [graph guide](../docs/graph.md), [query guide](../docs/queries.md).
 
+[`showcase_graph.ml`](../examples/showcase_graph.ml) runs the same capture on a
+private server it starts and removes:
+
+```console
+$ opam exec -- dune exec examples/showcase_graph.exe -- tmux
+```
+
+```text
+socket=/tmp/libtmux-ocaml-showcase-0cd3a1/server
+linked/0 linked-home: 1 pane(s)
+linked/7 editor: 1 pane(s)
+showcase/0 editor: 1 pane(s)
+graph: 2 sessions, 2 windows, 3 links, 2 panes
+```
+
 ## Cancellation and partial effects
 
 ### [`Cancellation.with_`][cancellation]: cancel a blocking call
@@ -140,26 +133,6 @@ already written still take effect; the call drains them before raising.
 
 More: [operations and recovery](../docs/control.md),
 [recovery walkthrough](../docs/recovery.md).
-
-## Clean up
-
-Remove the demo session and its socket directory. Closing a client leaves the
-daemon running.
-
-```console
-$ env -u TMUX -u TMUX_PANE tmux \
-    -S "$LIBTMUX_UNIX_DEMO_DIR/server" \
-    kill-session \
-    -t '=demo'
-```
-
-```console
-$ rm -f -- "$LIBTMUX_UNIX_DEMO_DIR/server"
-```
-
-```console
-$ rmdir "$LIBTMUX_UNIX_DEMO_DIR"
-```
 
 [Examples](../docs/showcases.md) · [Changelog](CHANGELOG.md) · [MIT](../LICENSE)
 

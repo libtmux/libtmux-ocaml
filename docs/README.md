@@ -32,5 +32,5 @@ and [operation conveniences](operations.md).
 
 See [compatibility](compatibility.md) for qualified components,
 [testing](testing.md) to reproduce checks, and [status](status.md) for
-remaining adoption requirements. The [README](../README.md) contains a complete
-private-server walkthrough.
+remaining adoption requirements. The [README](../README.md) runs a complete
+example on a private server.

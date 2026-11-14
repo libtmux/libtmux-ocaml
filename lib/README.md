@@ -79,6 +79,58 @@ ambiguous: at least 2 entries
 
 More: [query guide](../docs/queries.md).
 
+## Explain a query plan
+
+### [`Plan.panes`][plan-panes]: what tmux would filter and what stays local
+
+[`Plan.panes`][plan-panes] splits a filter into a tmux source filter and a local
+remainder, without I/O. [`Plan.explanation`][plan-explanation] says which;
+`Require_exact` rejects a filter that cannot be lowered. Capture clients do not
+run plans yet.
+
+<!-- example: examples/query_plan.ml -->
+
+```ocaml
+open Libtmux
+
+let get = function
+  | Ok value -> value
+  | Error error -> failwith (Format.asprintf "%a" Error.pp error)
+
+let show name expression =
+  let plan = get (Plan.panes expression) in
+  Printf.printf "%s: %s\n" name (Plan.explanation plan);
+  Printf.printf "  source filter: %s\n"
+    (Option.value (Plan.source_filter plan) ~default:"nothing");
+  Printf.printf "  local filter: %s\n" (Expr.describe (Plan.residual plan))
+
+let () =
+  let active : Pane.t Expr.t = Expr.Bool.is_true Pane.Fields.active in
+  let editors : Pane.t Expr.t =
+    Expr.all
+      [ active; Expr.Text.is_in Pane.Fields.current_command [ "nvim"; "vim" ] ]
+  in
+  show "active" active;
+  show "editors" editors;
+  match Plan.panes ~pushdown:Plan.Require_exact editors with
+  | Error error -> Format.printf "rejected: %a@." Error.pp error
+  | Ok _ -> failwith "an inexact plan was accepted"
+```
+
+```console
+$ opam exec -- dune exec examples/query_plan.exe
+```
+
+```text
+active: exact pane-flag source filter; retain local evaluation
+  source filter: #{==:#{pane_active},1}
+  local filter: pane_active = true
+editors: capture complete observations and evaluate locally
+  source filter: nothing
+  local filter: all [pane_active = true; pane_current_command in ["nvim"; "vim"]]
+rejected: unsupported: exact pushdown supports only pane flags and Boolean composition
+```
+
 ## Process a captured graph
 
 ### [`Snapshot.t`][snapshot]: read captured values without tmux I/O
@@ -147,7 +199,6 @@ Notes:
   few fields you need.
 - A target belongs to the connection that produced it. An ID or JSON document
   cannot mutate on a new connection.
-- `Plan.panes` describes source filtering; capture clients do not run it.
 
 [Run the full graph example](../README.md#read-a-real-tmux-graph) ·
 [Query JSON](../json/) · [Changelog](CHANGELOG.md) · [MIT](../LICENSE)
@@ -159,4 +210,6 @@ Notes:
 [expr]: https://libtmux.org/en/ocaml/latest/reference/libtmux-expr/
 [matching]: https://libtmux.org/en/ocaml/latest/reference/libtmux-query-matching/
 [exactly-one]: https://libtmux.org/en/ocaml/latest/reference/libtmux-query-exactly_one/
+[plan-panes]: https://libtmux.org/en/ocaml/latest/reference/libtmux-plan-panes/
+[plan-explanation]: https://libtmux.org/en/ocaml/latest/reference/libtmux-plan-explanation/
 [rel-any]: https://libtmux.org/en/ocaml/latest/reference/libtmux-expr-rel-any/

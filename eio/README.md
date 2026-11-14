@@ -47,34 +47,11 @@ newer and a local daemon. More: [compatibility](../docs/compatibility.md).
 
 ### [`Client.subscribe`][subscribe]: subscribe before sending input
 
-Start a private daemon with a `cat` pane, away from your own tmux server:
-
-```console
-$ export LIBTMUX_EIO_DEMO_DIR="$(mktemp -d -t libtmux-ocaml-eio-demo.XXXXXX)"
-```
-
-```console
-$ env -u TMUX -u TMUX_PANE tmux \
-    -S "$LIBTMUX_EIO_DEMO_DIR/server" \
-    -f /dev/null \
-    new-session \
-    -d \
-    -s demo \
-    -- "exec cat"
-```
-
 The example calls [`Client.subscribe`][subscribe] before
 [`Client.send_text`][send-text]. [`Subscription.wait_for_bytes`][wait-for-bytes]
 and the send run as concurrent fibers; [`Client.wait_for_text`][wait-for-text]
-then checks the rendered screen separately.
-
-```console
-$ opam exec -- dune exec examples/native_watch.exe -- \
-    tmux "$LIBTMUX_EIO_DEMO_DIR/server" %0 'ready; $HOME stays literal'
-```
-
-It prints `future_match_offset=` with a positive byte offset, then
-`rendered_pane=%0`. The complete program:
+then checks the rendered screen separately. The program takes a tmux binary, a
+socket path, a pane ID and the text to send:
 
 <!-- example: examples/native_watch.ml -->
 
@@ -149,6 +126,18 @@ let () =
                 (Pane.Id.to_string rendered.pane))))
 ```
 
+[`showcase_watch.ml`](../examples/showcase_watch.ml) runs the same flow on a
+private server it starts and removes:
+
+```console
+$ opam exec -- dune exec examples/showcase_watch.exe -- tmux
+```
+
+```text
+socket=/tmp/libtmux-ocaml-showcase-f76d47/server
+observed: changed
+```
+
 ## Choose the completion guarantee
 
 | Task | Surface | What completion establishes |
@@ -167,26 +156,6 @@ let () =
 
 More: [streaming](../docs/streaming.md). No fibers needed? Use the
 [blocking client](../unix/), or the [pure core](../lib/) to inspect snapshots.
-
-## Clean up
-
-Remove the demo session and its socket directory. Closing a client leaves the
-daemon running.
-
-```console
-$ env -u TMUX -u TMUX_PANE tmux \
-    -S "$LIBTMUX_EIO_DEMO_DIR/server" \
-    kill-session \
-    -t '=demo'
-```
-
-```console
-$ rm -f -- "$LIBTMUX_EIO_DEMO_DIR/server"
-```
-
-```console
-$ rmdir "$LIBTMUX_EIO_DEMO_DIR"
-```
 
 [Operations](../docs/control.md) · [Changelog](CHANGELOG.md) · [MIT](../LICENSE)
 

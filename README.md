@@ -71,34 +71,12 @@ More: [installation guide](docs/getting-started.md), for use from another Dune p
 
 ### [`Client.capture`][unix-capture]: sessions, window links and panes
 
-Start a demo server on a private socket, away from your usual one:
+One program starts a private server, builds two sessions that share a window,
+captures the graph and removes everything it made.
+[`Client.create_session`][create-session] and [`Client.link_window`][link-window]
+build the graph; [`Client.capture`][unix-capture] reads it:
 
-```console
-$ export LIBTMUX_DEMO_DIR="$(mktemp -d -t libtmux-ocaml-demo.XXXXXX)"
-```
-
-```console
-$ env -u TMUX -u TMUX_PANE tmux \
-    -S "$LIBTMUX_DEMO_DIR/server" \
-    -f /dev/null \
-    new-session \
-    -d \
-    -s demo \
-    -- "exec cat"
-```
-
-Print its sessions, window links and panes:
-
-```console
-$ opam exec -- dune exec examples/native_graph.exe -- \
-    tmux "$LIBTMUX_DEMO_DIR/server"
-```
-
-[`Client.connect`][unix-connect] opens the connection and
-[`Client.close`][unix-close] releases it before the local traversal.
-The complete [program](examples/native_graph.ml):
-
-<!-- example: examples/native_graph.ml -->
+<!-- example: examples/showcase_graph.ml#capture-graph -->
 
 ```ocaml
 open Libtmux
@@ -108,43 +86,41 @@ let get = function
   | Ok value -> value
   | Error error -> failwith (Format.asprintf "%a" Error.pp error)
 
-let print_graph snapshot =
-  Snapshot.sessions snapshot
-  |> Iarray.iter (fun session ->
-      Printf.printf "session %s %S\n"
-        (Session.Id.to_string (Session.id session))
-        (Session.name session);
-      Session.window_links session
-      |> Iarray.iter (fun link ->
-          let window = Window_link.window link in
-          Printf.printf "  window %s at %d %S\n"
-            (Window.Id.to_string (Window.id window))
-            (Window_link.index link) (Window.name window);
-          Window.panes window
-          |> Iarray.iter (fun pane ->
-              Printf.printf "    pane %s active=%b %dx%d %S\n"
-                (Pane.Id.to_string (Pane.id pane))
-                (Pane.active pane) (Pane.width pane) (Pane.height pane)
-                (Pane.current_command pane))))
-
-let () =
-  if Array.length Sys.argv <> 3 then (
-    prerr_endline "usage: native_graph TMUX_BINARY SOCKET_PATH";
-    exit 2);
-  let client =
+let capture_graph client (initial : Created.t) spawn =
+  let linked =
     get
-      (Client.connect ~binary:Sys.argv.(1) (Endpoint.socket_path Sys.argv.(2)))
+      (Client.create_session client ~name:"linked" ~window_name:"linked-home"
+         ~spawn ())
   in
-  let snapshot =
-    Fun.protect
-      ~finally:(fun () -> get (Client.close client))
-      (fun () -> get (Client.capture client))
+  let pane =
+    Snapshot.find_pane
+      (get (Client.capture client))
+      (Pane.Target.id linked.pane)
+    |> Option.get
   in
-  print_graph snapshot
+  let text = "showcase ready" in
+  ignore (get (Client.wait_for_text ~timeout:0.5 client pane ~text));
+  get
+    (Client.link_window client initial.window ~session:linked.session ~index:7);
+  get (Client.capture client)
+```
+
+```console
+$ opam exec -- dune exec examples/showcase_graph.exe -- tmux
+```
+
+```text
+socket=/tmp/libtmux-ocaml-showcase-0cd3a1/server
+linked/0 linked-home: 1 pane(s)
+linked/7 editor: 1 pane(s)
+showcase/0 editor: 1 pane(s)
+graph: 2 sessions, 2 windows, 3 links, 2 panes
 ```
 
 A window can belong to several sessions: [`Window_link.index`][window-index]
-is per session, [`Window.t`][window] is shared. More: [graph guide](docs/graph.md).
+is per session, [`Window.t`][window] is shared. The
+[complete program](examples/showcase_graph.ml) also starts the server and
+removes its directory. More: [graph guide](docs/graph.md).
 
 ## Filter captured values
 
@@ -185,16 +161,61 @@ let roomy_ids snapshot =
 ```
 
 A text operator on `Pane.Fields.width` fails to type-check. Matching keeps
-input order.
+input order. The [complete query program](examples/native_query.ml) takes a tmux
+binary and a socket path. More: [query guide](docs/queries.md).
 
-Run the [complete query program](examples/native_query.ml) against the demo:
+### [`Plan.panes`][plan-panes]: what tmux would filter and what stays local
 
-```console
-$ opam exec -- dune exec examples/native_query.exe -- \
-    tmux "$LIBTMUX_DEMO_DIR/server"
+[`Plan.panes`][plan-panes] splits a filter into a tmux source filter and a local
+remainder, without I/O. [`Plan.explanation`][plan-explanation],
+[`Plan.source_filter`][plan-source-filter] and [`Plan.residual`][plan-residual]
+show the split; `Require_exact` rejects a filter that cannot be lowered:
+
+<!-- example: examples/query_plan.ml -->
+
+```ocaml
+open Libtmux
+
+let get = function
+  | Ok value -> value
+  | Error error -> failwith (Format.asprintf "%a" Error.pp error)
+
+let show name expression =
+  let plan = get (Plan.panes expression) in
+  Printf.printf "%s: %s\n" name (Plan.explanation plan);
+  Printf.printf "  source filter: %s\n"
+    (Option.value (Plan.source_filter plan) ~default:"nothing");
+  Printf.printf "  local filter: %s\n" (Expr.describe (Plan.residual plan))
+
+let () =
+  let active : Pane.t Expr.t = Expr.Bool.is_true Pane.Fields.active in
+  let editors : Pane.t Expr.t =
+    Expr.all
+      [ active; Expr.Text.is_in Pane.Fields.current_command [ "nvim"; "vim" ] ]
+  in
+  show "active" active;
+  show "editors" editors;
+  match Plan.panes ~pushdown:Plan.Require_exact editors with
+  | Error error -> Format.printf "rejected: %a@." Error.pp error
+  | Ok _ -> failwith "an inexact plan was accepted"
 ```
 
-More: [query guide](docs/queries.md).
+```console
+$ opam exec -- dune exec examples/query_plan.exe
+```
+
+```text
+active: exact pane-flag source filter; retain local evaluation
+  source filter: #{==:#{pane_active},1}
+  local filter: pane_active = true
+editors: capture complete observations and evaluate locally
+  source filter: nothing
+  local filter: all [pane_active = true; pane_current_command in ["nvim"; "vim"]]
+rejected: unsupported: exact pushdown supports only pane flags and Boolean composition
+```
+
+Capture clients still read the whole graph and filter locally; they do not run
+plans yet. More: [query guide](docs/queries.md).
 
 ## Create a session and split its panes
 
@@ -236,25 +257,38 @@ let build client ~name ~directory =
   (session, right, logs)
 ```
 
+An existing session name fails; nothing is replaced. More:
+[operations and recovery](docs/control.md).
+
+[`showcase_layout.ml`](examples/showcase_layout.ml) splits panes and applies a
+layout on a private server it starts and removes:
+
 ```console
-$ opam exec -- dune exec examples/native_build.exe -- \
-    tmux "$LIBTMUX_DEMO_DIR/server" project "$LIBTMUX_DEMO_DIR"
+$ opam exec -- dune exec examples/showcase_layout.exe -- tmux
 ```
 
-Prints the IDs tmux returned. An existing session name fails; nothing is
-replaced. More: [operations and recovery](docs/control.md).
+```text
+socket=/tmp/libtmux-ocaml-showcase-0cd3a1/server
+layout: 3 horizontal panes
+```
 
 ## Send literal input and observe the reply with Eio
 
 ### [`Client.subscribe`][subscribe]: subscribe before sending input
 
+The clients drive tmux through persistent control-mode connections, and
+[`Client.subscribe`][subscribe] streams a pane's output over them.
 [`Client.send_text`][send-text] types into the pane;
 [`Client.wait_for_text`][wait-for-text] checks the screen.
-The [Eio program](examples/native_watch.ml):
+The [Eio program](examples/showcase_watch.ml) starts its own server:
 
 ```console
-$ opam exec -- dune exec examples/native_watch.exe -- \
-    tmux "$LIBTMUX_DEMO_DIR/server" %0 'ready; $HOME stays literal'
+$ opam exec -- dune exec examples/showcase_watch.exe -- tmux
+```
+
+```text
+socket=/tmp/libtmux-ocaml-showcase-f76d47/server
+observed: changed
 ```
 
 `send_text` types literally and never interprets shell syntax. Your application
@@ -326,30 +360,6 @@ shell.
 [Workspace docs](https://libtmux.org/en/ocaml/latest/workspace/) ·
 [Command guide](docs/workspaces.md) · [README](cli/README.md)
 
-## Clean up the demo
-
-Remove the two demo sessions. Closing a client leaves the daemon running:
-
-```console
-$ env -u TMUX -u TMUX_PANE tmux \
-    -S "$LIBTMUX_DEMO_DIR/server" \
-    kill-session -t '=project'
-```
-
-```console
-$ env -u TMUX -u TMUX_PANE tmux \
-    -S "$LIBTMUX_DEMO_DIR/server" \
-    kill-session -t '=demo'
-```
-
-```console
-$ rm -f -- "$LIBTMUX_DEMO_DIR/server"
-```
-
-```console
-$ rmdir "$LIBTMUX_DEMO_DIR"
-```
-
 For development, read [CONTRIBUTING.md](.github/CONTRIBUTING.md).
 Licensed under [MIT](LICENSE).
 
@@ -369,13 +379,16 @@ Licensed under [MIT](LICENSE).
 [matching]: https://libtmux.org/en/ocaml/latest/reference/libtmux-query-matching/
 [window-index]: https://libtmux.org/en/ocaml/latest/reference/libtmux-window_link-index/
 [unix-client]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-t/
-[unix-connect]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-connect/
 [unix-capture]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-capture/
-[unix-close]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-close/
 [create-session]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-create_session/
 [split-pane]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-split_pane/
 [create-window]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-create_window/
 [spawn]: https://libtmux.org/en/ocaml/latest/reference/libtmux-spawn-make/
+[link-window]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-link_window/
+[plan-panes]: https://libtmux.org/en/ocaml/latest/reference/libtmux-plan-panes/
+[plan-explanation]: https://libtmux.org/en/ocaml/latest/reference/libtmux-plan-explanation/
+[plan-source-filter]: https://libtmux.org/en/ocaml/latest/reference/libtmux-plan-source_filter/
+[plan-residual]: https://libtmux.org/en/ocaml/latest/reference/libtmux-plan-residual/
 [eio-client]: https://libtmux.org/en/ocaml/latest/reference/libtmux_eio-client-t/
 [subscribe]: https://libtmux.org/en/ocaml/latest/reference/libtmux_eio-client-subscribe/
 [send-text]: https://libtmux.org/en/ocaml/latest/reference/libtmux_eio-client-send_text/

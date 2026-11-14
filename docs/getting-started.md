@@ -1,13 +1,11 @@
 # Install and run your first capture
 
-Use the [README installation](../README.md#install-from-source) with OCaml
-5.5.2, opam and tmux on Linux. The native clients compile a small Linux C helper
-and require a C compiler and system headers. This source checkout installs the
-libraries; no registry release is available yet.
+Follow the [source install](../README.md#install-from-source). You need opam,
+tmux 3.3a or newer and a C compiler on Linux; the native clients build a small
+C helper. Not on opam yet.
 
-Activate the local switch in the current shell as shown in the README before
-changing to a separate project. This exports the switch choice for `opam exec`
-without changing shell startup files or the global default switch.
+Activate the local switch in your shell, as the README shows, before changing to
+a separate project. It leaves shell startup files and the default switch alone.
 
 ## Link an installed library
 
@@ -30,8 +28,7 @@ point instead:
 
 Create `dune-project` with `(lang dune 3.24)`, save the
 [graph program](../examples/native_graph.ml) as `main.ml`, and build from that
-project. The installed-example check does this outside the repository with a
-separate install prefix; it does not depend on source-tree library resolution.
+project.
 
 ```console
 $ opam exec -- dune build
@@ -43,15 +40,14 @@ $ opam exec -- dune build
 describes tmux's `-L` name. Constructing either performs no I/O. Ordinary
 `Client.connect` attaches to an existing daemon and does not start one.
 
-The [private demo setup](../README.md#read-a-real-tmux-graph) creates an owned
-socket and a `cat` pane. Run the graph program with the tmux binary and socket
-path, or copy its complete source into your project. It captures the graph,
-closes its connection and prints retained observations.
+The graph program takes the tmux binary and a socket path. It captures the
+graph, closes its connection and prints what it captured. For a self-contained
+run on a private server, see the
+[README example](../README.md#read-a-real-tmux-graph).
 
-A connection identifies the daemon PID twice around pidfd acquisition. The
-client and daemon must share a PID namespace and local scratch filesystem;
-an accessible socket by itself does not establish those conditions. A stale
-source is an error, never permission to reconnect a mutation automatically.
+The client and daemon must share a host, PID namespace and scratch filesystem;
+a reachable socket alone does not prove that. A stale connection is an error,
+and nothing reconnects a mutation for you.
 
 ## Run a concurrent application
 

@@ -1,8 +1,9 @@
 # Query captured data
 
 Capture once, then use standard collections. The [complete program](../examples/native_query.ml)
-closes its blocking client before evaluating any of the functions below.
-Follow the [README setup](../README.md#read-a-real-tmux-graph) first.
+closes its blocking client before evaluating any function below. It takes a tmux
+binary and a socket path; the [README](../README.md#read-a-real-tmux-graph)
+shows a self-contained run.
 
 ## Use a native predicate
 
