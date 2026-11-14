@@ -1,3 +1,4 @@
+(* docs:begin create-layout *)
 open Libtmux
 module Client = Libtmux_unix.Client
 
@@ -5,7 +6,6 @@ let get = function
   | Ok value -> value
   | Error error -> failwith (Format.asprintf "%a" Error.pp error)
 
-(* docs:begin create-layout *)
 let build client ~name ~directory =
   let spawn =
     Spawn.make ~cwd:directory

@@ -155,6 +155,8 @@ Plain functions, no tmux I/O:
 <!-- example: examples/native_query.ml#native-filter -->
 
 ```ocaml
+open Libtmux
+
 let active_ids snapshot =
   Snapshot.panes snapshot |> Iarray.to_seq |> Seq.filter Pane.active
   |> Seq.map Pane.id |> List.of_seq
@@ -205,6 +207,13 @@ From the [layout program](examples/native_build.ml):
 <!-- example: examples/native_build.ml#create-layout -->
 
 ```ocaml
+open Libtmux
+module Client = Libtmux_unix.Client
+
+let get = function
+  | Ok value -> value
+  | Error error -> failwith (Format.asprintf "%a" Error.pp error)
+
 let build client ~name ~directory =
   let spawn =
     Spawn.make ~cwd:directory

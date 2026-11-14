@@ -59,3 +59,8 @@
  (name showcase_watch)
  (modules showcase_watch)
  (libraries libtmux libtmux-workspace libtmux-unix libtmux-eio eio_main unix))
+
+(executable
+ (name query_plan)
+ (modules query_plan)
+ (libraries libtmux))

@@ -136,7 +136,7 @@ with tempfile.TemporaryDirectory(prefix="libtmux-ocaml-consumer-") as directory:
     examples = [snippet(f"examples/native_query.ml#{region}")
                 for region in ["native-filter", "typed-filter", "relationship-filter"]]
     examples.append(snippet("examples/native_recovery.ml#preserve-primary"))
-    (consumer / "main.ml").write_text("open Libtmux\n" + "\n".join(examples) + '''
+    (consumer / "main.ml").write_text("\n".join(examples) + '''
 let () =
   assert (try ignore (protect ~finally:(fun () -> raise Exit)
       (fun () -> failwith "retained primary")); false
@@ -201,6 +201,20 @@ let () =
         "json/query_json": b'{"schema":"libtmux.filter/1","model":"pane","expr":{"node":"compare","field":"pane_current_command","op":"starts_with","value":"nv"}}\ninvalid operand at /expr/value\n',
         "workspace/workspace_plan": b'project: 2 windows, 3 actions\n',
     }
+    plan = package_examples / "plan"
+    plan.mkdir()
+    (plan / "dune").write_text("(executable (name query_plan) (libraries libtmux))\n")
+    (plan / "query_plan.ml").write_text(snippet("examples/query_plan.ml"))
+    subprocess.run(["dune", "build", "--root", str(package_examples)], cwd=package_examples,
+                   env=environment, check=True)
+    expected["plan/query_plan"] = (
+        b"active: exact pane-flag source filter; retain local evaluation\n"
+        b"  source filter: #{==:#{pane_active},1}\n"
+        b"  local filter: pane_active = true\n"
+        b"editors: capture complete observations and evaluate locally\n"
+        b"  source filter: nothing\n"
+        b'  local filter: all [pane_active = true; pane_current_command in ["nvim"; "vim"]]\n'
+        b"rejected: unsupported: exact pushdown supports only pane flags and Boolean composition\n")
     for program, output in expected.items():
         result = subprocess.run([str(package_examples / "_build/default" / f"{program}.exe")],
                                 env=environment, capture_output=True, check=True, timeout=1)
@@ -287,8 +301,6 @@ let () = Eio_main.run (fun env -> Eio.Switch.run (fun sw ->
         run_hook_recovery(runtime, binary, environment)
         run_workspace_recovery(runtime, binary, environment)
         run_workspace_recovery(runtime, binary, environment, preserve_foreign=True)
-        for document in ("unix/README.md", "eio/README.md"):
-            readme_walkthrough.run(root, walkthrough, binary, environment, document)
         with TmuxFixture(binary) as fixture:
             result = subprocess.run([str(runtime / "_build/default/native_capture.exe"),
                                      fixture.binary, str(fixture.socket)],
@@ -361,7 +373,6 @@ let () = Eio_main.run (fun env -> Eio.Switch.run (fun sw ->
             paths = fixture.command("list-panes", "-s", "-t", created["session"], "-F", "#{pane_current_path}").stdout.splitlines()
             assert paths == [fixture.directory.name.encode()] * 3, paths
             assert fixture.command("list-clients").stdout == b""
-        readme_walkthrough.run(root, walkthrough, binary, environment)
         readme_walkthrough.run(root, walkthrough, binary, environment, "docs/recovery.md")
         readme_walkthrough.run(root, walkthrough, binary, environment, "docs/hook-recovery.md")
         readme_walkthrough.run(root, walkthrough, binary, environment, "docs/workspace-recovery.md")

@@ -1,9 +1,6 @@
+(* docs:begin capture-graph *)
 open Libtmux
 module Client = Libtmux_unix.Client
-module Workspace = Libtmux_unix.Workspace
-module Config = Libtmux_workspace.Config
-module Plan = Libtmux_workspace.Plan
-module Execution = Libtmux_workspace.Execution
 
 let get = function
   | Ok value -> value
@@ -26,6 +23,12 @@ let capture_graph client (initial : Created.t) spawn =
   get
     (Client.link_window client initial.window ~session:linked.session ~index:7);
   get (Client.capture client)
+(* docs:end capture-graph *)
+
+module Workspace = Libtmux_unix.Workspace
+module Config = Libtmux_workspace.Config
+module Plan = Libtmux_workspace.Plan
+module Execution = Libtmux_workspace.Execution
 
 let print_graph snapshot =
   Snapshot.sessions snapshot

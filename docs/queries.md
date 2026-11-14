@@ -9,6 +9,8 @@ Follow the [README setup](../README.md#read-a-real-tmux-graph) first.
 <!-- example: examples/native_query.ml#native-filter -->
 
 ```ocaml
+open Libtmux
+
 let active_ids snapshot =
   Snapshot.panes snapshot |> Iarray.to_seq |> Seq.filter Pane.active
   |> Seq.map Pane.id |> List.of_seq

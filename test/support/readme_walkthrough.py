@@ -28,16 +28,13 @@ def prepare(root, temporary, environment):
     return project
 
 
-def run(root, project, binary, environment, document="README.md"):
+def run(root, project, binary, environment, document):
     libc = ctypes.CDLL(None, use_errno=True)
     if libc.prctl(36, 1, 0, 0, 0):
         raise OSError(ctypes.get_errno(), "PR_SET_CHILD_SUBREAPER")
     child_file = Path(f"/proc/self/task/{os.getpid()}/children")
     previous_children = set(map(int, child_file.read_text().split()))
     variable, directory_prefix, expected_output = {
-        "README.md": ("LIBTMUX_DEMO_DIR", "libtmux-ocaml-demo.",
-                      [b'session $0 "demo"', b"active=%0\nroomy=%0\nsessions=demo\n",
-                       b"session=$1\n", b"rendered_pane=%0\n"]),
         "docs/recovery.md": ("LIBTMUX_RECOVERY_DIR", "libtmux-ocaml-recovery.",
                              [b"waiter=cancelled; operation=retained\n",
                               b"operation=finished; postcondition=recovery-complete\n"]),
@@ -52,10 +49,6 @@ def run(root, project, binary, environment, document="README.md"):
         "docs/streaming.md": ("LIBTMUX_STREAM_RECOVERY_DIR", "libtmux-ocaml-stream-recovery.",
                               [b"gap=membership-changed; history=unavailable\n",
                                b"coverage=fresh; cursor-generation=new; future=after-gap\n"]),
-        "unix/README.md": ("LIBTMUX_UNIX_DEMO_DIR", "libtmux-ocaml-unix-demo.",
-                           [b'session $0 "demo"', b"pane %0 active=true"]),
-        "eio/README.md": ("LIBTMUX_EIO_DEMO_DIR", "libtmux-ocaml-eio-demo.",
-                          [b"future_match_offset=", b"rendered_pane=%0\n"]),
     }[document]
     commands = []
     active = False

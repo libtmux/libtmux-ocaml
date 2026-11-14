@@ -1,11 +1,6 @@
-open Libtmux
-module Client = Libtmux_unix.Client
-
-let get = function
-  | Ok value -> value
-  | Error error -> failwith (Format.asprintf "%a" Error.pp error)
-
 (* docs:begin native-filter *)
+open Libtmux
+
 let active_ids snapshot =
   Snapshot.panes snapshot |> Iarray.to_seq |> Seq.filter Pane.active
   |> Seq.map Pane.id |> List.of_seq
@@ -36,6 +31,12 @@ let sessions_with_room snapshot =
   Snapshot.sessions snapshot |> Iarray.to_seq |> Query.matching expression
   |> Seq.map Session.name |> List.of_seq
 (* docs:end relationship-filter *)
+
+module Client = Libtmux_unix.Client
+
+let get = function
+  | Ok value -> value
+  | Error error -> failwith (Format.asprintf "%a" Error.pp error)
 
 let () =
   if Array.length Sys.argv <> 3 then (
