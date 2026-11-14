@@ -41,12 +41,10 @@ Captures, reads and subscriptions share the client's payload budget and process
 slots. The [capacity guide](streaming.md#plan-shared-capacity) shows their combined
 reservations and how to leave headroom for service operations.
 
-Eio `Client.close` rejects new command and subscription admission as soon as
-closing starts. Concurrent closes wait for the same teardown result. A later
-close retains an earlier teardown failure; the closed state alone does not
-prove resources were released. Inspect the client's `Cleanup` report for
-secondary failures. Internal connection teardown also retains one completion,
-so a concurrent failure path cannot skip cleanup already in progress.
+Eio `Client.close` rejects new commands and subscriptions as soon as it starts.
+Concurrent closes wait for one shared teardown, and a later close keeps an
+earlier failure, so a closed client does not prove its resources were released.
+Check the client's `Cleanup` report for secondary failures.
 
 The [complete recovery example](recovery.md) cancels an active waiter, awaits
 the same retained operation and checks server state before its next mutation.
@@ -72,23 +70,24 @@ When Eio's daemon watcher closes a connection, an in-flight operation retains
 error. Explicit client closure uses `Error.Closed`. Inspect the retained receipt
 to distinguish these reasons; each can leave an admitted mutation uncertain.
 
-`Client.cleanup` retains process and descriptor cleanup diagnostics after
-closure. Supply a `Cleanup.create ()` report through `~cleanup` before connecting
-when diagnostics must survive failed setup or cancellation. The same option is
-available on terminal attachment and workspace bootstrap. `Cleanup.inspect`
-returns the cleanup phase, typed library error when available, original
-exception and backtrace without I/O. The report retains at most 64 entries and
-counts further issues; exception payloads can still retain substantial memory.
-Reports and their diagnostics belong to the creating domain.
+`Client.cleanup` keeps process and descriptor cleanup diagnostics after closure.
+Pass a `Cleanup.create ()` report as `~cleanup` before connecting to keep them
+through failed setup or cancellation; terminal attachment and workspace
+bootstrap take the same option. `Cleanup.inspect` returns the phase, typed
+error, original exception and backtrace without I/O.
 
-Cleanup attempts independent releases even when one fails. A primary exception
-keeps its identity and backtrace; secondary failures go to the report. If there
-is no primary failure, the first unrecovered cleanup failure is returned or
-raised normally. A recovered fallback can still leave a diagnostic after a
-successful return: failure to open a child pidfd skips TERM grace, forces
-termination and reaps, while retaining the `Open_pidfd` issue.
-Failed forced termination produces an `Unreaped_child` issue when exit cannot
-be established without blocking. That issue does not prove resource release.
+- A report holds at most 64 entries, counts the rest, and belongs to its
+  creating domain.
+- Cleanup attempts every independent release even when one fails.
+- A primary exception keeps its identity and backtrace; secondary failures go
+  to the report. With no primary failure, the first unrecovered cleanup failure
+  is returned or raised.
+- A recovered fallback can still leave a diagnostic: failing to open a child
+  pidfd skips the TERM grace, forces termination and keeps an `Open_pidfd`
+  issue.
+- If forced termination cannot confirm exit without blocking, the report holds
+  `Unreaped_child`; that does not prove the resource was released.
+
 The [recovery example](recovery.md) keeps its report outside connection lifetime.
 
 ## Recover deliberately

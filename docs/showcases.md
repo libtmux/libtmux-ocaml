@@ -4,11 +4,9 @@ Each program creates a private tmux workspace, performs one task, verifies the
 result and closes its clients. Copy the whole file into a Dune project or run
 it from this checkout after [installation](getting-started.md).
 
-The programs use a minimal tmux configuration that makes their private daemon
-exit when its last client detaches. They accept an optional tmux binary,
-not a borrowed server socket. Their setup uses the public workspace API; the
-task uses the client API. The Eio example starts its scheduler after setup and
-subscribes before sending the bytes it observes.
+- The private daemon exits when its last client detaches.
+- A program takes an optional tmux binary, never a borrowed server socket.
+- Setup uses the workspace API; the task uses the client API.
 
 For a separate project, save a program as `main.ml` and use these Dune libraries:
 
@@ -83,14 +81,9 @@ Split a window and apply an even horizontal layout:
 $ opam exec -- dune exec examples/showcase_layout.exe -- tmux
 ```
 
-These examples support tmux 3.3a–3.8 on the qualified Linux environment.
-The native CI job executes their real entry points on 3.3a and 3.8,
-using a separate installation and Dune project. A nonzero exit, missing exact
-outcome line, leftover directory or surviving owned process fails the run.
-[`showcase.json`](../examples/showcase.json) records the whole files, commands,
-expected lines, tmux floor, workflow, job and runner.
+They need tmux 3.3a or newer. [`showcase.json`](../examples/showcase.json) lists
+each program, its command and its expected line.
 
-Sending keys confirms tmux accepted input. The rendered-text example observes
-the resulting screen; it does not wait for an arbitrary application's exit
-code. A future-byte subscription has no historical capture barrier. See
-[control outcomes](control.md) and [streaming](streaming.md) for those contracts.
+Sending keys confirms tmux accepted input, not that a program finished. A
+future-byte subscription has no history. See [control outcomes](control.md) and
+[streaming](streaming.md).

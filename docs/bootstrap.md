@@ -33,11 +33,6 @@ from [first use](getting-started.md#link-an-installed-library) with:
  (libraries libtmux libtmux-workspace libtmux-unix unix))
 ```
 
-CI compiles that complete file against installed packages and checks its exact
-outcome line, graph assertions, directory cleanup and owned process exit on
-tmux 3.3a and 3.8. The [executed inventory](../examples/showcase.json) records
-its command and workflow.
-
 ## Build, plan, await and capture
 
 The central function receives the binary's discovered version and a new private

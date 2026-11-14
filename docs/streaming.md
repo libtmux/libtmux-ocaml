@@ -1,12 +1,11 @@
 # Observe output and wait for rendered text
 
-Use [native_watch.ml](../examples/native_watch.ml) for a complete concurrent
-literal-send, future-byte match and rendered-screen check. Its application owns
-the Eio scheduler and switch. Use [native_wait.ml](../examples/native_wait.ml) to capture exactly one pane and
-wait until its ordinary screen contains the supplied text. The example imports
-the installed Eio client, owns its switch, uses an explicit socket, closes its
-client and prints the matched pane ID. It requires an existing daemon and one
-pane; absence and ambiguity remain errors.
+- [native_watch.ml](../examples/native_watch.ml): a concurrent literal send,
+  future-byte match and rendered-screen check. Your application owns the Eio
+  scheduler and switch.
+- [native_wait.ml](../examples/native_wait.ml): capture exactly one pane and
+  wait until its screen contains the text. It needs an existing daemon and one
+  pane; absence and ambiguity are errors.
 
 `Client.wait_for_text` first subscribes, then captures the screen immediately.
 Output invalidates that observation. Queued Data events are coalesced before

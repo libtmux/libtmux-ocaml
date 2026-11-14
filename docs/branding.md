@@ -2,7 +2,7 @@
 
 The library logo uses the tiled libtmux mark and cog. The large tile uses
 GitHub Linguist's OCaml color. Supporting shades and geometry come from
-the [libtmux asset kit](https://github.com/libtmux/assets).
+the libtmux asset kit.
 
 [`assets/source.json`](assets/source.json) records the source revision, original
 paths, sizes, and SHA-256 digests. The directory includes SVG and PNG logos,

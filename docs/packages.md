@@ -5,8 +5,8 @@ Each package has an authored manifest. Internal dependencies require the same
 package version, so a client or workspace adapter uses its matching core.
 
 The core and pure workspace library have no third-party runtime dependencies.
-They use OCaml 5.5.2's standard library, including `Iarray`, `Seq`, `List` and
-`result`. Test and documentation tools remain development dependencies.
+They use only the OCaml standard library, including `Iarray`, `Seq`, `List` and
+`result`. Test and documentation tools are development dependencies.
 
 | Package | Role | Runtime dependencies |
 | --- | --- | --- |
@@ -34,8 +34,8 @@ packages; a consuming Dune project lists only the libraries it uses.
 ## Scope policy
 
 Prefer standard-library types and ordinary functions. Keep transport, JSON and
-CLI dependencies at their integration boundaries. Use the current stable OCaml
-compiler in 2026; older-compiler shims and compatibility matrices are excluded.
+CLI dependencies at their integration boundaries. Target the current stable
+OCaml; older-compiler shims and compatibility matrices are out of scope.
 
 Native OCaml APIs and the workspace CLI are the project's automation
 interfaces.

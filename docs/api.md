@@ -3,9 +3,8 @@
 Browse the [published API reference](https://libtmux.org/en/ocaml/latest/reference/)
 for public modules and their contracts.
 
-The public `.mli` files define the API. They document module roles, input and
-result types, local versus effectful operations, ownership, ordering, limits
-and failure behavior. Source examples are compiled against installed libraries.
+The public `.mli` files define the API: module roles, types, which operations
+do I/O, ownership, ordering, limits and failures.
 
 | Package | Public interface | Start with |
 | --- | --- | --- |
@@ -22,7 +21,7 @@ it does not expose an additional OCaml library.
 Install the development documentation dependency outside validation loops:
 
 ```console
-$ opam install odoc.3.2.2
+$ opam install odoc
 ```
 
 Build the native reference:
@@ -31,10 +30,8 @@ Build the native reference:
 $ opam exec -- dune build @doc
 ```
 
-Open `_build/default/_doc/_html/index.html` in a browser. Package entry pages
-link to the public modules; module pages expose nested abstract types, labeled
-arguments, result values and cross-references. The `.mli` source links above
-remain usable directly from the repository.
+Open `_build/default/_doc/_html/index.html` in a browser. The `.mli` links
+above also work from the repository.
 
 The hosted reference covers the [core and clients](https://libtmux.org/en/ocaml/latest/reference/)
 and the [workspace APIs](https://libtmux.org/en/ocaml/latest/workspace/reference/).

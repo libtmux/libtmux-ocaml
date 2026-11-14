@@ -1,25 +1,24 @@
 # Current capabilities and adoption gaps
 
-The immutable model, typed queries, native Linux clients and output observation
-have real-tmux evidence at the active tmux endpoints, 3.3a and 3.8. Intermediate
-releases remain supported throughout 3.3a–3.8. The installed
-workspace CLI also passes those cells. The final suite review remains unfinished.
-The [guide and API reference](https://libtmux.org/en/ocaml/) are hosted under
-`latest`. No opam package release has been published.
+- The model, typed queries, native Linux clients, output observation and
+  workspace CLI are tested against real tmux 3.3a and 3.8. Releases in between
+  are supported but not run in CI.
+- The [guide and API reference](https://libtmux.org/en/ocaml/) are hosted.
+- Not on opam yet. The final suite review is unfinished.
 
 ## What an application can use
 
-Capture a complete graph, retain it after closing the client, traverse shared
-windows through session-specific links, filter with native predicates or typed
-expressions, and establish cardinality before an explicit mutation. Native
-operations cover sessions, windows, panes, captured clients, layouts,
-environment, options and hooks. Both blocking and Eio transports retain
-operation outcomes and expose bounded subscriptions.
+- Capture a graph, keep it after closing the client, and walk shared windows
+  through session links.
+- Filter with native predicates or typed expressions; check cardinality before
+  a mutation.
+- Run native operations on sessions, windows, panes, clients, layouts,
+  environment, options and hooks.
+- Keep operation outcomes and watch bounded subscriptions from the blocking or
+  Eio client.
 
-The [compatibility table](compatibility.md) identifies qualified components.
-The [examples](README.md) are installed, compiled and executed against owned
-servers; they cover graph links, query results, created resources, literal
-input, streaming, rendered waits and client teardown.
+The [compatibility table](compatibility.md) lists qualified components; the
+[examples](README.md) run against servers they own.
 
 ## What is still missing
 
@@ -30,40 +29,25 @@ input, streaming, rendered waits and client teardown.
 | Final qualification | Rerun every required component and exact release cell on the final source revision |
 | Package adoption | Obtain an independent caller-task review and resolve material findings |
 
-[Recorded benchmarks](benchmarking.md) cover blocking/Eio capture, graphs up to
-256 panes, concurrent requests, OCaml heap allocation, client/daemon CPU,
-future-output latency and cancellation cleanup. Their raw data preserves the
-workload, source identities and host conditions.
+[Recorded benchmarks](benchmarking.md) cover capture, concurrency, memory, CPU,
+output latency and cancellation cleanup.
 
-The workspace model, JSON loader, blocking/Eio executors and installed CLI are
-implemented. The [workspace guide](workspaces.md) executes the installed command
-through validation, planning, apply, receipt inspection and owned cleanup.
-Live tests cover partial effects, compensation, append isolation, stale plans,
-cancellation journals and bootstrap on fresh and existing daemons. Cleanup
-targets only proven newly created panes; foreign panes moved into a new window
-remain. Versioned advisory plans and execution receipts preserve errors,
-creation IDs and cleanup outcomes; output documents cannot be replayed as
-operational input. CLI checks also cover malformed input, collisions, missing
-endpoints, interrupted apply, changed documents and stalled or broken stdout.
+The workspace model, JSON loader, blocking and Eio executors and the CLI are
+implemented; the [workspace guide](workspaces.md) walks through them.
+
+- Live tests cover partial effects, compensation, append isolation, stale
+  plans, cancellation journals and bootstrap on fresh and existing daemons.
+- Cleanup removes only panes whose creation is proven. Foreign panes moved into
+  a new window remain.
+- Plans and receipts record errors, creation IDs and cleanup outcomes. They are
+  output, not input to replay.
 
 ## Engineering assessment
 
-For a Linux application needing immutable tmux observations and explicit native
-control, the model and clients are candidates for adoption with the documented
-constraints. Suite adoption still needs the documentation and qualification
-above. Maintainer count and alpha status do not decide that
-assessment; observable behavior and recovery do.
-
-An adopting engineer should expect explicit endpoint selection, client lifetime,
-command uncertainty and stream gaps. The package should keep these visible.
-Implicit reconnects, callback-driven property acquisition, a mandatory query
-wrapper or a required runtime for pure filtering would make the API harder to
-reason about.
-
-A 9.5/10 whole-package rating is not established. Hosted documentation and
-final qualification have open gates. Documentation
-quality cannot substitute for those results. [Testing](testing.md) describes
-current evidence and how examples are kept in sync with source.
-
-The supported automation surfaces are native OCaml APIs and the workspace CLI;
-see [package boundaries](packages.md).
+- For a Linux application that needs immutable tmux observations and explicit
+  native control, the model and clients are candidates for adoption within the
+  documented limits. Suite adoption needs the gates above.
+- Expect explicit endpoints, client lifetimes, command uncertainty and stream
+  gaps. The API keeps them visible and never reconnects for you.
+- The supported surfaces are the native OCaml APIs and the workspace CLI; see
+  [package boundaries](packages.md) and [testing](testing.md).
