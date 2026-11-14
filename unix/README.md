@@ -16,10 +16,11 @@
 </div>
 
 Capture a tmux graph, run targeted commands, and retain operation outcomes with
-`Libtmux_unix`. Calls block the invoking thread. Scoped cancellation can be
-signalled from another domain or system thread.
+[`Libtmux_unix.Client.t`][client]. Calls block the invoking thread. Scoped
+cancellation can be signalled from another domain or system thread.
 
 [API](https://libtmux.org/en/ocaml/latest/reference/libtmux_unix/) ·
+[Examples](#capture-once-traverse-after-closing) ·
 [Operations and recovery](../docs/control.md) ·
 [Compatibility](../docs/compatibility.md) · [Eio alternative](../eio/)
 
@@ -40,12 +41,14 @@ Copy the example as `native_graph.ml` and use this `dune` file:
 ```
 
 Native connections require Linux pidfds, tmux 3.3a–3.8, and the daemon's
-PID namespace and local filesystem. Ordinary `Client.connect` attaches to an
+PID namespace and local filesystem. [`Client.connect`][connect] attaches to an
 existing daemon; [workspace bootstrap](../docs/workspaces.md) creates a missing
 endpoint explicitly. See the compatibility guide for exact tested releases and
 workload limits.
 
 ## Capture once, traverse after closing
+
+### [`Client.capture`][capture]: sessions, window links and panes
 
 Create an isolated daemon with a `cat` pane. These commands address only the
 new private socket and clear inherited tmux context:
@@ -70,7 +73,8 @@ $ opam exec -- dune exec examples/native_graph.exe -- \
 ```
 
 The output starts with `session $0 "demo"` and lists its window link and pane
-`%0`. The complete program closes the client before traversing the snapshot:
+`%0`. The complete program calls [`Client.capture`][capture], then
+[`Client.close`][close] before traversing the snapshot:
 
 <!-- example: examples/native_graph.ml -->
 
@@ -117,23 +121,27 @@ let () =
   print_graph snapshot
 ```
 
-`Session.window_links` preserves session-specific indexes. `Window.panes` and
-all other captured accessors perform no I/O. See the [graph guide](../docs/graph.md)
+[`Session.window_links`][window-links] preserves session-specific indexes.
+[`Window.panes`][panes] and all other captured accessors perform no I/O.
+See the [graph guide](../docs/graph.md)
 for windows shared between sessions and the [query guide](../docs/queries.md)
 for native predicates, typed expressions and exact cardinality.
 
 ## Cancellation and partial effects
 
-Use `Cancellation.with_` for scoped cancellation, passing its token to operations
-that accept `~cancel`. Cancellation raises `Cancellation.Cancelled`; it does not
-mean an already written mutation had no effect. Written work drains before the
-awaiting call raises, within the documented transport deadline and local I/O
+### [`Cancellation.with_`][cancellation]: cancel a blocking call
+
+Use [`Cancellation.with_`][cancellation] for scoped cancellation, passing its
+token to operations that accept `~cancel`. Cancellation raises
+`Cancellation.Cancelled`; it does not mean an already written mutation had no
+effect. Written work drains before the awaiting call raises, within the
+documented transport deadline and local I/O
 completion limits.
 
-For recoverable mutations, keep the result of `Client.submit` outside the
-cancelled scope, then inspect or await the retained operation. Expected failures
-return `result`; `Error.pp` formats them. A caller-owned `Cleanup` report retains
-secondary teardown failures. [Recovery](../docs/recovery.md) explains the same
+For recoverable mutations, keep the result of [`Client.submit`][submit] outside
+the cancelled scope, then inspect or await the retained operation. Expected
+failures return `result`; `Error.pp` formats them. A caller-owned `Cleanup`
+report retains secondary teardown failures. [Recovery](../docs/recovery.md) explains the same
 retained-operation model through a complete Eio example.
 
 Live clients belong to their creating domain. Mutation targets are bound to the
@@ -160,3 +168,12 @@ $ rmdir "$LIBTMUX_UNIX_DEMO_DIR"
 ```
 
 [Examples](../docs/showcases.md) · [Changelog](CHANGELOG.md) · [MIT](../LICENSE)
+
+[client]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-t/
+[connect]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-connect/
+[capture]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-capture/
+[close]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-close/
+[window-links]: https://libtmux.org/en/ocaml/latest/reference/libtmux-session-window_links/
+[panes]: https://libtmux.org/en/ocaml/latest/reference/libtmux-window-panes/
+[cancellation]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-cancellation-with_/
+[submit]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-submit/

@@ -194,3 +194,10 @@ unrelated changes, and stage explicit paths. Describe the problem, resulting
 behavior, validation commands and durations, and remaining limitations.
 
 Do not claim an API, platform, or release until it exists and has been verified.
+
+## Releases
+
+Prepare versions and publication credentials with [RELEASE.md](RELEASE.md).
+Pull requests rehearse the source archive and opam installation without
+publishing. An approved annotated tag reruns the complete CI suite before
+the release job requests credentials.

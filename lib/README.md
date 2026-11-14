@@ -15,12 +15,13 @@
 
 </div>
 
-Build queries and inspect captured tmux graphs with `Libtmux`. The core uses
-the OCaml standard library and performs no tmux I/O. Add a
-[blocking client](../unix/) or [Eio client](../eio/) when acquiring observations
-or changing the server.
+Build [queries][query] and inspect [captured tmux graphs][snapshot] with
+[`Libtmux`][api]. The core uses the OCaml standard library and performs no tmux
+I/O. Add a [blocking client](../unix/) or [Eio client](../eio/) when acquiring
+observations or changing the server.
 
 [API](https://libtmux.org/en/ocaml/latest/reference/libtmux/) ·
+[Examples](#build-and-inspect-a-query) ·
 [Object graph](../docs/graph.md) ·
 [Queries](../docs/queries.md) · [Package boundaries](../docs/packages.md)
 
@@ -42,8 +43,10 @@ Copy the example as `query_description.ml` and use this `dune` file:
 
 ## Build and inspect a query
 
-This complete program needs no tmux server. Field and operator types are checked
-by the compiler; the expression remains inspectable data. Exact cardinality
+### [`Expr`][expr]: typed fields and operators
+
+This complete program needs no tmux server. [`Expr`][expr] combines typed
+fields and operators into inspectable data. [`Query.exactly_one`][exactly-one]
 counts duplicate entries rather than silently deduplicating them.
 
 <!-- example: examples/query_description.ml -->
@@ -78,7 +81,10 @@ ambiguous: at least 2 entries
 
 ## Process a captured graph
 
-A `Snapshot.t` comes from a client capture or validated `Snapshot.create` input.
+### [`Snapshot.t`][snapshot]: read captured values without tmux I/O
+
+A [`Snapshot.t`][snapshot] comes from a client capture or validated
+[`Snapshot.create`][snapshot-create] input.
 Use native predicates over its immutable arrays. This function is part of the
 [complete, executed query program](../examples/native_query.ml):
 
@@ -90,8 +96,10 @@ let active_ids snapshot =
   |> Seq.map Pane.id |> List.of_seq
 ```
 
-For inspectable filters, use `Query.matching`. This selects active terminal
-panes at least 80 columns wide:
+### [`Query.matching`][matching]: apply a typed predicate
+
+For inspectable filters, use [`Query.matching`][matching]. This selects active
+terminal panes at least 80 columns wide:
 
 <!-- example: examples/native_query.ml#typed-filter -->
 
@@ -143,3 +151,11 @@ Keep these contracts in mind:
 
 [Run the full graph example](../README.md#read-a-real-tmux-graph) ·
 [Query JSON](../json/) · [Changelog](CHANGELOG.md) · [MIT](../LICENSE)
+
+[api]: https://libtmux.org/en/ocaml/latest/reference/libtmux/
+[snapshot]: https://libtmux.org/en/ocaml/latest/reference/libtmux-snapshot-t/
+[snapshot-create]: https://libtmux.org/en/ocaml/latest/reference/libtmux-snapshot-create/
+[query]: https://libtmux.org/en/ocaml/latest/reference/libtmux-query/
+[expr]: https://libtmux.org/en/ocaml/latest/reference/libtmux-expr/
+[matching]: https://libtmux.org/en/ocaml/latest/reference/libtmux-query-matching/
+[exactly-one]: https://libtmux.org/en/ocaml/latest/reference/libtmux-query-exactly_one/

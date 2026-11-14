@@ -15,11 +15,12 @@
 
 </div>
 
-Use `Libtmux_eio` for concurrent commands, retained operation outcomes, and
-bounded future-output subscriptions. Your application supplies the Eio scheduler,
-switch, process manager and clock.
+Use [`Libtmux_eio.Client.t`][client] for concurrent commands, retained operation
+outcomes, and bounded future-output subscriptions. Your application supplies
+the Eio scheduler, switch, process manager and clock.
 
 [API](https://libtmux.org/en/ocaml/latest/reference/libtmux_eio/) ·
+[Examples](#subscribe-send-literal-text-await-output) ·
 [Streaming](../docs/streaming.md) ·
 [Recovery](../docs/recovery.md) · [Compatibility](../docs/compatibility.md)
 
@@ -46,6 +47,8 @@ qualified releases and the remaining intensive-observation limits.
 
 ## Subscribe, send literal text, await output
 
+### [`Client.subscribe`][subscribe]: subscribe before sending input
+
 Create an isolated daemon with a `cat` pane. These commands address only the
 new private socket and clear inherited tmux context:
 
@@ -63,8 +66,10 @@ $ env -u TMUX -u TMUX_PANE tmux \
     -- "exec cat"
 ```
 
-The example subscribes before sending. The input and output wait run as
-concurrent fibers; it then checks the rendered screen separately.
+The example calls [`Client.subscribe`][subscribe] before
+[`Client.send_text`][send-text]. [`Subscription.wait_for_bytes`][wait-for-bytes]
+and the send run as concurrent fibers; [`Client.wait_for_text`][wait-for-text]
+then checks the rendered screen separately.
 
 ```console
 $ opam exec -- dune exec examples/native_watch.exe -- \
@@ -152,10 +157,10 @@ let () =
 
 | Task | Surface | What completion establishes |
 | --- | --- | --- |
-| Capture current values | `Client.capture` | A validated graph captured over an interval |
-| Retain a mutation outcome | `Client.submit`, then `Client.await` | A retained command result or explicit uncertainty |
-| Match future bytes | `Subscription.wait_for_bytes` | Matching bytes within continuous subscribed coverage |
-| Match visible screen text | `Client.wait_for_text` | A later rendered capture contains the text |
+| Capture current values | [`Client.capture`][capture] | A validated graph captured over an interval |
+| Retain a mutation outcome | [`Client.submit`][submit], then [`Client.await`][await] | A retained command result or explicit uncertainty |
+| Match future bytes | [`Subscription.wait_for_bytes`][wait-for-bytes] | Matching bytes within continuous subscribed coverage |
+| Match visible screen text | [`Client.wait_for_text`][wait-for-text] | A later rendered capture contains the text |
 
 Cancellation propagates through Eio. Cancelling an awaiting fiber does not undo
 written commands; retain submitted handles outside that fiber when recovery
@@ -190,3 +195,12 @@ $ rmdir "$LIBTMUX_EIO_DEMO_DIR"
 ```
 
 [Operations](../docs/control.md) · [Changelog](CHANGELOG.md) · [MIT](../LICENSE)
+
+[client]: https://libtmux.org/en/ocaml/latest/reference/libtmux_eio-client-t/
+[subscribe]: https://libtmux.org/en/ocaml/latest/reference/libtmux_eio-client-subscribe/
+[send-text]: https://libtmux.org/en/ocaml/latest/reference/libtmux_eio-client-send_text/
+[wait-for-bytes]: https://libtmux.org/en/ocaml/latest/reference/libtmux_eio-subscription-wait_for_bytes/
+[wait-for-text]: https://libtmux.org/en/ocaml/latest/reference/libtmux_eio-client-wait_for_text/
+[capture]: https://libtmux.org/en/ocaml/latest/reference/libtmux_eio-client-capture/
+[submit]: https://libtmux.org/en/ocaml/latest/reference/libtmux_eio-client-submit/
+[await]: https://libtmux.org/en/ocaml/latest/reference/libtmux_eio-client-await/

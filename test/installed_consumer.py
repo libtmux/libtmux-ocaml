@@ -186,6 +186,7 @@ let () =
     package_examples.mkdir()
     (package_examples / "dune-project").write_text("(lang dune 3.24)\n")
     for package, name in [("lib", "query_description"), ("json", "query_json"),
+                          ("workspace", "workspace_plan"),
                           ("unix", "native_graph"), ("eio", "native_watch")]:
         project = package_examples / package
         project.mkdir()
@@ -198,6 +199,7 @@ let () =
     expected = {
         "lib/query_description": b'all [pane_active = true; pane_current_command in ["nvim"; "vim"]; pane_width >= 120]\nambiguous: at least 2 entries\n',
         "json/query_json": b'{"schema":"libtmux.filter/1","model":"pane","expr":{"node":"compare","field":"pane_current_command","op":"starts_with","value":"nv"}}\ninvalid operand at /expr/value\n',
+        "workspace/workspace_plan": b'project: 2 windows, 3 actions\n',
     }
     for program, output in expected.items():
         result = subprocess.run([str(package_examples / "_build/default" / f"{program}.exe")],
