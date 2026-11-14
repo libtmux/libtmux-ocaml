@@ -24,7 +24,7 @@ The watch program also needs `libtmux-eio` and `eio_main`. The
 | Start a private server and its first session | [Bootstrap](../examples/showcase_bootstrap.ml) | `bootstrapped: 1 session, 1 window, 1 pane` |
 | Navigate sessions, shared windows and panes | [Graph](../examples/showcase_graph.ml) | `graph: 2 sessions, 2 windows, 3 links, 2 panes` |
 | Observe future bytes concurrently | [Watch](../examples/showcase_watch.ml) | `observed: changed` |
-| Send literal input and Enter | [Keys](../examples/showcase_send_keys.ml) | `sent: literal: $HOME; #{pane_id}` |
+| Split a pane, send keys, capture the screen and resize | [Keys](../examples/showcase_send_keys.ml) | `sent: literal: $HOME; #{pane_id}` |
 | Rename a window and retain the old observation | [Rename](../examples/showcase_rename_window.ml) | `renamed: editor-main` |
 | Create a window and recapture its name | [Create](../examples/showcase_create_window.ml) | `created: logs` |
 | Move a window to another session's index | [Move](../examples/showcase_move_window.ml) | `moved: build at 7` |
@@ -51,7 +51,8 @@ Observe future output with an application-owned Eio switch:
 $ opam exec -- dune exec examples/showcase_watch.exe -- tmux
 ```
 
-Send a literal string containing shell and tmux format characters:
+Split a pane, send a literal string containing shell and tmux format
+characters, capture the screen and resize:
 
 ```console
 $ opam exec -- dune exec examples/showcase_send_keys.exe -- tmux

@@ -63,7 +63,7 @@
     },
     {
       "capability": "send-keys",
-      "title": "Send literal input and keys",
+      "title": "Split a pane, send keys, capture the screen and resize",
       "file": "examples/showcase_send_keys.ml",
       "whole_file": true,
       "command": [

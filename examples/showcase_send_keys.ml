@@ -1,26 +1,40 @@
+(* docs:begin pane-io *)
 open Libtmux
 module Client = Libtmux_unix.Client
-module Workspace = Libtmux_unix.Workspace
-module Config = Libtmux_workspace.Config
-module Plan = Libtmux_workspace.Plan
-module Execution = Libtmux_workspace.Execution
 
 let get = function
   | Ok value -> value
   | Error error -> failwith (Format.asprintf "%a" Error.pp error)
 
-let send_keys client (initial : Created.t) _spawn =
-  let text = "literal: $HOME; #{pane_id}" in
-  let pane =
-    Snapshot.find_pane
-      (get (Client.capture client))
-      (Pane.Target.id initial.pane)
-    |> Option.get
+let find client target =
+  Snapshot.find_pane (get (Client.capture client)) (Pane.Target.id target)
+  |> Option.get
+
+let wait client pane text =
+  ignore (get (Client.wait_for_text ~timeout:0.5 client pane ~text))
+
+let drive client (initial : Created.t) spawn =
+  let right =
+    get (Client.split_pane client initial.pane ~direction:Geometry.Right ~spawn)
   in
-  get (Client.send_text client (Pane.target pane) ~text);
-  get (Client.send_keys client (Pane.target pane) [ Key.Enter ]);
-  ignore (get (Client.wait_for_text ~timeout:0.5 client pane ~text));
-  Printf.printf "sent: %s\n" text
+  let pane = find client right.pane in
+  wait client pane "showcase ready";
+  let text = "literal: $HOME; #{pane_id}" in
+  get (Client.send_text client right.pane ~text);
+  get (Client.send_keys client right.pane [ Key.Enter ]);
+  wait client pane text;
+  let screen = get (Client.capture_text client pane ~start:0 ~end_:1) in
+  Printf.printf "sent: %s\ncaptured: %S\n" text screen.bytes;
+  get (Client.resize_window client initial.window ~width:100 ~height:30);
+  get (Client.resize_pane client right.pane ~width:20);
+  let resized = find client right.pane in
+  Printf.printf "resized: %dx%d\n" (Pane.width resized) (Pane.height resized)
+(* docs:end pane-io *)
+
+module Workspace = Libtmux_unix.Workspace
+module Config = Libtmux_workspace.Config
+module Plan = Libtmux_workspace.Plan
+module Execution = Libtmux_workspace.Execution
 
 let with_demo binary use =
   let directory = Filename.temp_dir "libtmux-ocaml-showcase-" "" in
@@ -99,4 +113,4 @@ let with_demo binary use =
 
 let () =
   let binary = if Array.length Sys.argv = 2 then Sys.argv.(1) else "tmux" in
-  with_demo binary send_keys
+  with_demo binary drive
