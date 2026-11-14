@@ -182,7 +182,118 @@ module Subscription : sig
 end
 
 (** An explicit generation-bound connection. Applications retain ownership of
-    the endpoint choice and resource lifetime. *)
+    the endpoint choice and resource lifetime.
+
+    {1 What is on here}
+
+    A client does a great many things, so this module has a great many
+    functions. They fall into a few groups:
+
+    {b Connecting and closing.} {!Client.connect} attaches to a daemon that is
+    already running, given a {!Libtmux.Endpoint.t}; the daemon needs at least
+    one session and must share the caller's PID namespace and filesystem.
+    {!Client.close} releases the control clients and descriptors the client owns
+    and sends no signal to the daemon. {!Client.source} and {!Client.version}
+    read what the client is bound to without I/O, and {!Client.cleanup} returns
+    the {!Cleanup.t} report that retains failed releases.
+
+    {!Client.connect}, {!Client.close}, {!Client.source}, {!Client.version} and
+    {!Client.cleanup}
+
+    {b Listing everything.} {!Client.capture} lists sessions, windows, window
+    links, panes and clients with a fixed number of listing commands and returns
+    a {!Libtmux.Snapshot}. The listings span an interval rather than one
+    instant, and a race between them fails validation. Reading the snapshot,
+    even after {!Client.close}, performs no I/O: filter its collections with
+    {!Libtmux.Expr} and {!Libtmux.Query.matching}, or look an entity up with
+    {!Libtmux.Snapshot.find_pane}.
+
+    {!Client.capture}, {!Libtmux.Snapshot}, {!Libtmux.Expr},
+    {!Libtmux.Query.matching} and {!Libtmux.Snapshot.find_pane}
+
+    {b Reading a pane.} {!Client.capture_text} returns the rendered rows of a
+    pane's ordinary screen, from [start] to [end_] inclusive, as a
+    {!Libtmux.Captured_text}; it works through a private file in a scratch
+    directory the daemon can also read. {!Client.wait_for_text} captures again
+    after output until the screen contains the text or the deadline passes.
+    {!Client.subscribe} returns a {!Subscription.t} of the bytes the pane prints
+    once it is admitted, read with {!Subscription.next}; overflow and layout or
+    membership changes end it with an explicit gap.
+
+    {!Client.capture_text}, {!Client.wait_for_text}, {!Client.subscribe} and
+    {!Subscription.next}
+
+    {b Sending input and synchronizing.} {!Client.send_text} writes literal
+    bytes to a pane and {!Client.send_keys} sends a list of {!Libtmux.Key.t} in
+    order; neither adds an Enter. {!Client.wait_for} waits on a named tmux
+    semaphore using a dedicated lane, and {!Client.signal} releases a waiter or
+    keeps the signal for a later wait. {!Client.signal} does not signal an OS
+    process.
+
+    {!Client.send_text}, {!Client.send_keys}, {!Client.wait_for} and
+    {!Client.signal}
+
+    {b Creating things.} {!Client.create_session} creates a detached session and
+    fails on a name collision. {!Client.create_window} adds a detached window to
+    a session and rejects an occupied explicit index, and {!Client.split_pane}
+    adds a detached pane beside a target. {!Client.break_pane} moves an existing
+    pane into a new window at an explicit index. Each returns a
+    {!Libtmux.Created.t} with the IDs tmux reports.
+
+    {!Client.create_session}, {!Client.create_window}, {!Client.split_pane} and
+    {!Client.break_pane}
+
+    {b Changing things.} A function ending in [_at] addresses the window at an
+    index, or the client bearing a name, as it is when the command runs rather
+    than when a snapshot was captured. {!Client.kill_window} destroys the
+    window, all its session links and every pane in it, while
+    {!Client.unlink_window_at} removes one link and tmux rejects removing a
+    window's last link unless [allow_kill] is true. Resize and layout functions
+    request a geometry: tmux can constrain the result, so capture again to
+    observe it.
+
+    - Sessions: {!Client.rename_session} and {!Client.kill_session}
+    - Windows: {!Client.rename_window}, {!Client.select_window_at},
+      {!Client.link_window}, {!Client.unlink_window_at},
+      {!Client.move_window_at}, {!Client.resize_window},
+      {!Client.select_layout}, {!Client.cycle_layout} and {!Client.kill_window}
+    - Panes: {!Client.select_pane}, {!Client.set_pane_title},
+      {!Client.resize_pane}, {!Client.move_pane}, {!Client.swap_panes},
+      {!Client.rotate_panes}, {!Client.zoom_pane}, {!Client.respawn_pane},
+      {!Client.clear_history} and {!Client.kill_pane}
+    - Clients: {!Client.switch_client_at}, {!Client.request_detach_client_at},
+      {!Client.refresh_client_at} and {!Client.resize_control_client_at}
+
+    {b Options, hooks and environment.} Every option and hook function takes a
+    {!Libtmux.Options.type-scope}, so one function serves the server, the global
+    session and window tables, and a session, window or pane.
+    {!Client.capture_options}, {!Client.capture_hooks} and
+    {!Client.capture_environment} return a whole table, while
+    {!Client.read_option} and {!Client.read_hook} read one exact name and return
+    [None] when there is no entry. Option text is literal, with tmux format
+    expansion disabled, and {!Client.set_hook} encodes {!Libtmux.Hook.command}
+    values as command data, not shell code. {!Client.unset_environment} removes
+    the local entry so a global value applies again, while
+    {!Client.remove_environment} stores a removal marker that excludes the
+    variable from future panes.
+
+    - Options: {!Client.capture_options}, {!Client.read_option},
+      {!Client.set_option}, {!Client.unset_option} and
+      {!Client.clear_option_array}
+    - Hooks: {!Client.capture_hooks}, {!Client.read_hook}, {!Client.set_hook},
+      {!Client.remove_hook} and {!Client.run_hook}
+    - Environment: {!Client.capture_environment}, {!Client.set_environment},
+      {!Client.unset_environment} and {!Client.remove_environment}
+
+    {b Running a command.} {!Client.submit} validates a {!Libtmux.Command.t} and
+    reserves queue capacity without I/O, returning an {!Operation.t}.
+    {!Client.await} pumps admitted work until that operation finishes; only one
+    blocking caller may own the client at a time. {!Client.run} does both in one
+    call, as most functions above do for the command {!Libtmux.Operations}
+    builds. Keep the handle from {!Client.submit} to read {!Operation.inspect}
+    after a failure or cancellation.
+
+    {!Client.submit}, {!Client.await} and {!Client.run} *)
 module Client : sig
   type t
 
