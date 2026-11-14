@@ -52,6 +52,11 @@ A README is scanned, not read. Each line has to survive a glance.
   newer". Toolchain pins and CI matrices stay in their own files.
 - Cut what a reader would assume or never need: that examples are tested,
   how the documentation is built, what the checks cover.
+- An example comes from a file that CI compiles and runs, and starts with its
+  imports. It starts its own private server and removes what it made through
+  the library, with no shell `tmux` setup or cleanup.
+- The root README shows queries, the query planner and subscriptions, each
+  under a heading linked to its reference page.
 
 ## Executable examples
 
