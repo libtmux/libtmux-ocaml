@@ -28,15 +28,13 @@ and observe output through an [Eio][eio-client] or [blocking client][unix-client
 [Compatibility](https://libtmux.org/en/ocaml/latest/guides/compatibility/) ·
 [CI](https://github.com/libtmux/libtmux-ocaml/actions/workflows/ocaml.yml)
 
-Targets **OCaml 5.5.2 on Linux** and supports **tmux 3.3a–3.8**, including
-intermediate releases. CI tests the two endpoints. Connections require Linux
-pidfds, the daemon's PID namespace and a shared local filesystem. The pure model
-and queries use the standard library.
+Needs OCaml 5, Linux and tmux 3.3a or newer. The model and queries use the
+standard library alone.
 
 ## Install from source
 
-There is no opam release yet. With [opam](https://opam.ocaml.org/doc/Install.html)
-initialized and tmux installed, clone this repository:
+Not on opam yet. With [opam](https://opam.ocaml.org/doc/Install.html) and tmux
+installed, clone the repository:
 
 ```console
 $ git clone https://github.com/libtmux/libtmux-ocaml.git
@@ -46,7 +44,7 @@ $ git clone https://github.com/libtmux/libtmux-ocaml.git
 $ cd libtmux-ocaml
 ```
 
-Create a local compiler switch; this leaves the global switch unchanged:
+Create a local compiler switch; the global one is untouched:
 
 ```console
 $ opam switch create \
@@ -55,27 +53,25 @@ $ opam switch create \
     . ocaml-base-compiler.5.5.2
 ```
 
-Install the libraries and the Eio entry point used by the examples:
+Install the libraries and the Eio entry point:
 
 ```console
 $ opam install . eio_main.1.6
 ```
 
-Activate this switch in the current shell before using another Dune project:
+Activate the switch in this shell:
 
 ```console
 $ eval "$(opam env --switch=. --set-switch)"
 ```
 
-The [installation guide](docs/getting-started.md) shows how to use the installed
-packages in a separate Dune project.
+More: [installation guide](docs/getting-started.md), for use from another Dune project.
 
 ## Read a real tmux graph
 
 ### [`Client.capture`][unix-capture]: sessions, window links and panes
 
-Create an isolated demonstration server. These commands clear inherited tmux
-context and use a private socket, so the examples do not select your usual server.
+Start a demo server on a private socket, away from your usual one:
 
 ```console
 $ export LIBTMUX_DEMO_DIR="$(mktemp -d -t libtmux-ocaml-demo.XXXXXX)"
@@ -98,10 +94,9 @@ $ opam exec -- dune exec examples/native_graph.exe -- \
     tmux "$LIBTMUX_DEMO_DIR/server"
 ```
 
-This is the complete [program](examples/native_graph.ml).
-[`Client.connect`][unix-connect] opens the connection,
-[`Client.capture`][unix-capture] acquires the graph, and
-[`Client.close`][unix-close] releases the client before local traversal:
+[`Client.connect`][unix-connect] opens the connection and
+[`Client.close`][unix-close] releases it before the local traversal.
+The complete [program](examples/native_graph.ml):
 
 <!-- example: examples/native_graph.ml -->
 
@@ -148,16 +143,14 @@ let () =
   print_graph snapshot
 ```
 
-A window can belong to several sessions. [`Window_link.index`][window-index]
-belongs to a session/window link; [`Window.t`][window] identifies the shared
-window. The [graph guide](docs/graph.md) demonstrates linking one window twice
-without losing either context.
+A window can belong to several sessions: [`Window_link.index`][window-index]
+is per session, [`Window.t`][window] is shared. More: [graph guide](docs/graph.md).
 
 ## Filter captured values
 
 ### [`Snapshot`][snapshot]: filter with native OCaml functions
 
-Use ordinary functions first. This performs no tmux I/O:
+Plain functions, no tmux I/O:
 
 <!-- example: examples/native_query.ml#native-filter -->
 
@@ -169,8 +162,7 @@ let active_ids snapshot =
 
 ### [`Query.matching`][matching]: apply an inspectable expression
 
-Use [`Expr`][expr] when a query needs inspection, serialization or reuse.
-[`Query.matching`][matching] applies the expression to captured panes:
+An [`Expr`][expr] can be inspected, serialized and reused:
 
 <!-- example: examples/native_query.ml#typed-filter -->
 
@@ -190,9 +182,8 @@ let roomy_ids snapshot =
   |> Seq.map Pane.id |> List.of_seq
 ```
 
-A text operator on `Pane.Fields.width`, or a session filter applied to panes,
-fails to type-check. Results use `Iarray`, `Seq` and `List`. Matching preserves
-input order and duplicates; local accessors stay readable after client closure.
+A text operator on `Pane.Fields.width` fails to type-check. Matching keeps
+input order.
 
 Run the [complete query program](examples/native_query.ml) against the demo:
 
@@ -201,18 +192,15 @@ $ opam exec -- dune exec examples/native_query.exe -- \
     tmux "$LIBTMUX_DEMO_DIR/server"
 ```
 
-The [query guide](docs/queries.md) covers relationship quantifiers, empty
-relations, exact cardinality and explicit acquisition with source filtering.
+More: [query guide](docs/queries.md).
 
 ## Create a session and split its panes
 
 ### [`Client.create_session`][create-session]: start a session and build its layout
 
-The [layout program](examples/native_build.ml) uses
-[`Client.create_session`][create-session], [`Client.split_pane`][split-pane]
-and [`Client.create_window`][create-window] to create an `editor` window with
-two panes and a separate `logs` window. [`Spawn.make`][spawn] supplies the
-working directory, command and environment:
+[`Client.split_pane`][split-pane] and [`Client.create_window`][create-window]
+add to it; [`Spawn.make`][spawn] sets the directory, command and environment.
+From the [layout program](examples/native_build.ml):
 
 <!-- example: examples/native_build.ml#create-layout -->
 
@@ -244,34 +232,25 @@ $ opam exec -- dune exec examples/native_build.exe -- \
     tmux "$LIBTMUX_DEMO_DIR/server" project "$LIBTMUX_DEMO_DIR"
 ```
 
-It prints the IDs tmux returned. Existing session names fail instead of replacing
-resources. Mutations receive generation-bound targets; selecting a value does
-not make a later mutation atomic. [Operations and recovery](docs/control.md)
-explains acknowledgement, completion and uncertain outcomes.
+Prints the IDs tmux returned. An existing session name fails; nothing is
+replaced. More: [operations and recovery](docs/control.md).
 
 ## Send literal input and observe the reply with Eio
 
 ### [`Client.subscribe`][subscribe]: subscribe before sending input
 
-The [Eio program](examples/native_watch.ml) calls
-[`Client.subscribe`][subscribe] before [`Client.send_text`][send-text],
-awaits future bytes concurrently with the send, then checks the screen with
-[`Client.wait_for_text`][wait-for-text]:
+[`Client.send_text`][send-text] types into the pane;
+[`Client.wait_for_text`][wait-for-text] checks the screen.
+The [Eio program](examples/native_watch.ml):
 
 ```console
 $ opam exec -- dune exec examples/native_watch.exe -- \
     tmux "$LIBTMUX_DEMO_DIR/server" %0 'ready; $HOME stays literal'
 ```
 
-It sends the string to the demo's `cat` pane and explicitly presses Enter.
-`send_text` does not interpret shell syntax. The application owns `Eio_main`
-and its switch; the library never starts a scheduler.
-
-Subscriptions report `Data`, `Gap` and `End` through bounded queues. A slow
-subscriber cannot block another subscriber or the command lane. Future-byte
-matching and rendered-screen waits have different contracts; neither supplies
-terminal history or an atomic capture/stream barrier. See
-[streaming and cancellation](docs/streaming.md).
+`send_text` types literally and never interprets shell syntax. Your application
+owns `Eio_main`; the library starts no scheduler. A slow subscriber never blocks
+another. More: [streaming and cancellation](docs/streaming.md).
 
 ## Packages and current limits
 
@@ -284,26 +263,15 @@ terminal history or an atomic capture/stream barrier. See
 | [libtmux-workspace](workspace/) | [Libtmux_workspace][workspace-api] | Configuration, plans and execution journals | [Preview a native workspace](workspace/README.md#preview-a-native-workspace) |
 | [libtmux-workspace-cli](cli/) | [Workspace commands](docs/workspaces.md) | Validate, preview and apply JSON workspaces | [Check a configuration](cli/README.md#install-and-validate) |
 
-The [libtmux-workspace-cli](cli/) package installs `tmux-workspace` to validate, preview
-and apply JSON workspaces. The [workspace guide](docs/workspaces.md) runs a
-complete configuration through validation, planning, apply and receipt inspection.
+- **Dependencies.** Core and the workspace library use the standard library
+  alone; JSON and Eio are optional. [Package boundaries](docs/packages.md).
+- **Not supported.** macOS, Windows and remote daemons.
+- **Status.** [Adoption gaps](docs/status.md) ·
+  [Compatibility](docs/compatibility.md).
+- **More.** [API docs](docs/api.md) · [Testing](docs/testing.md) ·
+  [Benchmarks](docs/benchmarking.md) · [Workspace guide](docs/workspaces.md).
 
-The core and pure workspace library use the OCaml standard library. JSON and Eio
-stay in optional packages; [package boundaries](docs/packages.md) lists their
-dependencies. See [status and adoption gaps](docs/status.md) for remaining
-qualification work.
-macOS, Windows, remote-daemon binding and Java regex evaluation are outside the
-current support contract.
-
-[API documentation](docs/api.md) comes from the public `.mli` files using odoc.
-The [testing guide](docs/testing.md) explains typed Alcotest assertions,
-ppx_expect diagnostics, QCheck properties, installed examples and cached tmux
-builds. [Benchmarks](docs/benchmarking.md) include reproducible same-graph
-blocking/Eio capture data. [Compatibility](docs/compatibility.md) records
-component-level evidence.
-
-Each heading below links to the package's directory on GitHub, where its
-README lives.
+Each heading links to the package's directory on GitHub.
 
 ### [`libtmux`](https://github.com/libtmux/libtmux-ocaml/tree/master/lib): the immutable graph and typed queries
 
@@ -353,8 +321,7 @@ shell.
 
 ## Clean up the demo
 
-Remove only the two sessions created above; closing a library client leaves
-the daemon running:
+Remove the two demo sessions. Closing a client leaves the daemon running:
 
 ```console
 $ env -u TMUX -u TMUX_PANE tmux \
