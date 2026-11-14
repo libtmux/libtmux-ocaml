@@ -15,10 +15,9 @@
 <!-- /libtmux-logo -->
 
 Validate workspace descriptions and preview their actions with
-[`Libtmux_workspace`][api]. The package depends on the pure [core](../lib/) and the
-OCaml standard library. Add the [JSON codec](../json/) to read configuration
-documents, or a [blocking](../unix/) or [Eio](../eio/) client to create sessions,
-windows and panes.
+[`Libtmux_workspace`][api]. It needs only the [core](../lib/). Add the
+[JSON codec](../json/) to read configuration files, and a [blocking](../unix/)
+or [Eio](../eio/) client to create sessions, windows and panes.
 
 [API](https://libtmux.org/en/ocaml/latest/workspace/reference/libtmux_workspace/) ·
 [Examples](#preview-a-native-workspace) ·
@@ -27,9 +26,8 @@ windows and panes.
 
 ## Use from OCaml
 
-Follow the [source installation](../README.md#install-from-source) with
-**OCaml 5.5.2**. There is no opam release yet. Link `libtmux-workspace` alongside
-`libtmux` in your Dune application.
+Not on opam yet: follow the [source install](../README.md#install-from-source).
+Link `libtmux-workspace` alongside `libtmux` in your Dune project.
 
 | Module | Use | I/O |
 | --- | --- | --- |
@@ -42,12 +40,11 @@ Follow the [source installation](../README.md#install-from-source) with
 ### [`Plan.make`][plan-make]: preview actions without tmux I/O
 
 [`Config.make`][config-make] validates the description; [`Plan.make`][plan-make]
-builds an ordered preview. This complete program performs no tmux or filesystem
-I/O. The absolute directory and socket paths describe a prospective endpoint;
-`observed:None` explicitly models it as missing.
+builds an ordered preview. No tmux or filesystem I/O. The paths describe a
+prospective endpoint, and `observed:None` says it is missing.
 
-In a separate application, create `dune-project` containing `(lang dune 3.24)`.
-Copy the program as `workspace_plan.ml` and use this `dune` file:
+In your own project, set `(lang dune 3.24)` in `dune-project`, copy the
+program as `workspace_plan.ml` and use this `dune` file:
 
 ```dune
 (executable
@@ -91,7 +88,7 @@ let () =
     (Iarray.length (Plan.actions plan))
 ```
 
-After source installation, run the shipped program from the checkout root:
+From the checkout root:
 
 ```console
 $ opam exec -- dune exec examples/workspace_plan.exe
@@ -101,26 +98,24 @@ $ opam exec -- dune exec examples/workspace_plan.exe
 project: 2 windows, 3 actions
 ```
 
-[`Plan.actions`][plan-actions] contains session creation, pane splitting and
-window creation. To execute a plan, choose the [blocking][unix-workspace] or
-[Eio][eio-workspace] workspace adapter explicitly.
+[`Plan.actions`][plan-actions] lists session creation, pane splitting and window
+creation. To run a plan, pick the [blocking][unix-workspace] or
+[Eio][eio-workspace] adapter.
 
-The [native bootstrap walkthrough](../docs/bootstrap.md) shows a complete
-builder and client program. The [interruption example](../docs/workspace-recovery.md)
-retains its execution handle outside cancellation, inspects the journal after
-client cleanup and checks compensation. The journal lives in process memory;
-a saved receipt does not resume a later execution or authorize a retry.
+- The journal lives in process memory; a saved receipt cannot resume or retry.
+- [Native bootstrap](../docs/bootstrap.md): a complete builder and client program.
+- [Interruption example](../docs/workspace-recovery.md): cancel, read the
+  journal, check compensation.
 
 ## Use from the command line
 
 ### [`tmux-workspace check`](../docs/workspaces.md#validate-preview-and-apply): validate a JSON workspace
 
 The [libtmux-workspace-cli](../cli/) package installs `tmux-workspace` for JSON
-configurations. It uses this library for validation, plans and execution.
+configurations, built on this library.
 
-After following the [source installation](../README.md#install-from-source), run
-this from the repository root to validate the shipped configuration without
-contacting tmux:
+From the checkout root, validate the shipped configuration without contacting
+tmux:
 
 ```console
 $ opam exec -- tmux-workspace check examples/workspace/project.json
@@ -128,12 +123,9 @@ $ opam exec -- tmux-workspace check examples/workspace/project.json
 
 Expected output: `Valid workspace "ocaml-project": 2 windows, 3 panes`.
 
-See the [core README](../README.md) for the graph and query APIs, and
-[current limits](../README.md#packages-and-current-limits) before adopting the
-complete automation suite.
-
-The [workspace guide](../docs/workspaces.md) covers the JSON format, explicit
-endpoints, bootstrap, collision policies, exit codes and partial-failure recovery.
+More: [workspace guide](../docs/workspaces.md) for the JSON format, endpoints,
+collisions, exit codes and recovery. Graph and queries are in the
+[core](../lib/); see the [current limits](../README.md#packages-and-current-limits).
 
 [JSON codec](../json/) · [Changelog](CHANGELOG.md) · [MIT](../LICENSE)
 

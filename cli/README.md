@@ -18,9 +18,8 @@
 </div>
 
 Validate JSON workspace files, preview their plans and create tmux sessions,
-windows and panes with `tmux-workspace`. This package installs a command-line
-application built on the [workspace library](../workspace/),
-[JSON codec](../json/) and native clients.
+windows and panes with `tmux-workspace`. Built on the
+[workspace library](../workspace/), [JSON codec](../json/) and native clients.
 
 [Command guide](../docs/workspaces.md) ·
 [Workspace API](https://libtmux.org/en/ocaml/latest/workspace/reference/) ·
@@ -31,13 +30,13 @@ application built on the [workspace library](../workspace/),
 
 ## Install and validate
 
-Follow the [source installation](../README.md#install-from-source) with
-**OCaml 5.5.2 on Linux**. `opam install .` includes the CLI; there is no opam
-release yet. Run the following commands from the repository root.
+Not on opam yet: follow the [source install](../README.md#install-from-source);
+`opam install .` includes the CLI. Linux only. Run the commands below from the
+checkout root.
 
 ### [`tmux-workspace check`](../docs/workspaces.md#validate-preview-and-apply): validate without contacting tmux
 
-Validate the shipped configuration without starting or contacting tmux:
+Check the shipped configuration:
 
 ```console
 $ opam exec -- tmux-workspace check examples/workspace/project.json
@@ -55,9 +54,9 @@ $ opam exec -- tmux-workspace --help=plain
 
 ## Define the workspace
 
-The checked [project.json](../examples/workspace/project.json) describes two
-windows and three panes. Each pane runs `/bin/cat -u` through literal argv.
-Relative working directories resolve against the JSON file's directory.
+[project.json](../examples/workspace/project.json) describes two windows and
+three panes, each running `/bin/cat -u` as literal argv. Relative directories
+resolve against the file's directory.
 The CLI decodes this document through [`Libtmux_json.Workspace`][json-workspace],
 then uses [`Plan`][plan] and the [Eio workspace executor][eio-workspace] to apply it.
 
@@ -96,27 +95,27 @@ then uses [`Plan`][plan] and the [Eio workspace executor][eio-workspace] to appl
 | `plan` | Observe an explicit socket and print an advisory plan | Never starts a daemon |
 | `apply` | Read the document again, check current state and execute a fresh plan | Creates and configures resources |
 
-`plan` and `apply` require `--socket`. Connections support **tmux 3.3a–3.8**
-and require Linux pidfds, the daemon's PID namespace and a shared local
-filesystem. With `--require-existing`, a missing endpoint fails instead of
-bootstrapping a session. Closing the CLI's client leaves the daemon running.
+- `plan` and `apply` require `--socket`. Needs tmux 3.3a or newer and a local
+  daemon.
+- `--require-existing` fails on a missing endpoint instead of starting a session.
+- Closing the CLI's client leaves the daemon running.
 
-Follow the [complete workspace walkthrough](../docs/workspaces.md#validate-preview-and-apply)
-to copy the configuration into a private directory, start an isolated server,
-apply it, verify `editor:2` and `logs:1`, and remove only the created resources.
+More: the [full walkthrough](../docs/workspaces.md#validate-preview-and-apply)
+starts a private server, applies the file, verifies `editor:2` and `logs:1`,
+and cleans up.
 
 ## Inspect failures before retrying
 
-`--json` emits a versioned result or execution receipt. Invalid input exits 2;
-a collision, changed document or stale plan exits 4; partial or uncertain apply
-exits 5. The [exit-code reference](../docs/workspaces.md#collisions-and-recovery)
-lists the remaining cases.
-
-An existing session name is rejected by default. `--append` adds new windows
-without changing existing session settings. Failed or interrupted applies
-compensate only proven creations; `--keep-partial` retains them. Inspect the
-receipt before another mutation. Cancellation does not undo commands already
-written, and a receipt does not provide crash-durable recovery or replay authority.
+- `--json` emits a versioned result or receipt.
+- Exit 2: invalid input. Exit 4: collision, changed document or stale plan.
+  Exit 5: partial or uncertain apply.
+  [All exit codes](../docs/workspaces.md#collisions-and-recovery).
+- An existing session name is rejected; `--append` adds windows and leaves
+  session settings alone.
+- A failed or interrupted apply undoes only proven creations; `--keep-partial`
+  keeps them.
+- Read the receipt before mutating again. It cannot replay or recover a crashed
+  run, and cancellation does not undo written commands.
 
 [Workspace library](../workspace/) · [JSON codec](../json/) ·
 [Changelog](CHANGELOG.md) · [MIT](../LICENSE)

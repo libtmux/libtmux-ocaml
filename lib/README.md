@@ -18,9 +18,8 @@
 </div>
 
 Build [queries][query] and inspect [captured tmux graphs][snapshot] with
-[`Libtmux`][api]. The core uses the OCaml standard library and performs no tmux
-I/O. Add a [blocking client](../unix/) or [Eio client](../eio/) when acquiring
-observations or changing the server.
+[`Libtmux`][api]. It does no tmux I/O and needs only the standard library. To
+reach a server, add the [blocking client](../unix/) or [Eio client](../eio/).
 
 [API](https://libtmux.org/en/ocaml/latest/reference/libtmux/) ·
 [Examples](#build-and-inspect-a-query) ·
@@ -29,13 +28,11 @@ observations or changing the server.
 
 ## Install and link
 
-Use the [source installation](../README.md#install-from-source) with
-**OCaml 5.5.2**. There is no opam release yet. That route installs this
-workspace's packages and activates the local switch; run the commands below
-from the checkout root.
+Not on opam yet: follow the [source install](../README.md#install-from-source)
+and run the commands below from the checkout root.
 
-In a separate application, create `dune-project` containing `(lang dune 3.24)`.
-Copy the example as `query_description.ml` and use this `dune` file:
+In your own project, set `(lang dune 3.24)` in `dune-project`, copy the example
+as `query_description.ml` and use this `dune` file:
 
 ```dune
 (executable
@@ -47,9 +44,8 @@ Copy the example as `query_description.ml` and use this `dune` file:
 
 ### [`Expr`][expr]: typed fields and operators
 
-This complete program needs no tmux server. [`Expr`][expr] combines typed
-fields and operators into inspectable data. [`Query.exactly_one`][exactly-one]
-counts duplicate entries rather than silently deduplicating them.
+No tmux server needed. [`Expr`][expr] builds typed filters as inspectable data;
+[`Query.exactly_one`][exactly-one] counts duplicates instead of hiding them.
 
 <!-- example: examples/query_description.ml -->
 
@@ -81,14 +77,15 @@ all [pane_active = true; pane_current_command in ["nvim"; "vim"]; pane_width >= 
 ambiguous: at least 2 entries
 ```
 
+More: [query guide](../docs/queries.md).
+
 ## Process a captured graph
 
 ### [`Snapshot.t`][snapshot]: read captured values without tmux I/O
 
-A [`Snapshot.t`][snapshot] comes from a client capture or validated
-[`Snapshot.create`][snapshot-create] input.
-Use native predicates over its immutable arrays. This function is part of the
-[complete, executed query program](../examples/native_query.ml):
+A [`Snapshot.t`][snapshot] comes from a client capture or
+[`Snapshot.create`][snapshot-create]. Plain predicates work over its immutable
+arrays. From the [query program](../examples/native_query.ml):
 
 <!-- example: examples/native_query.ml#native-filter -->
 
@@ -100,8 +97,8 @@ let active_ids snapshot =
 
 ### [`Query.matching`][matching]: apply a typed predicate
 
-For inspectable filters, use [`Query.matching`][matching]. This selects active
-terminal panes at least 80 columns wide:
+[`Query.matching`][matching] applies an inspectable filter. This one selects
+active terminal panes at least 80 columns wide:
 
 <!-- example: examples/native_query.ml#typed-filter -->
 
@@ -121,8 +118,9 @@ let roomy_ids snapshot =
   |> Seq.map Pane.id |> List.of_seq
 ```
 
-Combine relationships with typed quantifiers to select sessions containing
-at least one matching pane:
+### [`Expr.Rel.any`][rel-any]: sessions with a matching pane
+
+Quantify over relationships, here sessions with at least one matching pane:
 
 <!-- example: examples/native_query.ml#relationship-filter -->
 
@@ -137,19 +135,17 @@ let sessions_with_room snapshot =
 ```
 
 The graph is `Session → Window_link → Window → Pane`. A shared window can have
-several session links; each link owns its index and current state. Collections
-are `Iarray.t`, and sequences derived from a snapshot read captured values.
+several links; each link owns its index and state. Collections are `Iarray.t`.
 
-Keep these contracts in mind:
+Notes:
 
-- Queries preserve input order and duplicates. Establish `Query.exactly_one`
-  before a mutation when ambiguity matters.
-- Observations survive client closure. Holding one observation retains its
-  complete snapshot; copy scalar summaries when retaining only a few fields.
-- Targets retain their source generation. An ID or a JSON document does not
-  authorize a mutation on a new connection.
-- `Plan.panes` describes source-filtering possibilities. Capture clients do
-  not execute those plans.
+- Queries keep input order and duplicates. Use `Query.exactly_one` before a
+  mutation when ambiguity matters.
+- An observation outlives its client but retains the whole snapshot; copy the
+  few fields you need.
+- A target belongs to the connection that produced it. An ID or JSON document
+  cannot mutate on a new connection.
+- `Plan.panes` describes source filtering; capture clients do not run it.
 
 [Run the full graph example](../README.md#read-a-real-tmux-graph) ·
 [Query JSON](../json/) · [Changelog](CHANGELOG.md) · [MIT](../LICENSE)
@@ -161,3 +157,4 @@ Keep these contracts in mind:
 [expr]: https://libtmux.org/en/ocaml/latest/reference/libtmux-expr/
 [matching]: https://libtmux.org/en/ocaml/latest/reference/libtmux-query-matching/
 [exactly-one]: https://libtmux.org/en/ocaml/latest/reference/libtmux-query-exactly_one/
+[rel-any]: https://libtmux.org/en/ocaml/latest/reference/libtmux-expr-rel-any/

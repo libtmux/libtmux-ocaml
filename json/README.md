@@ -18,10 +18,9 @@
 </div>
 
 Decode query documents into typed [`Libtmux.Expr.t`][expr] values and validate
-workspace configuration with [`Libtmux_json`][api]. The codec performs no tmux
-or filesystem I/O.
-It depends on the [core](../lib/), the pure [workspace package](../workspace/),
-and Yojson.
+workspace configuration with [`Libtmux_json`][api]. No tmux or filesystem I/O.
+Depends on the [core](../lib/), the [workspace package](../workspace/) and
+Yojson.
 
 [API](https://libtmux.org/en/ocaml/latest/reference/libtmux_json/) ·
 [Examples](#round-trip-a-query-and-locate-invalid-input) ·
@@ -30,13 +29,11 @@ and Yojson.
 
 ## Install and link
 
-Use the [source installation](../README.md#install-from-source) with
-**OCaml 5.5.2**. There is no opam release yet. That route installs this
-workspace's packages and activates the local switch; run the commands below
-from the checkout root.
+Not on opam yet: follow the [source install](../README.md#install-from-source)
+and run the commands below from the checkout root.
 
-In a separate application, create `dune-project` containing `(lang dune 3.24)`.
-Copy the example as `query_json.ml` and use this `dune` file:
+In your own project, set `(lang dune 3.24)` in `dune-project`, copy the example
+as `query_json.ml` and use this `dune` file:
 
 ```dune
 (executable
@@ -87,10 +84,9 @@ The first line is the portable document:
 {"schema":"libtmux.filter/1","model":"pane","expr":{"node":"compare","field":"pane_current_command","op":"starts_with","value":"nv"}}
 ```
 
-The second line is `invalid operand at /expr/value`. Apply the decoded expression
-to captured panes through [`Query.matching`][matching] or
-[`Expr.compile`][compile]; decoding itself neither acquires observations nor
-executes commands.
+The second line is `invalid operand at /expr/value`. Run a decoded expression
+with [`Query.matching`][matching] or [`Expr.compile`][compile]; decoding does no
+I/O. More: [query interchange](../docs/query-interchange.md).
 
 ## Supported documents and limits
 
@@ -101,21 +97,19 @@ executes commands.
 | `Workspace.encode_plan` | `libtmux.workspace-plan/1` | Advisory preview without executable authority |
 | `Workspace.encode_receipt` | `libtmux.workspace-receipt/1` | Retained outcomes and cleanup evidence |
 
-Use the string decoders for untrusted documents: they enforce a 64 KiB input
-bound, UTF-8 and at most 32 JSON nesting levels before parsing. Query expressions
-have at most 1,024 nodes and membership lists at most 256 values. Query numeric
-operands must fit signed 32-bit integers; workspace numeric options use signed
-64-bit integers. Unknown and duplicate properties are rejected.
+- **Untrusted input.** Use the string decoders. They check a 64 KiB size limit,
+  UTF-8 and 32 nesting levels before parsing, then allow at most 1,024 query
+  nodes and 256 values per membership list. Unknown and duplicate properties
+  are rejected.
+- **Numbers.** Query operands fit signed 32 bits; workspace options use 64.
+- **Not on the wire.** Java regex, relationships and native extension fields
+  fail with `Unsupported`. Native expressions can do more; see the
+  [query guide](../docs/queries.md).
+- **Workspaces.** Pass the absolute document directory as `~directory`; relative
+  paths resolve without being read. Plans and receipts are capped at 4 MiB, and
+  neither authorizes replaying a mutation.
 
-Query interchange deliberately rejects Java regex, relationships and native
-extension fields with `Unsupported`. Native OCaml expressions support more than
-the wire subset; [the query guide](../docs/queries.md) describes that boundary.
-
-For workspaces, pass the absolute document directory as `~directory`; validation
-resolves relative paths without reading them. JSON receipts and IDs convey
-neither live targets nor permission to replay an uncertain mutation. Exported
-plans and receipts have a 4 MiB bound. See the [workspace guide](../docs/workspaces.md)
-for complete configuration, planning and execution examples.
+More: [workspace guide](../docs/workspaces.md).
 
 [Changelog](CHANGELOG.md) · [MIT](../LICENSE)
 

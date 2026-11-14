@@ -17,9 +17,9 @@
 
 </div>
 
-Capture a tmux graph, run targeted commands, and retain operation outcomes with
-[`Libtmux_unix.Client.t`][client]. Calls block the invoking thread. Scoped
-cancellation can be signalled from another domain or system thread.
+Capture a tmux graph, run commands and keep their outcomes with
+[`Libtmux_unix.Client.t`][client]. Calls block the calling thread; another
+domain or thread can cancel them.
 
 [API](https://libtmux.org/en/ocaml/latest/reference/libtmux_unix/) ·
 [Examples](#capture-once-traverse-after-closing) ·
@@ -28,13 +28,11 @@ cancellation can be signalled from another domain or system thread.
 
 ## Install and link
 
-Use the [source installation](../README.md#install-from-source) with
-**OCaml 5.5.2**. There is no opam release yet. That route installs this
-workspace's packages and activates the local switch; run the commands below
-from the checkout root.
+Not on opam yet: follow the [source install](../README.md#install-from-source)
+and run the commands below from the checkout root.
 
-In a separate application, create `dune-project` containing `(lang dune 3.24)`.
-Copy the example as `native_graph.ml` and use this `dune` file:
+In your own project, set `(lang dune 3.24)` in `dune-project`, copy the example
+as `native_graph.ml` and use this `dune` file:
 
 ```dune
 (executable
@@ -42,18 +40,16 @@ Copy the example as `native_graph.ml` and use this `dune` file:
  (libraries libtmux libtmux-unix))
 ```
 
-Native connections require Linux pidfds, tmux 3.3a–3.8, and the daemon's
-PID namespace and local filesystem. [`Client.connect`][connect] attaches to an
-existing daemon; [workspace bootstrap](../docs/workspaces.md) creates a missing
-endpoint explicitly. See the compatibility guide for exact tested releases and
-workload limits.
+Needs Linux, tmux 3.3a or newer and a local daemon.
+[`Client.connect`][connect] attaches to an existing daemon;
+[workspace bootstrap](../docs/workspaces.md) starts a missing one.
+More: [compatibility](../docs/compatibility.md).
 
 ## Capture once, traverse after closing
 
 ### [`Client.capture`][capture]: sessions, window links and panes
 
-Create an isolated daemon with a `cat` pane. These commands address only the
-new private socket and clear inherited tmux context:
+Start a private daemon with a `cat` pane, away from your own tmux server:
 
 ```console
 $ export LIBTMUX_UNIX_DEMO_DIR="$(mktemp -d -t libtmux-ocaml-unix-demo.XXXXXX)"
@@ -74,9 +70,9 @@ $ opam exec -- dune exec examples/native_graph.exe -- \
     tmux "$LIBTMUX_UNIX_DEMO_DIR/server"
 ```
 
-The output starts with `session $0 "demo"` and lists its window link and pane
-`%0`. The complete program calls [`Client.capture`][capture], then
-[`Client.close`][close] before traversing the snapshot:
+It prints `session $0 "demo"`, then its window link and pane `%0`. The program
+calls [`Client.capture`][capture], then [`Client.close`][close], then walks the
+snapshot:
 
 <!-- example: examples/native_graph.ml -->
 
@@ -123,36 +119,32 @@ let () =
   print_graph snapshot
 ```
 
-[`Session.window_links`][window-links] preserves session-specific indexes.
-[`Window.panes`][panes] and all other captured accessors perform no I/O.
-See the [graph guide](../docs/graph.md)
-for windows shared between sessions and the [query guide](../docs/queries.md)
-for native predicates, typed expressions and exact cardinality.
+[`Session.window_links`][window-links] keeps each session's own indexes.
+[`Window.panes`][panes] and every other captured accessor do no I/O.
+More: [graph guide](../docs/graph.md), [query guide](../docs/queries.md).
 
 ## Cancellation and partial effects
 
 ### [`Cancellation.with_`][cancellation]: cancel a blocking call
 
-Use [`Cancellation.with_`][cancellation] for scoped cancellation, passing its
-token to operations that accept `~cancel`. Cancellation raises
-`Cancellation.Cancelled`; it does not mean an already written mutation had no
-effect. Written work drains before the awaiting call raises, within the
-documented transport deadline and local I/O
-completion limits.
+Pass the token from [`Cancellation.with_`][cancellation] to any operation that
+takes `~cancel`. A cancelled call raises `Cancellation.Cancelled`. Mutations
+already written still take effect; the call drains them before raising.
 
-For recoverable mutations, keep the result of [`Client.submit`][submit] outside
-the cancelled scope, then inspect or await the retained operation. Expected
-failures return `result`; `Error.pp` formats them. A caller-owned `Cleanup`
-report retains secondary teardown failures. [Recovery](../docs/recovery.md) explains the same
-retained-operation model through a complete Eio example.
+- Keep the result of [`Client.submit`][submit] outside the cancelled scope,
+  then inspect or await the retained operation.
+- Expected failures return `result`; format them with `Error.pp`.
+- A caller-owned `Cleanup` report keeps secondary teardown failures.
+- A client belongs to its creating domain and a target to its connection.
+  Nothing reconnects or retries for you.
 
-Live clients belong to their creating domain. Mutation targets are bound to the
-connection generation; the library does not reconnect or retry them automatically.
+More: [operations and recovery](../docs/control.md),
+[recovery walkthrough](../docs/recovery.md).
 
 ## Clean up
 
-Remove the demonstration session and its socket directory. Closing a library
-client releases its resources; it does not send a daemon shutdown command.
+Remove the demo session and its socket directory. Closing a client leaves the
+daemon running.
 
 ```console
 $ env -u TMUX -u TMUX_PANE tmux \

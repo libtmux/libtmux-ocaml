@@ -17,9 +17,9 @@
 
 </div>
 
-Use [`Libtmux_eio.Client.t`][client] for concurrent commands, retained operation
-outcomes, and bounded future-output subscriptions. Your application supplies
-the Eio scheduler, switch, process manager and clock.
+Run concurrent commands, keep their outcomes and watch future output with
+[`Libtmux_eio.Client.t`][client]. Your application owns the Eio scheduler,
+switch, process manager and clock.
 
 [API](https://libtmux.org/en/ocaml/latest/reference/libtmux_eio/) ·
 [Examples](#subscribe-send-literal-text-await-output) ·
@@ -28,13 +28,11 @@ the Eio scheduler, switch, process manager and clock.
 
 ## Install and link
 
-Use the [source installation](../README.md#install-from-source) with
-**OCaml 5.5.2**. There is no opam release yet. That route installs this
-workspace's packages and activates the local switch; run the commands below
-from the checkout root.
+Not on opam yet: follow the [source install](../README.md#install-from-source)
+and run the commands below from the checkout root.
 
-In a separate application, create `dune-project` containing `(lang dune 3.24)`.
-Copy the example as `native_watch.ml` and use this `dune` file:
+In your own project, set `(lang dune 3.24)` in `dune-project`, copy the example
+as `native_watch.ml` and use this `dune` file:
 
 ```dune
 (executable
@@ -42,17 +40,14 @@ Copy the example as `native_watch.ml` and use this `dune` file:
  (libraries libtmux libtmux-eio eio_main))
 ```
 
-The source installation includes Eio 1.6 and the application's `eio_main`
-entry point. Native connections require Linux pidfds, tmux 3.3a–3.8, and
-the daemon's PID namespace and local filesystem. See compatibility for exact
-qualified releases and the remaining intensive-observation limits.
+The source install includes Eio and `eio_main`. Needs Linux, tmux 3.3a or
+newer and a local daemon. More: [compatibility](../docs/compatibility.md).
 
 ## Subscribe, send literal text, await output
 
 ### [`Client.subscribe`][subscribe]: subscribe before sending input
 
-Create an isolated daemon with a `cat` pane. These commands address only the
-new private socket and clear inherited tmux context:
+Start a private daemon with a `cat` pane, away from your own tmux server:
 
 ```console
 $ export LIBTMUX_EIO_DEMO_DIR="$(mktemp -d -t libtmux-ocaml-eio-demo.XXXXXX)"
@@ -78,9 +73,8 @@ $ opam exec -- dune exec examples/native_watch.exe -- \
     tmux "$LIBTMUX_EIO_DEMO_DIR/server" %0 'ready; $HOME stays literal'
 ```
 
-It prints `future_match_offset=...` with a positive byte offset, followed by
-`rendered_pane=%0`. The offset depends on the bytes tmux emits. Here is the
-complete program, including its scheduler and resource cleanup:
+It prints `future_match_offset=` with a positive byte offset, then
+`rendered_pane=%0`. The complete program:
 
 <!-- example: examples/native_watch.ml -->
 
@@ -164,22 +158,20 @@ let () =
 | Match future bytes | [`Subscription.wait_for_bytes`][wait-for-bytes] | Matching bytes within continuous subscribed coverage |
 | Match visible screen text | [`Client.wait_for_text`][wait-for-text] | A later rendered capture contains the text |
 
-Cancellation propagates through Eio. Cancelling an awaiting fiber does not undo
-written commands; retain submitted handles outside that fiber when recovery
-matters. The [recovery example](../examples/native_recovery.ml) demonstrates this.
+- Cancelling a waiting fiber does not undo written commands. Keep submitted
+  handles outside that fiber ([recovery example](../examples/native_recovery.ml)).
+- A subscription yields `Data`, `Gap` and `End`. After a gap, capture again and
+  resubscribe; lost output cannot be recovered.
+- Queues are bounded, and a slow reader never stalls the others.
+- A client and its subscriptions belong to their creating domain.
 
-Subscriptions expose `Data`, `Gap` and `End`. A gap requires fresh observation
-and resubscription when continuing coverage; a new capture cannot restore lost
-historical output. Queues and admission are bounded. Stream readers do not wait
-for slow consumers, and live handles remain on their creating domain.
-
-The [pure core](../lib/) can inspect captured snapshots without Eio. The
-[blocking backend](../unix/) is available for scripts that do not need fibers.
+More: [streaming](../docs/streaming.md). No fibers needed? Use the
+[blocking client](../unix/), or the [pure core](../lib/) to inspect snapshots.
 
 ## Clean up
 
-Remove the demonstration session and its socket directory. Closing a library
-client releases its resources; it does not send a daemon shutdown command.
+Remove the demo session and its socket directory. Closing a client leaves the
+daemon running.
 
 ```console
 $ env -u TMUX -u TMUX_PANE tmux \
