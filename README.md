@@ -271,8 +271,6 @@ another. More: [streaming and cancellation](docs/streaming.md).
 - **More.** [API docs](docs/api.md) · [Testing](docs/testing.md) ·
   [Benchmarks](docs/benchmarking.md) · [Workspace guide](docs/workspaces.md).
 
-Each heading links to the package's directory on GitHub.
-
 ### [`libtmux`](https://github.com/libtmux/libtmux-ocaml/tree/master/lib): the immutable graph and typed queries
 
 [`Libtmux`][core-api] models captured sessions, window links and panes, and
