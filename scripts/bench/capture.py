@@ -1,3 +1,8 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = []
+# ///
 """Benchmark serial graph capture with equivalent query results and owned teardown."""
 
 import argparse
@@ -14,7 +19,7 @@ import sys
 import time
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "test"))
 from support.tmux_fixture import TmuxFixture
 
@@ -27,9 +32,10 @@ def source_digest():
     ).split(b"\0")
     for name in sorted(set(filter(None, names))):
         path = Path(os.fsdecode(name))
-        behavior = name.startswith((b"lib/", b"unix/", b"eio/", b"bench/")) and (
-            path.suffix in {".ml", ".mli", ".py", ".c", ".h"} or path.name == "dune"
-        )
+        behavior = (
+            name.startswith((b"lib/", b"unix/", b"eio/", b"bench/"))
+            or (name.startswith(b"scripts/bench/") and b"/tests/" not in name)
+        ) and (path.suffix in {".ml", ".mli", ".py", ".c", ".h"} or path.name == "dune")
         if behavior or name.endswith(b".opam") or name == b"dune-project":
             digest.update(
                 name + b"\0" + (ROOT / os.fsdecode(name)).read_bytes() + b"\0"

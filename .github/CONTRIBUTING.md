@@ -161,7 +161,8 @@ Tag slow tests with a one-line reason and place them in the outer loop.
 Fix over-budget loops before adding tests; do not raise the budget.
 
 Benchmarks are separate. Keep each run under ten minutes and a full sweep
-under one hour; reduce workloads when necessary.
+under one hour; reduce workloads when necessary. The drivers live in
+`scripts/bench/`; [benchmarking](../docs/benchmarking.md) gives their commands.
 
 ## Owned tmux fixtures
 

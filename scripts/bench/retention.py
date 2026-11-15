@@ -1,3 +1,8 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = []
+# ///
 """Measure live OCaml heap retained by repeated real graph captures."""
 
 import argparse

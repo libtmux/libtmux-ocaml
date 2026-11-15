@@ -1,6 +1,6 @@
 # Measure capture, concurrency and output delivery
 
-The [capture benchmark](../bench/capture.py) compares serial blocking and Eio
+The [capture benchmark](../scripts/bench/capture.py) compares serial blocking and Eio
 capture on one owned graph: one session, four windows and sixteen panes. Each
 sample captures the graph 100 times by default and selects active panes using both a
 compiled expression and a native predicate over each same snapshot.
@@ -19,10 +19,11 @@ then build the benchmark outside normal test loops:
 $ opam exec -- dune build bench/capture.exe
 ```
 
-Run it with Python 3.11 or newer. Choose a new output file each time:
+Run it with uv, which supplies Python 3.11 or newer. Choose a new output file
+each time:
 
 ```console
-$ opam exec -- python3 bench/capture.py /path/to/tmux-3.8/bin/tmux \
+$ opam exec -- uv run scripts/bench/capture.py /path/to/tmux-3.8/bin/tmux \
     --iterations 100 \
     --repeat 5 \
     --output scratch/capture-baseline.json
@@ -65,7 +66,7 @@ they do not measure process RSS or tmux's allocations.
 ## Heap retained across captures
 
 Keeping one pane keeps its captured graph reachable. The
-[retention benchmark](../bench/retention.py) measures this with a blocking
+[retention benchmark](../scripts/bench/retention.py) measures this with a blocking
 client and one session containing one pane per window. Each sample runs in a
 fresh process, warms the connection, then captures the same graph 100 times.
 It measures live OCaml heap after full major collection before capture, while
@@ -105,7 +106,7 @@ $ opam exec -- dune build bench/retention.exe
 Run the 64-window case with a new output path:
 
 ```console
-$ opam exec -- python3 bench/retention.py /path/to/tmux-3.8/bin/tmux \
+$ opam exec -- uv run scripts/bench/retention.py /path/to/tmux-3.8/bin/tmux \
     --windows 64 \
     --captures 100 \
     --repeat 6 \
@@ -114,7 +115,7 @@ $ opam exec -- python3 bench/retention.py /path/to/tmux-3.8/bin/tmux \
 
 ## Completed control-lane mutations
 
-The [control benchmark](../bench/control.py) measures typed
+The [control benchmark](../scripts/bench/control.py) measures typed
 `Libtmux.Operations.set_option` mutations through one persistent Eio control
 client. Each sample starts a fresh one-session, one-window, one-pane daemon,
 warms the connection, then
@@ -135,7 +136,7 @@ $ opam exec -- dune build bench/control.exe
 Run the complete matrix on one endpoint fixture:
 
 ```console
-$ opam exec -- python3 bench/control.py /path/to/tmux-3.8/bin/tmux \
+$ opam exec -- uv run scripts/bench/control.py /path/to/tmux-3.8/bin/tmux \
     --requests 128 \
     --concurrency 1 8 32 \
     --repeat 6 \
@@ -181,7 +182,7 @@ stream-gap or mixed-load failures in [compatibility](compatibility.md).
 
 ## Concurrent reads, streaming and cancellation
 
-The [Eio benchmark](../bench/concurrency.py) runs bounded concurrent option
+The [Eio benchmark](../scripts/bench/concurrency.py) runs bounded concurrent option
 reads with distinct expected values. It checks response attribution and input
 order, then measures future output from an owned `cat` process with terminal
 echo disabled. Output cursors must advance. Finally it cancels active byte
@@ -202,7 +203,7 @@ $ opam exec -- dune build bench/concurrency.exe
 Run the three phases against an owned release fixture:
 
 ```console
-$ opam exec -- python3 bench/concurrency.py /path/to/tmux-3.8/bin/tmux \
+$ opam exec -- uv run scripts/bench/concurrency.py /path/to/tmux-3.8/bin/tmux \
     --requests 128 \
     --concurrency 8 \
     --streams 10 \
@@ -235,7 +236,7 @@ ranges and load before choosing a workload or drawing performance conclusions.
 
 ## Mixed commands, stream pressure and membership changes
 
-The [mixed-load benchmark](../bench/mixed.py) overlaps retained command
+The [mixed-load benchmark](../scripts/bench/mixed.py) overlaps retained command
 submissions, seven fast stream readers, seven deliberately stalled readers,
 membership changes and cancellation. Its default runs three waves with eight
 command workers and four attributed output frames per stream lane. It adds no
@@ -250,7 +251,7 @@ $ opam exec -- dune build bench/mixed.exe
 Run the bounded workload against one owned release fixture:
 
 ```console
-$ opam exec -- python3 bench/mixed.py /path/to/tmux-3.8/bin/tmux \
+$ opam exec -- uv run scripts/bench/mixed.py /path/to/tmux-3.8/bin/tmux \
     --output scratch/mixed-baseline.json
 ```
 
@@ -305,7 +306,7 @@ not those byte maxima. No automatic retries or timeout increases hide a failure.
 Exercise teardown after interruption with a new output file:
 
 ```console
-$ opam exec -- python3 bench/mixed.py /path/to/tmux-3.8/bin/tmux \
+$ opam exec -- uv run scripts/bench/mixed.py /path/to/tmux-3.8/bin/tmux \
     --rounds 1 \
     --frames 2 \
     --inject-failure \

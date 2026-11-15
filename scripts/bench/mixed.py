@@ -1,3 +1,8 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = []
+# ///
 """Bounded mixed Eio load with source-held outcomes and owned process sampling."""
 
 import argparse
@@ -199,7 +204,7 @@ def observed_maxima(samples, *, include_clients=True):
 def provenance():
     files = [
         "bench/mixed.ml",
-        "bench/mixed.py",
+        "scripts/bench/mixed.py",
         "bench/dune",
         "dune-project",
         ".tool-versions",
@@ -656,8 +661,9 @@ def main():
             "load_average_start": os.getloadavg(),
         },
         "command": [
-            "python3",
-            "bench/mixed.py",
+            "uv",
+            "run",
+            "scripts/bench/mixed.py",
             fixture.binary,
             "--rounds",
             str(args.rounds),

@@ -1,3 +1,8 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = []
+# ///
 """Measure completed control-lane mutations on fixed, owned tmux fixtures."""
 
 import argparse
