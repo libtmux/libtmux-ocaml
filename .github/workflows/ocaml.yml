@@ -48,10 +48,10 @@ jobs:
         run: |
           uv run scripts/docs_snippets/docs_snippets.py
           git ls-files -z -- '*.ml' '*.mli' | xargs -0 opam exec -- ocamlformat --check
-          opam exec -- python3 tools/generate_fields.py --check
-          opam exec -- python3 tools/generate_options.py --check
-          opam exec -- python3 tools/generate_formats.py --check
-          opam exec -- python3 tools/generate_operations.py --check
+          opam exec -- uv run scripts/generate/generate_fields.py --check
+          opam exec -- uv run scripts/generate/generate_options.py --check
+          opam exec -- uv run scripts/generate/generate_formats.py --check
+          opam exec -- uv run scripts/generate/generate_operations.py --check
           git diff --exit-code
       - name: Retain failed build diagnostics
         if: failure()

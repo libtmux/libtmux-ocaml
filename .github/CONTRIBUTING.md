@@ -110,7 +110,9 @@ presentation, property cases and cached native builds.
 Check generated field descriptors and documentation:
 
 ```console
-$ /usr/bin/time -p mise exec -- opam exec -- python3 tools/generate_fields.py --check
+$ /usr/bin/time -p mise exec -- opam exec -- uv run \
+    scripts/generate/generate_fields.py \
+    --check
 ```
 
 Verify installation from an independent temporary consumer in the outer loop:
@@ -122,17 +124,23 @@ $ /usr/bin/time -p mise exec -- opam exec -- python3 test/installed_consumer.py
 Check generated versioned option and hook descriptors:
 
 ```console
-$ /usr/bin/time -p mise exec -- opam exec -- python3 tools/generate_options.py --check
+$ /usr/bin/time -p mise exec -- opam exec -- uv run \
+    scripts/generate/generate_options.py \
+    --check
 ```
 
 Check generated format availability and backend convenience APIs:
 
 ```console
-$ /usr/bin/time -p mise exec -- opam exec -- python3 tools/generate_formats.py --check
+$ /usr/bin/time -p mise exec -- opam exec -- uv run \
+    scripts/generate/generate_formats.py \
+    --check
 ```
 
 ```console
-$ /usr/bin/time -p mise exec -- opam exec -- python3 tools/generate_operations.py --check
+$ /usr/bin/time -p mise exec -- opam exec -- uv run \
+    scripts/generate/generate_operations.py \
+    --check
 ```
 
 ## Validation loops
