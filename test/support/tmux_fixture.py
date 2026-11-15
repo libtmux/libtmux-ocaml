@@ -107,11 +107,9 @@ class TmuxFixture:
                         signal.pidfd_send_signal(pane_pidfd, signal.SIGKILL)
                         raise RuntimeError("owned pane did not exit with its daemon")
         finally:
-            for name in ("pidfd",):
-                descriptor = getattr(self, name)
-                if descriptor is not None:
-                    os.close(descriptor)
-                    setattr(self, name, None)
+            if self.pidfd is not None:
+                os.close(self.pidfd)
+                self.pidfd = None
             for descriptor in self.pane_pidfds.values():
                 os.close(descriptor)
             self.pane_pidfds.clear()

@@ -11,9 +11,11 @@ import sys
 import tempfile
 from pathlib import Path
 
+PR_SET_CHILD_SUBREAPER = 36
+
 root = Path(__file__).resolve().parents[1]
 libc = ctypes.CDLL(None, use_errno=True)
-if libc.prctl(36, 1, 0, 0, 0):
+if libc.prctl(PR_SET_CHILD_SUBREAPER, 1, 0, 0, 0):
     raise OSError(ctypes.get_errno(), "PR_SET_CHILD_SUBREAPER")
 child_file = Path(f"/proc/self/task/{os.getpid()}/children")
 
@@ -23,7 +25,7 @@ commands = [
     for block in re.findall(r"```console\n(.*?)```", document, re.DOTALL)
     if block.startswith("$ ")
 ]
-assert any("mktemp" in command for command in commands) is False
+assert not any("mktemp" in command for command in commands)
 check = next(c for c in commands if "tmux-workspace" in c)
 apply = next(c for c in commands if any("workspace_apply.exe" in a for a in c))
 assert apply[-1] == "tmux"

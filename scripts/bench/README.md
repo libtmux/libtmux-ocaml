@@ -7,8 +7,8 @@ reports, and writes one JSON record with timings, hashes and host details. The
 OCaml sources and `bench/dune` stay in `bench/`; recorded results stay in
 `bench/results/`.
 
-- `capture.py` compares serial blocking and Eio graph capture. `capture.py` also
-  holds `ROOT` and `source_digest()`, which the other drivers import.
+- `capture.py` compares serial blocking and Eio graph capture. It also holds
+  `ROOT` and `source_digest()`, which the other drivers import.
 - `retention.py` measures live OCaml heap retained by captured graphs.
 - `control.py` measures typed option writes through one persistent Eio control
   client.
