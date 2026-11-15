@@ -594,15 +594,8 @@ suite, all supported releases or a published consumer installation. Follow
 [adoption gaps](../../status.md) for those results.
 
 The [scalar interchange contract](../../query-interchange.md) defines the
-supported wire subset. Its [conformance procedure](../../../test/conformance/README.md)
-fetches pinned Java source, prepares and verifies artifact digests, builds the
-current OCaml peer, and runs both evaluators and codec directions. It retains
-fixtures, exchanged documents, outputs and failures with source/tool identities.
-This remains a separate qualification step, not a continuously maintained
-cross-language CI guarantee or a core runtime dependency. Ordinary CI checks
-the runner's evidence validation without a JVM. The current query property
-test varies values against a fixed compound expression; it does not generate
-arbitrary expression trees.
+supported wire subset. The current query property test varies values against a
+fixed compound expression; it does not generate arbitrary expression trees.
 
 This requires maintaining fixtures and documentation tooling alongside the
 library. It makes examples and contracts reviewable without forcing a browser,

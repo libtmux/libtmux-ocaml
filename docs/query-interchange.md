@@ -68,12 +68,4 @@ example, a string supplied to `"pane_width"` reports `Wrong_type` at
 `/expr/value`. The decoder returns the first detected error, not an aggregate
 validation report. It does not include the whole input in the error.
 
-## Reproduce the compatibility check
-
-The [conformance procedure](../test/conformance/README.md) pins the Java source,
-verifies prepared artifacts, rebuilds the OCaml peer and exchanges queries in
-both directions over the same fixture. The current 66 cases establish the
-tested scalar behavior. They do not imply support for the rest of Java's query
-language or a Java runtime dependency for OCaml users.
-
 [java-wire]: https://github.com/libtmux/libtmux-java/blob/e8a39689d8d60968ac978a1dd2a89c6112333896/docs/guide/filtering.md

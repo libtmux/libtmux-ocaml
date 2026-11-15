@@ -1,3 +1,0 @@
-(executable
- (name filter_peer)
- (libraries libtmux libtmux-json model_fixture yojson))
