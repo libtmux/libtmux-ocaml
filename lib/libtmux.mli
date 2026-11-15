@@ -1211,7 +1211,101 @@ end
 (** Construct typed tmux operations for a backend client. Observations are
     immutable, mutations use explicit targets, and no command retries a mutation
     against another connection generation. Construction performs no I/O; the
-    descriptions below state what execution does. *)
+    descriptions below state what execution does.
+
+    {1 What is on here}
+
+    Each function returns a {!Command.t} that a backend client runs. A function
+    ending in [_at] addresses the window at an index, or the client bearing a
+    name, as it is when the command runs rather than when a snapshot was
+    captured. The functions fall into a few groups:
+
+    {b Capturing state.} {!Operations.capture} acquires the complete session,
+    window-link and pane graph as a {!Snapshot.t}. {!Operations.capture_text}
+    returns the visible rows of one captured pane as a {!Captured_text.t}.
+    Neither changes a session, window or pane.
+
+    {!Operations.capture} and {!Operations.capture_text}
+
+    {b Sending input and synchronizing.} {!Operations.send_text} writes literal
+    bytes to a pane and {!Operations.send_keys} sends named keys in order;
+    neither adds an Enter. {!Operations.wait_for} waits on a named tmux
+    semaphore and {!Operations.signal} releases a waiter or keeps the signal for
+    a later wait. {!Operations.signal} does not signal an OS process.
+
+    {!Operations.send_text}, {!Operations.send_keys}, {!Operations.wait_for} and
+    {!Operations.signal}
+
+    {b Creating things.} {!Operations.create_session} creates a detached session
+    and fails on a name collision. {!Operations.create_window} adds a detached
+    window to a session and rejects an occupied explicit index.
+    {!Operations.split_pane} adds a detached pane beside a target, and
+    {!Operations.break_pane} moves an existing pane into a new window at an
+    explicit index. Each returns a {!Created.t} with the IDs tmux reports.
+
+    {!Operations.create_session}, {!Operations.create_window},
+    {!Operations.split_pane} and {!Operations.break_pane}
+
+    {b Changing sessions and clients.} {!Operations.kill_session} removes a
+    session and its window links, destroying windows that have no other link,
+    and may stop tmux when it removes the last session.
+    {!Operations.switch_client_at} moves a terminal or a control client to a
+    session without opening a terminal, and
+    {!Operations.request_detach_client_at} confirms that tmux processed the
+    request, not that the client exited.
+
+    - Sessions: {!Operations.rename_session} and {!Operations.kill_session}
+    - Clients: {!Operations.switch_client_at},
+      {!Operations.request_detach_client_at}, {!Operations.refresh_client_at}
+      and {!Operations.resize_control_client_at}
+
+    {b Changing windows.} {!Operations.kill_window} destroys the window, all its
+    session links and every pane in it, while {!Operations.unlink_window_at}
+    removes one link and tmux rejects removing a window's last link unless
+    [allow_kill] is true. {!Operations.link_window} adds a link at an unoccupied
+    index and {!Operations.move_window_at} moves a link. Resize and layout
+    functions request a geometry: tmux can constrain the result, so capture
+    again to observe it.
+
+    {!Operations.rename_window}, {!Operations.select_window_at},
+    {!Operations.link_window}, {!Operations.unlink_window_at},
+    {!Operations.move_window_at}, {!Operations.resize_window},
+    {!Operations.select_layout}, {!Operations.cycle_layout} and
+    {!Operations.kill_window}
+
+    {b Changing panes.} {!Operations.select_pane} makes a pane active in its
+    window and {!Operations.set_pane_title} sets its title as literal text.
+    {!Operations.resize_pane}, {!Operations.move_pane},
+    {!Operations.swap_panes}, {!Operations.rotate_panes} and
+    {!Operations.zoom_pane} rearrange panes without changing which process runs
+    in which pane. {!Operations.respawn_pane} starts a command in an existing
+    pane, replacing a running process only with [kill_running:true], and
+    {!Operations.kill_pane} destroys the pane and its process.
+
+    {!Operations.select_pane}, {!Operations.set_pane_title},
+    {!Operations.resize_pane}, {!Operations.move_pane},
+    {!Operations.swap_panes}, {!Operations.rotate_panes},
+    {!Operations.zoom_pane}, {!Operations.respawn_pane},
+    {!Operations.clear_history} and {!Operations.kill_pane}
+
+    {b Options, hooks and environment.} Every option and hook function takes an
+    {!Options.type-scope}, so one function serves the server, the global session
+    and window tables, and a session, window or pane. Option text is literal,
+    with tmux format expansion disabled, and {!Operations.set_hook} encodes
+    {!Hook.command} values as command data, not shell code.
+    {!Operations.unset_environment} removes the local entry so a global value
+    applies again, while {!Operations.remove_environment} stores a removal
+    marker that excludes the variable from future panes.
+
+    - Options: {!Operations.capture_options}, {!Operations.read_option},
+      {!Operations.set_option}, {!Operations.unset_option} and
+      {!Operations.clear_option_array}
+    - Hooks: {!Operations.capture_hooks}, {!Operations.read_hook},
+      {!Operations.set_hook}, {!Operations.remove_hook} and
+      {!Operations.run_hook}
+    - Environment: {!Operations.capture_environment},
+      {!Operations.set_environment}, {!Operations.unset_environment} and
+      {!Operations.remove_environment} *)
 module Operations : sig
   val capture : unit -> Snapshot.t Command.t
   (** Capture and validate the complete session/window-link/pane graph. The
