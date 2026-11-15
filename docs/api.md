@@ -56,7 +56,7 @@ $ LIBTMUX_API_EXPORT=1 opam exec -- dune build @install tools/api_export.exe
 Export the checked-out public interfaces:
 
 ```console
-$ opam exec -- python3 tools/export_api.py \
+$ opam exec -- uv run scripts/export_api/export_api.py \
     --output _build/docs/ocaml.json
 ```
 

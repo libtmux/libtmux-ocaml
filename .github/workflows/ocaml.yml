@@ -40,8 +40,8 @@ jobs:
           LIBTMUX_API_EXPORT: '1'
         run: |
           opam exec -- dune build tools/api_export.exe
-          opam exec -- python3 test/api_export_test.py
-          opam exec -- python3 tools/export_api.py --output _build/docs/ocaml.json
+          opam exec -- uv run pytest scripts/export_api
+          opam exec -- uv run scripts/export_api/export_api.py --output _build/docs/ocaml.json
       - name: Verify workspace document bounds and input backends
         run: opam exec -- python3 test/workspace_document_test.py
       - name: Verify format and generated catalogs
