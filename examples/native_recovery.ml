@@ -108,12 +108,16 @@ let recover client session =
       assert (Window.name after = "recovery-complete");
       Printf.printf "operation=finished; postcondition=%s\n" (Window.name after))
 
+let session_named snapshot name =
+  Snapshot.sessions snapshot |> Iarray.to_seq
+  |> Seq.find (fun session -> Session.name session = name)
+  |> Option.get
+
 let () =
-  if Array.length Sys.argv <> 4 then (
-    prerr_endline "usage: native_recovery TMUX_BINARY SOCKET_PATH SESSION_ID";
-    exit 2);
+  let binary = if Array.length Sys.argv = 2 then Sys.argv.(1) else "tmux" in
   Eio_main.run @@ fun env ->
-  Eio.Switch.run @@ fun sw ->
+  let process_mgr = Eio.Stdenv.process_mgr env
+  and mono_clock = Eio.Stdenv.mono_clock env in
   let cleanup = Cleanup.create () in
   protect
     ~finally:(fun () ->
@@ -130,19 +134,20 @@ let () =
         (Iarray.length report.issues)
         report.omitted)
     (fun () ->
-      let client =
-        get
-          (Client.connect ~cleanup ~sw ~binary:Sys.argv.(1)
-             ~process_mgr:(Eio.Stdenv.process_mgr env)
-             ~mono_clock:(Eio.Stdenv.mono_clock env)
-             (Endpoint.socket_path Sys.argv.(2)))
-      in
-      protect
-        ~finally:(fun () ->
-          Eio.Cancel.protect (fun () -> get (Client.close client)))
-        (fun () ->
-          let id = get (Session.Id.of_string Sys.argv.(3)) in
-          let session =
-            Snapshot.find_session (get (Client.capture client)) id |> Option.get
-          in
-          recover client (Session.target session)))
+      get
+        (Libtmux_eio.with_private_daemon ~cleanup ~binary
+           ~session:"recovery-demo" ~process_mgr ~mono_clock (fun endpoint ->
+             Eio.Switch.run @@ fun sw ->
+             let client =
+               get
+                 (Client.connect ~cleanup ~sw ~binary ~process_mgr ~mono_clock
+                    endpoint)
+             in
+             protect
+               ~finally:(fun () ->
+                 Eio.Cancel.protect (fun () -> get (Client.close client)))
+               (fun () ->
+                 let session =
+                   session_named (get (Client.capture client)) "recovery-demo"
+                 in
+                 recover client (Session.target session)))))

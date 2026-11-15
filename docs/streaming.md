@@ -174,48 +174,17 @@ survive waiter cancellation, retain `Client.submit`'s handle before `Client.awai
 as shown in [operation recovery](recovery.md). An uncertain outcome does not
 authorize a retry or deletion of an unproven resource.
 
-After [installing from source](getting-started.md), run this walkthrough from
-the clone. Create a private seed session:
+After [installing from source](getting-started.md), run this program from the
+clone. It starts its own private server with a `stream-demo` session and stops
+it when it finishes:
 
 ```console
-$ export LIBTMUX_STREAM_RECOVERY_DIR="$(mktemp -d -t libtmux-ocaml-stream-recovery.XXXXXX)"
-```
-
-```console
-$ env -u TMUX -u TMUX_PANE tmux \
-    -S "$LIBTMUX_STREAM_RECOVERY_DIR/server" \
-    -f /dev/null \
-    new-session \
-    -d \
-    -s stream-demo \
-    -- "exec cat"
-```
-
-Run the program against the seed session's literal `$0` ID:
-
-```console
-$ opam exec -- dune exec examples/native_stream_recovery.exe -- \
-    tmux "$LIBTMUX_STREAM_RECOVERY_DIR/server" '$0'
+$ opam exec -- dune exec examples/native_stream_recovery.exe -- tmux
 ```
 
 Expected output is `gap=membership-changed; history=unavailable`, followed by
-`coverage=fresh; cursor-generation=new; future=after-gap`. The seed session
-remains, with no additional panes or clients. Remove that session and directory:
-
-```console
-$ env -u TMUX -u TMUX_PANE tmux \
-    -S "$LIBTMUX_STREAM_RECOVERY_DIR/server" \
-    kill-session \
-    -t '=stream-demo'
-```
-
-```console
-$ rm -f -- "$LIBTMUX_STREAM_RECOVERY_DIR/server"
-```
-
-```console
-$ rmdir "$LIBTMUX_STREAM_RECOVERY_DIR"
-```
+`coverage=fresh; cursor-generation=new; future=after-gap`. The program removes
+its extra panes and closes its client; no session, pane or directory remains.
 
 This exercise uses a stable private daemon and a deliberate layout change.
 Transport loss, repeated membership changes or a missing pane can prevent fresh

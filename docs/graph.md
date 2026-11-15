@@ -27,7 +27,7 @@ $ opam exec -- dune exec examples/showcase_graph.exe -- tmux
 ```
 
 ```text
-socket=/tmp/libtmux-ocaml-showcase-0cd3a1/server
+socket=/tmp/libtmux-ocaml-0cd3a1/server
 linked/0 linked-home: 1 pane(s)
 linked/7 editor: 1 pane(s)
 showcase/0 editor: 1 pane(s)

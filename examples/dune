@@ -64,3 +64,8 @@
  (name query_plan)
  (modules query_plan)
  (libraries libtmux))
+
+(executable
+ (name workspace_apply)
+ (modules workspace_apply)
+ (libraries libtmux libtmux-workspace libtmux-json libtmux-unix unix))

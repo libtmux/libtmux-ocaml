@@ -110,7 +110,7 @@ $ opam exec -- dune exec examples/showcase_graph.exe -- tmux
 ```
 
 ```text
-socket=/tmp/libtmux-ocaml-showcase-0cd3a1/server
+socket=/tmp/libtmux-ocaml-0cd3a1/server
 linked/0 linked-home: 1 pane(s)
 linked/7 editor: 1 pane(s)
 showcase/0 editor: 1 pane(s)
@@ -268,7 +268,7 @@ $ opam exec -- dune exec examples/showcase_layout.exe -- tmux
 ```
 
 ```text
-socket=/tmp/libtmux-ocaml-showcase-0cd3a1/server
+socket=/tmp/libtmux-ocaml-0cd3a1/server
 layout: 3 horizontal panes
 ```
 
@@ -323,7 +323,7 @@ $ opam exec -- dune exec examples/showcase_send_keys.exe -- tmux
 ```
 
 ```text
-socket=/tmp/libtmux-ocaml-showcase-0cd3a1/server
+socket=/tmp/libtmux-ocaml-0cd3a1/server
 sent: literal: $HOME; #{pane_id}
 captured: "showcase ready\nliteral: $HOME; #{pane_id}\n"
 resized: 20x30
@@ -350,7 +350,7 @@ $ opam exec -- dune exec examples/showcase_watch.exe -- tmux
 ```
 
 ```text
-socket=/tmp/libtmux-ocaml-showcase-f76d47/server
+socket=/tmp/libtmux-ocaml-f76d47/server
 observed: changed
 ```
 

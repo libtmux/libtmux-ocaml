@@ -4,7 +4,7 @@ Each program creates a private tmux workspace, performs one task, verifies the
 result and closes its clients. Copy the whole file into a Dune project or run
 it from this checkout after [installation](getting-started.md).
 
-- The private daemon exits when its last client detaches.
+- The program starts a private daemon with `with_private_daemon`, which stops it and removes its directory when the program ends.
 - A program takes an optional tmux binary, never a borrowed server socket.
 - Setup uses the workspace API; the task uses the client API.
 

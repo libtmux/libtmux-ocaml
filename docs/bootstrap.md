@@ -23,7 +23,7 @@ whose `editor` window runs `/bin/cat -u`, captures the graph, and reads that
 snapshot after closing its client.
 
 The [complete source](../examples/showcase_bootstrap.ml) includes its private
-directory, tmux configuration, local version discovery and cleanup. To use the
+daemon, local version discovery and cleanup. To use the
 whole program outside this checkout, save it as `main.ml` in the Dune project
 from [first use](getting-started.md#link-an-installed-library) with:
 
@@ -57,7 +57,9 @@ let bootstrap ~binary ~version ~directory endpoint =
 
 Passing [`None`](https://ocaml.org/manual/5.5/api/Option.html#TYPEELTt.None) as the
 `observed` argument means the endpoint is known to be missing. The full program
-uses a newly created private directory to establish that precondition. A failed
+starts a private daemon with
+[`Libtmux_unix.with_private_daemon`](../unix/libtmux_unix.mli), which has no
+session and so leaves the endpoint ready for bootstrap. A failed
 capture must remain an error; treating it as a missing observation discards that
 failure and produces the wrong plan. A plan remains advisory; another process
 can still change the endpoint before execution.
@@ -93,10 +95,12 @@ after using that client; its snapshot stays readable.
 ## Choose the daemon's lifetime
 
 Bootstrapping owns the new client, not the tmux daemon. Closing the handle
-releases that client. The example explicitly configures its private daemon
-with `exit-unattached on`, supplied through a small shell exec wrapper. The
-daemon and its demonstration pane exit after
-the final client detaches. It then removes only its own temporary files.
+releases that client. The example runs inside `with_private_daemon`, which owns
+the daemon: when the program's scope ends it terminates the daemon and its
+demonstration pane and removes only its own temporary directory. When
+bootstrap itself starts the server, `Workspace.submit_bootstrap ~config_file`
+passes a tmux configuration file as `-f`, for example one that sets
+`exit-unattached on`.
 
 For an application that keeps the server, choose its normal tmux lifetime
 policy and retain the workspace handle while using the borrowed client. An

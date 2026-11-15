@@ -48,105 +48,44 @@ followed by Enter; they do not wait for a command to finish.
 
 ## Validate, preview and apply
 
-This walkthrough uses a private server and an empty tmux configuration. The
-`seed` session keeps the server alive while the CLI creates the project.
-Inherited `TMUX` and `TMUX_PANE` do not select the endpoint.
-
-<!-- workspace-walkthrough:begin -->
+`check` needs no server. Run it from the repository root:
 
 ```console
-$ export LIBTMUX_WORKSPACE_DIR="$(mktemp -d -t libtmux-ocaml-workspace.XXXXXX)"
-```
-
-Copying the file also makes its working directory the private directory:
-
-```console
-$ cp examples/workspace/project.json "$LIBTMUX_WORKSPACE_DIR/project.json"
-```
-
-```console
-$ opam exec -- tmux-workspace check "$LIBTMUX_WORKSPACE_DIR/project.json"
+$ opam exec -- tmux-workspace check examples/workspace/project.json
 ```
 
 Expected output: `Valid workspace "ocaml-project": 2 windows, 3 panes`.
 
-```console
-$ env -u TMUX -u TMUX_PANE tmux \
-    -S "$LIBTMUX_WORKSPACE_DIR/server" \
-    -f /dev/null \
-    new-session \
-    -d \
-    -s seed \
-    -- "exec cat"
-```
+`plan` and `apply` act on a socket you name with `--socket`, on a tmux 3.3a or
+newer server you run. `plan` prints the advisory actions without changing
+anything. `apply` rereads the document and runs a fresh plan; `--json` writes a
+[`libtmux.workspace-receipt/1`](../json/libtmux_json.mli) document whose
+`status` is `succeeded` when `failed`, `uncertain` and `skipped` are empty, and
+each creation records the IDs tmux returned. Without `--require-existing`,
+`apply` can start a missing endpoint by creating the requested session; that
+server uses the normal tmux configuration and keeps running after the CLI's
+client closes, so its appearance does not grant daemon ownership. `plan` on a
+missing endpoint checks the local tmux version and returns a bootstrap plan
+without creating the socket.
+
+The [complete program](../examples/workspace_apply.ml) runs the same document
+through the library with no server of your own. It decodes the file with
+`Libtmux_json.Workspace`, starts a private server, bootstraps the plan, checks
+the receipt, reads the resulting windows and stops the server:
 
 ```console
-$ opam exec -- tmux-workspace plan \
-    --socket "$LIBTMUX_WORKSPACE_DIR/server" \
-    --require-existing \
-    "$LIBTMUX_WORKSPACE_DIR/project.json"
+$ opam exec -- dune exec examples/workspace_apply.exe -- tmux
 ```
 
-The plan lists session creation, settings, the split and layout, and the logs
-window. Applying it requires the original configuration:
+Expected output:
 
-```console
-$ opam exec -- tmux-workspace apply \
-    --socket "$LIBTMUX_WORKSPACE_DIR/server" \
-    --require-existing \
-    --json \
-    "$LIBTMUX_WORKSPACE_DIR/project.json" \
-    > "$LIBTMUX_WORKSPACE_DIR/receipt.json"
+```text
+Valid workspace "ocaml-project": 2 windows, 3 panes
+Plan: 6 actions
+Receipt: succeeded
+editor:2
+logs:1
 ```
-
-The receipt uses [`libtmux.workspace-receipt/1`](../json/libtmux_json.mli).
-On success, `status` is
-`succeeded`; `failed`, `uncertain` and `skipped` are empty. Each creation records
-the IDs returned by tmux. Check the resulting windows independently:
-
-```console
-$ env -u TMUX -u TMUX_PANE tmux \
-    -S "$LIBTMUX_WORKSPACE_DIR/server" \
-    list-windows \
-    -t '=ocaml-project' \
-    -F '#{window_name}:#{window_panes}'
-```
-
-Expected output is `editor:2` followed by `logs:1`.
-
-Remove only the sessions this walkthrough created:
-
-```console
-$ env -u TMUX -u TMUX_PANE tmux \
-    -S "$LIBTMUX_WORKSPACE_DIR/server" \
-    kill-session \
-    -t '=ocaml-project'
-```
-
-```console
-$ env -u TMUX -u TMUX_PANE tmux \
-    -S "$LIBTMUX_WORKSPACE_DIR/server" \
-    kill-session \
-    -t '=seed'
-```
-
-```console
-$ rm -f -- "$LIBTMUX_WORKSPACE_DIR/server" \
-    "$LIBTMUX_WORKSPACE_DIR/project.json" \
-    "$LIBTMUX_WORKSPACE_DIR/receipt.json"
-```
-
-```console
-$ rmdir "$LIBTMUX_WORKSPACE_DIR"
-```
-
-<!-- workspace-walkthrough:end -->
-
-Without `--require-existing`, `apply` can start a missing endpoint by creating
-the requested session. That server uses the normal tmux configuration. Closing
-the CLI's client leaves the server running; its appearance does not grant
-daemon ownership. `plan` on a missing endpoint checks the local tmux version
-and returns a bootstrap plan without creating the socket.
 
 ## Collisions and recovery
 

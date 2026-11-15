@@ -100,9 +100,9 @@ then uses [`Plan`][plan] and the [Eio workspace executor][eio-workspace] to appl
 - `--require-existing` fails on a missing endpoint instead of starting a session.
 - Closing the CLI's client leaves the daemon running.
 
-More: the [full walkthrough](../docs/workspaces.md#validate-preview-and-apply)
-starts a private server, applies the file, verifies `editor:2` and `logs:1`,
-and cleans up.
+More: the [guide](../docs/workspaces.md#validate-preview-and-apply) runs the
+same document through a complete program on a private server and verifies
+`editor:2` and `logs:1`.
 
 ## Inspect failures before retrying
 

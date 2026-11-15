@@ -7,82 +7,27 @@ before that failure, including after the client closes.
 
 This example creates one window on an explicitly selected session, closes its
 client, then prints the retained outcome and any reported window and pane IDs.
-The setup installs a failing hook on a private demonstration daemon.
+The program installs a failing hook on its own private daemon with
+`Client.set_hook`.
 
 ## Run the complete program
 
 Complete the [source installation](getting-started.md), then run from the
-checkout. Create a private directory:
+checkout. The program starts its own private server and stops it when it
+finishes:
 
 ```console
-$ export LIBTMUX_HOOK_RECOVERY_DIR="$(mktemp -d -t libtmux-ocaml-hook-recovery.XXXXXX)"
-```
-
-Start the seed session:
-
-```console
-$ env -u TMUX -u TMUX_PANE tmux \
-    -S "$LIBTMUX_HOOK_RECOVERY_DIR/server" \
-    -f /dev/null \
-    new-session \
-    -d \
-    -s hook-demo \
-    -- "exec /bin/cat -u"
-```
-
-Make the creation hook select a pane that does not exist:
-
-```console
-$ env -u TMUX -u TMUX_PANE tmux \
-    -S "$LIBTMUX_HOOK_RECOVERY_DIR/server" \
-    set-hook \
-    -g \
-    after-new-window \
-    "select-pane -t %4294967294"
-```
-
-The fresh daemon's seed session has ID `$0`. Quote that ID:
-
-```console
-$ opam exec -- dune exec examples/native_hook_recovery.exe -- \
-    tmux "$LIBTMUX_HOOK_RECOVERY_DIR/server" '$0'
+$ opam exec -- dune exec examples/native_hook_recovery.exe -- tmux
 ```
 
 The program prints `operation=unknown`, a hook-failure cause,
 `reported-window=@1; reported-pane=%1`, and `cleanup-issues=0; omitted=0`.
-It submits one creation. Its retained handle stays outside the client cleanup
-scope, so reporting runs after the close attempt, including when awaiting or
-closing raises.
-
-Inspect the current windows through a fresh command:
-
-```console
-$ env -u TMUX -u TMUX_PANE tmux \
-    -S "$LIBTMUX_HOOK_RECOVERY_DIR/server" \
-    list-windows \
-    -t '=hook-demo' \
-    -F '#{window_id}:#{window_index}:#{window_name}:#{window_panes}'
-```
-
-The created window appears as `@1:4:hook-created:1`. The failed hook did not
-undo its creation or stop its pane program.
-
-Remove the private demonstration session, including that window:
-
-```console
-$ env -u TMUX -u TMUX_PANE tmux \
-    -S "$LIBTMUX_HOOK_RECOVERY_DIR/server" \
-    kill-session \
-    -t '=hook-demo'
-```
-
-```console
-$ rm -f -- "$LIBTMUX_HOOK_RECOVERY_DIR/server"
-```
-
-```console
-$ rmdir "$LIBTMUX_HOOK_RECOVERY_DIR"
-```
+It sets an `after-new-window` hook that selects a pane that does not exist,
+then submits one creation. The created window exists as `@1` at index 4 named
+`hook-created`; the failed hook did not undo its creation or stop its pane
+program. The retained handle stays outside the client cleanup scope, so
+reporting runs after the close attempt, including when awaiting or closing
+raises. The library then stops the daemon, which removes the window.
 
 ## Retain evidence outside cleanup
 
@@ -153,10 +98,7 @@ let report_cleanup cleanup =
     report.omitted
 
 let () =
-  if Array.length Sys.argv <> 4 then (
-    prerr_endline
-      "usage: native_hook_recovery TMUX_BINARY SOCKET_PATH SESSION_ID";
-    exit 2);
+  let binary = if Array.length Sys.argv = 2 then Sys.argv.(1) else "tmux" in
   let cleanup = Cleanup.create () and pending = ref None in
   protect
     ~finally:(fun () ->
@@ -164,33 +106,44 @@ let () =
         ~finally:(fun () -> report_cleanup cleanup)
         (fun () -> Option.iter report_operation !pending))
     (fun () ->
-      let client =
-        get
-          (Client.connect ~cleanup ~binary:Sys.argv.(1)
-             (Endpoint.socket_path Sys.argv.(2)))
-      in
-      protect
-        ~finally:(fun () -> get (Client.close client))
-        (fun () ->
-          let id = get (Session.Id.of_string Sys.argv.(3)) in
-          let session =
-            match Snapshot.find_session (get (Client.capture client)) id with
-            | Some session -> session
-            | None -> failwith "requested session is absent from the capture"
-          in
-          let operation =
-            get
-              (Client.submit client
-                 (Operations.create_window ~index:4 ~name:"hook-created"
-                    ~spawn:
-                      (Spawn.make
-                         (Exec { program = "/bin/cat"; args = [ "-u" ] }))
-                    (Session.target session)))
-          in
-          pending := Some operation;
-          match Client.await operation with
-          | Ok _ | Error (Error.Outcome_unknown _) -> ()
-          | Error error -> failwith (Format.asprintf "%a" Error.pp error)))
+      get
+        (Libtmux_unix.with_private_daemon ~cleanup ~binary ~session:"hook-demo"
+           (fun endpoint ->
+             let client = get (Client.connect ~cleanup ~binary endpoint) in
+             protect
+               ~finally:(fun () -> get (Client.close client))
+               (fun () ->
+                 let session =
+                   Snapshot.sessions (get (Client.capture client))
+                   |> Iarray.to_seq
+                   |> Seq.find (fun session ->
+                       Session.name session = "hook-demo")
+                   |> Option.get
+                 in
+                 (* The hook selects a pane that does not exist, so tmux
+                    reports a failure after it created the window. *)
+                 get
+                   (Client.set_hook client Options.Global_sessions
+                      ~name:"after-new-window"
+                      [
+                        {
+                          Hook.name = "select-pane";
+                          arguments = [ "-t"; "%4294967294" ];
+                        };
+                      ]);
+                 let operation =
+                   get
+                     (Client.submit client
+                        (Operations.create_window ~index:4 ~name:"hook-created"
+                           ~spawn:
+                             (Spawn.make
+                                (Exec { program = "/bin/cat"; args = [ "-u" ] }))
+                           (Session.target session)))
+                 in
+                 pending := Some operation;
+                 match Client.await operation with
+                 | Ok _ | Error (Error.Outcome_unknown _) -> ()
+                 | Error error -> failwith (Format.asprintf "%a" Error.pp error)))))
 ```
 
 To use this file outside the checkout, save it as `main.ml` in the Dune project

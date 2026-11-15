@@ -57,10 +57,7 @@ let report_cleanup cleanup =
     report.omitted
 
 let () =
-  if Array.length Sys.argv <> 4 then (
-    prerr_endline
-      "usage: native_hook_recovery TMUX_BINARY SOCKET_PATH SESSION_ID";
-    exit 2);
+  let binary = if Array.length Sys.argv = 2 then Sys.argv.(1) else "tmux" in
   let cleanup = Cleanup.create () and pending = ref None in
   protect
     ~finally:(fun () ->
@@ -68,30 +65,41 @@ let () =
         ~finally:(fun () -> report_cleanup cleanup)
         (fun () -> Option.iter report_operation !pending))
     (fun () ->
-      let client =
-        get
-          (Client.connect ~cleanup ~binary:Sys.argv.(1)
-             (Endpoint.socket_path Sys.argv.(2)))
-      in
-      protect
-        ~finally:(fun () -> get (Client.close client))
-        (fun () ->
-          let id = get (Session.Id.of_string Sys.argv.(3)) in
-          let session =
-            match Snapshot.find_session (get (Client.capture client)) id with
-            | Some session -> session
-            | None -> failwith "requested session is absent from the capture"
-          in
-          let operation =
-            get
-              (Client.submit client
-                 (Operations.create_window ~index:4 ~name:"hook-created"
-                    ~spawn:
-                      (Spawn.make
-                         (Exec { program = "/bin/cat"; args = [ "-u" ] }))
-                    (Session.target session)))
-          in
-          pending := Some operation;
-          match Client.await operation with
-          | Ok _ | Error (Error.Outcome_unknown _) -> ()
-          | Error error -> failwith (Format.asprintf "%a" Error.pp error)))
+      get
+        (Libtmux_unix.with_private_daemon ~cleanup ~binary ~session:"hook-demo"
+           (fun endpoint ->
+             let client = get (Client.connect ~cleanup ~binary endpoint) in
+             protect
+               ~finally:(fun () -> get (Client.close client))
+               (fun () ->
+                 let session =
+                   Snapshot.sessions (get (Client.capture client))
+                   |> Iarray.to_seq
+                   |> Seq.find (fun session ->
+                       Session.name session = "hook-demo")
+                   |> Option.get
+                 in
+                 (* The hook selects a pane that does not exist, so tmux
+                    reports a failure after it created the window. *)
+                 get
+                   (Client.set_hook client Options.Global_sessions
+                      ~name:"after-new-window"
+                      [
+                        {
+                          Hook.name = "select-pane";
+                          arguments = [ "-t"; "%4294967294" ];
+                        };
+                      ]);
+                 let operation =
+                   get
+                     (Client.submit client
+                        (Operations.create_window ~index:4 ~name:"hook-created"
+                           ~spawn:
+                             (Spawn.make
+                                (Exec { program = "/bin/cat"; args = [ "-u" ] }))
+                           (Session.target session)))
+                 in
+                 pending := Some operation;
+                 match Client.await operation with
+                 | Ok _ | Error (Error.Outcome_unknown _) -> ()
+                 | Error error -> failwith (Format.asprintf "%a" Error.pp error)))))

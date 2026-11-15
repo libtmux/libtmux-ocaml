@@ -17,50 +17,19 @@ program. [Control](control.md) compares Eio and blocking cancellation timing.
 ## Run the complete program
 
 Complete the [source installation](getting-started.md) and run from the cloned
-repository. Start an empty private server:
+repository. The program starts its own private server and stops it when it
+finishes:
 
 ```console
-$ export LIBTMUX_RECOVERY_DIR="$(mktemp -d -t libtmux-ocaml-recovery.XXXXXX)"
-```
-
-```console
-$ env -u TMUX -u TMUX_PANE tmux \
-    -S "$LIBTMUX_RECOVERY_DIR/server" \
-    -f /dev/null \
-    new-session \
-    -d \
-    -s recovery-demo \
-    -- "exec cat"
-```
-
-The fresh server's session ID is `$0`; quote it to preserve the literal ID:
-
-```console
-$ opam exec -- dune exec examples/native_recovery.exe -- \
-    tmux "$LIBTMUX_RECOVERY_DIR/server" '$0'
+$ opam exec -- dune exec examples/native_recovery.exe -- tmux
 ```
 
 Expected output is `waiter=cancelled; operation=retained`, followed by
 `operation=finished; postcondition=recovery-complete` and
-`cleanup-issues=0; omitted=0`. The program creates a window and removes its own pane afterward. It preserves the seed session and
-other panes, and closes its client on success or failure.
-
-Remove the private seed session and directory:
-
-```console
-$ env -u TMUX -u TMUX_PANE tmux \
-    -S "$LIBTMUX_RECOVERY_DIR/server" \
-    kill-session \
-    -t '=recovery-demo'
-```
-
-```console
-$ rm -f -- "$LIBTMUX_RECOVERY_DIR/server"
-```
-
-```console
-$ rmdir "$LIBTMUX_RECOVERY_DIR"
-```
+`cleanup-issues=0; omitted=0`. The program creates a window and removes its own
+pane afterward. It closes its client on success or failure, and
+`Libtmux_eio.with_private_daemon` then stops the daemon and removes its
+directory.
 
 ## Inspect before acting
 
@@ -181,12 +150,16 @@ let recover client session =
       assert (Window.name after = "recovery-complete");
       Printf.printf "operation=finished; postcondition=%s\n" (Window.name after))
 
+let session_named snapshot name =
+  Snapshot.sessions snapshot |> Iarray.to_seq
+  |> Seq.find (fun session -> Session.name session = name)
+  |> Option.get
+
 let () =
-  if Array.length Sys.argv <> 4 then (
-    prerr_endline "usage: native_recovery TMUX_BINARY SOCKET_PATH SESSION_ID";
-    exit 2);
+  let binary = if Array.length Sys.argv = 2 then Sys.argv.(1) else "tmux" in
   Eio_main.run @@ fun env ->
-  Eio.Switch.run @@ fun sw ->
+  let process_mgr = Eio.Stdenv.process_mgr env
+  and mono_clock = Eio.Stdenv.mono_clock env in
   let cleanup = Cleanup.create () in
   protect
     ~finally:(fun () ->
@@ -203,22 +176,23 @@ let () =
         (Iarray.length report.issues)
         report.omitted)
     (fun () ->
-      let client =
-        get
-          (Client.connect ~cleanup ~sw ~binary:Sys.argv.(1)
-             ~process_mgr:(Eio.Stdenv.process_mgr env)
-             ~mono_clock:(Eio.Stdenv.mono_clock env)
-             (Endpoint.socket_path Sys.argv.(2)))
-      in
-      protect
-        ~finally:(fun () ->
-          Eio.Cancel.protect (fun () -> get (Client.close client)))
-        (fun () ->
-          let id = get (Session.Id.of_string Sys.argv.(3)) in
-          let session =
-            Snapshot.find_session (get (Client.capture client)) id |> Option.get
-          in
-          recover client (Session.target session)))
+      get
+        (Libtmux_eio.with_private_daemon ~cleanup ~binary
+           ~session:"recovery-demo" ~process_mgr ~mono_clock (fun endpoint ->
+             Eio.Switch.run @@ fun sw ->
+             let client =
+               get
+                 (Client.connect ~cleanup ~sw ~binary ~process_mgr ~mono_clock
+                    endpoint)
+             in
+             protect
+               ~finally:(fun () ->
+                 Eio.Cancel.protect (fun () -> get (Client.close client)))
+               (fun () ->
+                 let session =
+                   session_named (get (Client.capture client)) "recovery-demo"
+                 in
+                 recover client (Session.target session)))))
 ```
 
 The release attempt is recorded before its I/O so cleanup cannot retry an

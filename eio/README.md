@@ -134,7 +134,7 @@ $ opam exec -- dune exec examples/showcase_watch.exe -- tmux
 ```
 
 ```text
-socket=/tmp/libtmux-ocaml-showcase-f76d47/server
+socket=/tmp/libtmux-ocaml-f76d47/server
 observed: changed
 ```
 

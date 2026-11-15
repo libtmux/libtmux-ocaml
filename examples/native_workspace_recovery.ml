@@ -106,11 +106,10 @@ let report_cleanup cleanup =
     report.omitted
 
 let () =
-  if Array.length Sys.argv <> 3 then (
-    prerr_endline "usage: native_workspace_recovery TMUX_BINARY SOCKET_PATH";
-    exit 2);
+  let binary = if Array.length Sys.argv = 2 then Sys.argv.(1) else "tmux" in
   Eio_main.run @@ fun env ->
-  let endpoint = Endpoint.socket_path Sys.argv.(2) in
+  let process_mgr = Eio.Stdenv.process_mgr env
+  and mono_clock = Eio.Stdenv.mono_clock env in
   let cleanup = Cleanup.create () and pending = ref None in
   protect
     ~finally:(fun () ->
@@ -118,44 +117,65 @@ let () =
         ~finally:(fun () -> report_cleanup cleanup)
         (fun () -> Option.iter report !pending))
     (fun () ->
-      Eio.Switch.run @@ fun sw ->
-      let connect () =
-        get
-          (Client.connect ~cleanup ~sw ~binary:Sys.argv.(1)
-             ~process_mgr:(Eio.Stdenv.process_mgr env)
-             ~mono_clock:(Eio.Stdenv.mono_clock env)
-             endpoint)
-      in
-      let client = connect () in
-      let observer = connect () in
-      let execution = get (Workspace.submit client (plan client endpoint)) in
-      pending := Some execution;
-      let created_session =
-        protect
-          ~finally:(fun () -> get (Workspace.close execution))
-          (fun () ->
-            interrupt execution observer;
-            let receipt = get (Workspace.inspect execution) in
-            if
-              receipt.status <> Execution.Interrupted
-              || Iarray.length receipt.cleanup <> 1
-              || Result.is_error (Iarray.get receipt.cleanup 0).outcome
-              || Option.is_some receipt.cleanup_error
-              || not
-                   (Iarray.exists
-                      (fun (step : Execution.step) -> step.status = Skipped)
-                      receipt.steps)
-            then failwith "workspace interruption did not confirm compensation";
-            receipt.steps |> Iarray.to_seq
-            |> Seq.filter_map (fun (step : Execution.step) ->
-                match (step.action, step.created) with
-                | Plan.Create_session _, [ created ] ->
-                    Some (Session.Target.id created.session)
-                | _ -> None)
-            |> Query.exactly_one
-            |> checked Cardinality.pp_error)
-      in
-      let after = get (Client.capture client) in
-      if Option.is_some (Snapshot.find_session after created_session) then
-        failwith "created workspace session remains present";
-      print_endline "postcondition=created-session-absent")
+      (* The seed session keeps the daemon's workspace compensation visible. *)
+      get
+        (Libtmux_eio.with_private_daemon ~cleanup ~binary
+           ~session:"workspace-seed" ~process_mgr ~mono_clock (fun endpoint ->
+             Eio.Switch.run @@ fun sw ->
+             let connect () =
+               get
+                 (Client.connect ~cleanup ~sw ~binary ~process_mgr ~mono_clock
+                    endpoint)
+             in
+             let client = connect () in
+             let observer = connect () in
+             (* Pause the first workspace creation at its hook. *)
+             get
+               (Client.set_hook client Options.Global_sessions
+                  ~name:"after-new-session"
+                  [
+                    {
+                      Hook.name = "wait-for";
+                      arguments = [ "-S"; "libtmux-workspace-ready" ];
+                    };
+                    {
+                      Hook.name = "wait-for";
+                      arguments = [ "libtmux-workspace-release" ];
+                    };
+                  ]);
+             let execution =
+               get (Workspace.submit client (plan client endpoint))
+             in
+             pending := Some execution;
+             let created_session =
+               protect
+                 ~finally:(fun () -> get (Workspace.close execution))
+                 (fun () ->
+                   interrupt execution observer;
+                   let receipt = get (Workspace.inspect execution) in
+                   if
+                     receipt.status <> Execution.Interrupted
+                     || Iarray.length receipt.cleanup <> 1
+                     || Result.is_error (Iarray.get receipt.cleanup 0).outcome
+                     || Option.is_some receipt.cleanup_error
+                     || not
+                          (Iarray.exists
+                             (fun (step : Execution.step) ->
+                               step.status = Skipped)
+                             receipt.steps)
+                   then
+                     failwith
+                       "workspace interruption did not confirm compensation";
+                   receipt.steps |> Iarray.to_seq
+                   |> Seq.filter_map (fun (step : Execution.step) ->
+                       match (step.action, step.created) with
+                       | Plan.Create_session _, [ created ] ->
+                           Some (Session.Target.id created.session)
+                       | _ -> None)
+                   |> Query.exactly_one
+                   |> checked Cardinality.pp_error)
+             in
+             let after = get (Client.capture client) in
+             if Option.is_some (Snapshot.find_session after created_session)
+             then failwith "created workspace session remains present";
+             print_endline "postcondition=created-session-absent")))

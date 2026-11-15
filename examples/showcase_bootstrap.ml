@@ -77,44 +77,33 @@ let local_version binary =
 
 let () =
   let binary = if Array.length Sys.argv = 2 then Sys.argv.(1) else "tmux" in
-  let directory = Filename.temp_dir "libtmux-ocaml-showcase-" "" in
-  protect
-    ~finally:(fun () ->
-      Sys.readdir directory
-      |> Array.iter (fun name -> Sys.remove (Filename.concat directory name));
-      Unix.rmdir directory)
-    (fun () ->
-      let socket = Filename.concat directory "server" in
-      let config_file = Filename.concat directory "tmux.conf" in
-      Out_channel.with_open_text config_file (fun output ->
-          output_string output "set-option -s exit-unattached on\n");
-      let wrapper = Filename.concat directory "tmux" in
-      Out_channel.with_open_text wrapper (fun output ->
-          Printf.fprintf output "#!/bin/sh\nexec %s -f %s \"$@\"\n"
-            (Filename.quote binary)
-            (Filename.quote config_file));
-      Unix.chmod wrapper 0o700;
-      let execution =
-        bootstrap ~binary:wrapper ~version:(local_version binary) ~directory
-          (Endpoint.socket_path socket)
-      in
-      (* docs:begin await-bootstrap *)
-      let snapshot =
-        protect
-          ~finally:(fun () -> get (Workspace.close execution))
-          (fun () ->
-            let receipt = get (Workspace.await execution) in
-            require_success receipt;
-            let client = Option.get (Workspace.client execution) in
-            get (Client.capture client))
-        (* docs:end await-bootstrap *)
-      in
-      assert (Iarray.length (Snapshot.sessions snapshot) = 1);
-      assert (Iarray.length (Snapshot.windows snapshot) = 1);
-      assert (Iarray.length (Snapshot.panes snapshot) = 1);
-      assert (
-        Session.name (Iarray.get (Snapshot.sessions snapshot) 0)
-        = "bootstrap-demo");
-      assert (Window.name (Iarray.get (Snapshot.windows snapshot) 0) = "editor");
-      Printf.printf "socket=%s\n" socket;
-      print_endline "bootstrapped: 1 session, 1 window, 1 pane")
+  let snapshot =
+    get
+      (Libtmux_unix.with_private_daemon ~binary (fun endpoint ->
+           let execution =
+             bootstrap ~binary ~version:(local_version binary)
+               ~directory:(Sys.getcwd ()) endpoint
+           in
+           (* docs:begin await-bootstrap *)
+           let snapshot =
+             protect
+               ~finally:(fun () -> get (Workspace.close execution))
+               (fun () ->
+                 let receipt = get (Workspace.await execution) in
+                 require_success receipt;
+                 let client = Option.get (Workspace.client execution) in
+                 get (Client.capture client))
+             (* docs:end await-bootstrap *)
+           in
+           (match Endpoint.kind endpoint with
+           | Endpoint.Socket_path socket -> Printf.printf "socket=%s\n" socket
+           | Endpoint.Named_socket _ -> ());
+           snapshot))
+  in
+  assert (Iarray.length (Snapshot.sessions snapshot) = 1);
+  assert (Iarray.length (Snapshot.windows snapshot) = 1);
+  assert (Iarray.length (Snapshot.panes snapshot) = 1);
+  assert (
+    Session.name (Iarray.get (Snapshot.sessions snapshot) 0) = "bootstrap-demo");
+  assert (Window.name (Iarray.get (Snapshot.windows snapshot) 0) = "editor");
+  print_endline "bootstrapped: 1 session, 1 window, 1 pane"

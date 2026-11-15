@@ -95,27 +95,25 @@ let recover ~clock client session =
       recover_coverage client id before)
 
 let () =
-  if Array.length Sys.argv <> 4 then (
-    prerr_endline
-      "usage: native_stream_recovery TMUX_BINARY SOCKET_PATH SESSION_ID";
-    exit 2);
+  let binary = if Array.length Sys.argv = 2 then Sys.argv.(1) else "tmux" in
   Eio_main.run @@ fun env ->
-  Eio.Switch.run @@ fun sw ->
-  let clock = Eio.Stdenv.mono_clock env in
-  let client =
-    get
-      (Client.connect ~sw ~binary:Sys.argv.(1)
-         ~process_mgr:(Eio.Stdenv.process_mgr env)
-         ~mono_clock:clock
-         (Endpoint.socket_path Sys.argv.(2)))
-  in
-  protect
-    ~finally:(fun () -> get (Client.close client))
-    (fun () ->
-      let id = get (Session.Id.of_string Sys.argv.(3)) in
-      let session =
-        match Snapshot.find_session (get (Client.capture client)) id with
-        | Some session -> session
-        | None -> failwith "requested session is absent"
-      in
-      recover ~clock client (Session.target session))
+  let process_mgr = Eio.Stdenv.process_mgr env
+  and clock = Eio.Stdenv.mono_clock env in
+  get
+    (Libtmux_eio.with_private_daemon ~binary ~session:"stream-demo" ~process_mgr
+       ~mono_clock:clock (fun endpoint ->
+         Eio.Switch.run @@ fun sw ->
+         let client =
+           get
+             (Client.connect ~sw ~binary ~process_mgr ~mono_clock:clock endpoint)
+         in
+         protect
+           ~finally:(fun () -> get (Client.close client))
+           (fun () ->
+             let session =
+               Snapshot.sessions (get (Client.capture client))
+               |> Iarray.to_seq
+               |> Seq.find (fun session -> Session.name session = "stream-demo")
+               |> Option.get
+             in
+             recover ~clock client (Session.target session))))

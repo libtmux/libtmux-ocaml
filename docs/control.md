@@ -2,9 +2,9 @@
 
 Observations are local values. Client calls perform explicit I/O, and mutations
 use targets bound to the source that produced them. Closing a client releases
-its own transports. tmux then applies its configured lifetime: for example,
-[the standalone programs](showcases.md) enable `exit-unattached` on their
-private daemons so they exit after their final client detaches.
+its own transports. tmux then applies its configured lifetime. A daemon the program started with
+`with_private_daemon`, as [the standalone programs](showcases.md) do, ends when
+that scope ends, and `Client.kill_server` stops any daemon the client is bound to.
 
 The [layout program](../examples/native_build.ml) creates a session, splits its
 first pane and adds a logs window. It passes argv through `Spawn.Exec`, a working
