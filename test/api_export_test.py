@@ -1,14 +1,15 @@
 """Outer: exercise public interface extraction with real compiler artifacts."""
+
 import json
-from pathlib import Path
 import subprocess
 import tempfile
+from pathlib import Path
 
 root = Path(__file__).resolve().parents[1]
 exporter = root / "_build/default/tools/api_export.exe"
 with tempfile.TemporaryDirectory(prefix="libtmux-ocaml-api-") as temporary:
     project = Path(temporary)
-    source = '''(** Public fixture with [inline code]. *)
+    source = """(** Public fixture with [inline code]. *)
 module type ID = sig
   type t
   val of_string : string -> (t, string) result
@@ -30,7 +31,7 @@ module Alias = Nested
 module Cleanup : sig
   type t = Cleanup.t
 end
-'''
+"""
     (project / "public.mli").write_text(source)
     (project / "private.mli").write_text("val hidden : unit -> unit\n")
     (project / "implementation.mli").write_text("type t\n")
@@ -39,15 +40,29 @@ end
         subprocess.run(["ocamlc", "-bin-annot", "-c", name], cwd=project, check=True)
     compile_public = ["ocamlc", "-bin-annot", "-open", "Public__", "-c", "public.mli"]
     subprocess.run(compile_public, cwd=project, check=True)
-    manifest = {"modules": [{"module": "Public", "package": "fixture", "product": "core",
-                              "submodules": {"Nested": "workspace"},
-                              "source": "public.mli", "cmti": "public.cmti"}]}
+    manifest = {
+        "modules": [
+            {
+                "module": "Public",
+                "package": "fixture",
+                "product": "core",
+                "submodules": {"Nested": "workspace"},
+                "source": "public.mli",
+                "cmti": "public.cmti",
+            }
+        ]
+    }
     path = project / "manifest.json"
     path.write_text(json.dumps(manifest))
 
     def extract():
-        return subprocess.run([str(exporter), str(project), str(path)],
-                              cwd=root, capture_output=True, text=True)
+        return subprocess.run(
+            [str(exporter), str(project), str(path)],
+            cwd=root,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
 
     result = extract()
     assert result.returncode == 0, result.stderr
@@ -65,7 +80,9 @@ end
     run = symbols["Public.Nested.run"]
     signature = run["signatures"][0]
     assert [param["name"] for param in signature["params"]] == ["limit", "name", "arg1"]
-    assert signature["params"][0]["optional"] and signature["params"][0]["type"] == "int"
+    assert (
+        signature["params"][0]["optional"] and signature["params"][0]["type"] == "int"
+    )
     assert signature["params"][1]["keywordOnly"]
     assert all("default" not in param for param in signature["params"])
     assert signature["returns"] == "(alias, string) result"
@@ -76,7 +93,9 @@ end
     assert "{!val-state}" in run["doc"]["body"]
     assert "{{!type-state}the state type}" in run["doc"]["body"]
     assert "`state`" in run["doc"]["body"]
-    assert "[Type guide](https://ocaml.org/manual/5.5/typedecl.html)" in run["doc"]["body"]
+    assert (
+        "[Type guide](https://ocaml.org/manual/5.5/typedecl.html)" in run["doc"]["body"]
+    )
     assert "inline code" in symbols["Public"]["doc"]["summary"]
     assert run["source"] == {"file": "public.mli", "line": 14}
     assert symbols["Public"]["product"] == "core"
@@ -86,7 +105,10 @@ end
     assert "Public.Nested.state:type.Failed.message" in symbols
     assert symbols["Public.Nested.state"]["kind"] == "function"
     assert symbols["Public.Nested.state:type"]["qualifiedName"] == "Public.Nested.state"
-    assert symbols["Public.Nested.state:type.Failed"]["qualifiedName"] == "Public.Nested.Failed"
+    assert (
+        symbols["Public.Nested.state:type.Failed"]["qualifiedName"]
+        == "Public.Nested.Failed"
+    )
     assert len(symbols) == len(model["symbols"]), "colliding public identities"
     (project / "public.mli").write_text(source + "\nval stale : int\n")
     stale = extract()
@@ -98,8 +120,15 @@ end
     assert fallback.returncode != 0 and ".cmti" in fallback.stderr
     manifest["modules"][0]["cmti"] = "public.cmti"
     path.write_text(json.dumps(manifest))
-    (project / "public.mli").write_text(source.replace("module Alias = Nested", "module Alias = Private"))
+    (project / "public.mli").write_text(
+        source.replace("module Alias = Nested", "module Alias = Private")
+    )
     subprocess.run(compile_public, cwd=project, check=True)
     private = extract()
-    assert private.returncode != 0 and "outside the public module manifest" in private.stderr
-print("PASS public cmti: opaque types, aliases, labels, results, docs, sources, freshness and private exclusion")
+    assert (
+        private.returncode != 0
+        and "outside the public module manifest" in private.stderr
+    )
+print(
+    "PASS public cmti: opaque types, aliases, labels, results, docs, sources, freshness and private exclusion"
+)

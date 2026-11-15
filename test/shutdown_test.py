@@ -1,8 +1,8 @@
-#!/usr/bin/env python3
 """Outer: owned-child TERM grace, escalation and reaping require real processes."""
+
+import contextlib
 import json
 import os
-from pathlib import Path
 import pty
 import selectors
 import signal
@@ -10,6 +10,7 @@ import socket
 import subprocess
 import sys
 import time
+from pathlib import Path
 
 from support.tmux_fixture import TmuxFixture
 
@@ -22,11 +23,18 @@ def helper():
     if mode == "close":
         child = subprocess.Popen(
             [os.environ["LIBTMUX_SHUTDOWN_BINARY"], *sys.argv[1:]],
-            stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=sys.stderr,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=sys.stderr,
         )
     with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as barrier:
         barrier.connect(os.environ["LIBTMUX_SHUTDOWN_BARRIER"])
-        barrier.sendall(json.dumps({"helper": os.getpid(), "client": child.pid if child else None}).encode() + b"\n")
+        barrier.sendall(
+            json.dumps(
+                {"helper": os.getpid(), "client": child.pid if child else None}
+            ).encode()
+            + b"\n"
+        )
         assert barrier.recv(1) == b"G"
     if mode == "failed":
         os.write(1, b"shutdown fixture\n")
@@ -35,6 +43,9 @@ def helper():
             os.kill(os.getpid(), signal.SIGSTOP)
         while True:
             signal.pause()
+    assert child is not None
+    assert child.stdin is not None
+    assert child.stdout is not None
     with selectors.DefaultSelector() as ready:
         ready.register(0, selectors.EVENT_READ)
         ready.register(child.stdout, selectors.EVENT_READ)
@@ -49,10 +60,8 @@ def helper():
                     child.stdin.write(data)
                     child.stdin.flush()
                 else:
-                    try:
+                    with contextlib.suppress(BrokenPipeError):
                         os.write(1, data)
-                    except BrokenPipeError:
-                        pass
     child.wait()
     while True:
         signal.pause()
@@ -72,7 +81,9 @@ def line(stream, timeout=1):
 def run_case(fixture, backend, mode, stopped, eio_backend=None):
     path = Path(fixture.directory.name) / "shutdown-barrier"
     proxy = Path(fixture.directory.name) / "shutdown-tmux"
-    proxy.write_text(f"#!/bin/sh\nexec '{sys.executable}' '{Path(__file__).resolve()}' \"$@\"\n")
+    proxy.write_text(
+        f"#!/bin/sh\nexec '{sys.executable}' '{Path(__file__).resolve()}' \"$@\"\n"
+    )
     proxy.chmod(0o700)
     peer = Path(__file__).resolve().parents[1] / "_build/default/test/shutdown_peer.exe"
     master, slave = pty.openpty()
@@ -85,7 +96,9 @@ def run_case(fixture, backend, mode, stopped, eio_backend=None):
             barrier.settimeout(1)
             env = fixture.environment | {
                 "LIBTMUX_SHUTDOWN_HELPER": "1",
-                "LIBTMUX_SHUTDOWN_MODE": "close" if mode in ("close-join", "scope", "cancel-scope") else mode,
+                "LIBTMUX_SHUTDOWN_MODE": "close"
+                if mode in ("close-join", "scope", "cancel-scope")
+                else mode,
                 "LIBTMUX_SHUTDOWN_BINARY": fixture.binary,
                 "LIBTMUX_SHUTDOWN_BARRIER": str(path),
                 "LIBTMUX_SHUTDOWN_STOPPED": str(int(stopped)),
@@ -93,10 +106,23 @@ def run_case(fixture, backend, mode, stopped, eio_backend=None):
             if eio_backend is not None:
                 env["EIO_BACKEND"] = eio_backend
             process = subprocess.Popen(
-                [str(peer), str(proxy), str(fixture.socket), backend, mode, os.ttyname(slave)],
-                env=env, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                [
+                    str(peer),
+                    str(proxy),
+                    str(fixture.socket),
+                    backend,
+                    mode,
+                    os.ttyname(slave),
+                ],
+                env=env,
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
                 bufsize=0,
             )
+            assert process.stdin is not None
+            assert process.stdout is not None
+            assert process.stderr is not None
             connection, _ = barrier.accept()
             with connection:
                 with connection.makefile("rb") as message:
@@ -108,38 +134,52 @@ def run_case(fixture, backend, mode, stopped, eio_backend=None):
                 if stopped:
                     signal.pidfd_send_signal(children[0][1], signal.SIGSTOP)
             if mode != "failed":
-                process.stdin.write(f"GO {pids['helper']}\n".encode() if mode == "close-join" else b"GO\n")
+                process.stdin.write(
+                    f"GO {pids['helper']}\n".encode()
+                    if mode == "close-join"
+                    else b"GO\n"
+                )
                 process.stdin.flush()
             started = time.monotonic()
             if backend == "eio" and mode in ("close", "close-join"):
                 assert line(process.stdout, 0.75) == b"YIELDED\n"
             assert line(process.stdout, 0.75) == b"DONE\n"
             elapsed = time.monotonic() - started
-            for pid, pidfd in children:
+            for _pid, pidfd in children:
                 with selectors.DefaultSelector() as exited:
                     exited.register(pidfd, selectors.EVENT_READ)
                     assert exited.select(0.5), "owned child survived library cleanup"
-            assert not Path(f"/proc/{pids['helper']}").exists(), "owned helper was not reaped"
-            assert fixture.server.poll() is None, "library cleanup killed the tmux daemon"
+            assert not Path(f"/proc/{pids['helper']}").exists(), (
+                "owned helper was not reaped"
+            )
+            assert fixture.server.poll() is None, (
+                "library cleanup killed the tmux daemon"
+            )
             assert fixture.command("has-session", "-t", "=fixture").returncode == 0
             process.stdin.write(b"EXIT\n")
             process.stdin.flush()
             stdout, stderr = process.communicate(timeout=1)
-            assert process.returncode == 0 and stdout == b"" and stderr == b"", (process.returncode, stdout, stderr)
+            assert process.returncode == 0 and stdout == b"" and stderr == b"", (
+                process.returncode,
+                stdout,
+                stderr,
+            )
             label = f"{backend}/{eio_backend}" if eio_backend else backend
-            print(f"PASS {label} {mode} {'stopped' if stopped else 'TERM/EOF resistant'}: {elapsed:.3f}s", flush=True)
+            print(
+                f"PASS {label} {mode} {'stopped' if stopped else 'TERM/EOF resistant'}: {elapsed:.3f}s",
+                flush=True,
+            )
     except (AssertionError, TimeoutError, RuntimeError) as error:
         if process is not None and process.poll() is not None:
+            assert process.stderr is not None
             detail = process.stderr.read().decode(errors="replace")
             raise RuntimeError(f"{error}; peer stderr: {detail}") from error
         raise
     finally:
         # Recovery is scoped to the helper/client pidfds created by this case.
         for _, pidfd in children:
-            try:
+            with contextlib.suppress(ProcessLookupError):
                 signal.pidfd_send_signal(pidfd, signal.SIGKILL)
-            except ProcessLookupError:
-                pass
         if process is not None:
             if process.poll() is None:
                 try:
@@ -163,14 +203,27 @@ else:
     failures = []
     for binary in sys.argv[1:]:
         with TmuxFixture(binary) as fixture:
-            for backend, eio_backend in (("unix", None), ("eio", "linux"), ("eio", "posix")):
-                modes = ("close", "failed", "terminal") + (("cancel-setup", "close-join", "scope", "cancel-scope") if backend == "eio" else ())
+            for backend, eio_backend in (
+                ("unix", None),
+                ("eio", "linux"),
+                ("eio", "posix"),
+            ):
+                modes = ("close", "failed", "terminal") + (
+                    ("cancel-setup", "close-join", "scope", "cancel-scope")
+                    if backend == "eio"
+                    else ()
+                )
                 for mode in modes:
                     for stopped in (False, True):
                         try:
                             run_case(fixture, backend, mode, stopped, eio_backend)
                         except (AssertionError, TimeoutError, RuntimeError) as error:
-                            failures.append((backend, eio_backend, mode, stopped, str(error)))
-                            print(f"FAIL {backend}/{eio_backend} {mode} stopped={stopped}: {error}", flush=True)
+                            failures.append(
+                                (backend, eio_backend, mode, stopped, str(error))
+                            )
+                            print(
+                                f"FAIL {backend}/{eio_backend} {mode} stopped={stopped}: {error}",
+                                flush=True,
+                            )
     if failures:
         raise SystemExit(f"{len(failures)} shutdown cases failed")

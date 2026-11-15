@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Delay one real tmux command at an externally controlled cancellation boundary."""
+
 import os
 import selectors
 import signal
@@ -9,8 +10,14 @@ import sys
 
 signal.signal(signal.SIGTERM, lambda *_: None)
 barrier = None
-process = subprocess.Popen([os.environ["LIBTMUX_TEST_BINARY"], *sys.argv[1:]],
-                           stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=sys.stderr)
+process = subprocess.Popen(
+    [os.environ["LIBTMUX_TEST_BINARY"], *sys.argv[1:]],
+    stdin=subprocess.PIPE,
+    stdout=subprocess.PIPE,
+    stderr=sys.stderr,
+)
+assert process.stdin is not None
+assert process.stdout is not None
 pending = b""
 held = False
 try:
@@ -32,7 +39,9 @@ try:
                     pending += data
                     while b"\n" in pending:
                         line, pending = pending.split(b"\n", 1)
-                        if not held and line.startswith(os.environ["LIBTMUX_TEST_CAPTURE_STEP"].encode() + b" "):
+                        if not held and line.startswith(
+                            os.environ["LIBTMUX_TEST_CAPTURE_STEP"].encode() + b" "
+                        ):
                             held = True
                             barrier = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
                             barrier.connect(os.environ["LIBTMUX_TEST_BARRIER"])

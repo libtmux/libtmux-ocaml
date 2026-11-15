@@ -1,26 +1,35 @@
 """Generate backend conveniences and an operation inventory from the native API."""
+
 import argparse
 import json
-from pathlib import Path
 import re
 import subprocess
+from pathlib import Path
 
 START = "  (* BEGIN GENERATED OPERATIONS *)"
 END = "  (* END GENERATED OPERATIONS *)"
 
 
 def operations(root):
-    interface = (root / "lib/libtmux.mli").read_text().split("module Operations : sig\n", 1)[1]
-    implementation = (root / "lib/commands.ml").read_text().split("module Operations = struct\n", 1)[1]
+    interface = (
+        (root / "lib/libtmux.mli").read_text().split("module Operations : sig\n", 1)[1]
+    )
+    implementation = (
+        (root / "lib/commands.ml")
+        .read_text()
+        .split("module Operations = struct\n", 1)[1]
+    )
     signatures = {}
-    for match in re.finditer(r'^  val (\w+)\s*:(.*?)(?=^  val |^end|\Z)', interface, re.M | re.S):
+    for match in re.finditer(
+        r"^  val (\w+)\s*:(.*?)(?=^  val |^end|\Z)", interface, re.MULTILINE | re.DOTALL
+    ):
         name, body = match.groups()
-        signature = re.sub(r'\(\*.*?\*\)', '', body, flags=re.S).strip()
-        doc = re.search(r'\(\*\*(.*?)\*\)', body, re.S)
+        signature = re.sub(r"\(\*.*?\*\)", "", body, flags=re.DOTALL).strip()
+        doc = re.search(r"\(\*\*(.*?)\*\)", body, re.DOTALL)
         assert signature.endswith(" Command.t"), (name, signature)
         signatures[name] = (" ".join(signature.split()), doc.group(0) if doc else "")
     records = []
-    for match in re.finditer(r'^  let (\w+)\b', implementation, re.M):
+    for match in re.finditer(r"^  let (\w+)\b", implementation, re.MULTILINE):
         name = match.group(1)
         start, depth, quoted = match.end(), 0, False
         position = start
@@ -29,57 +38,90 @@ def operations(root):
             if c == '"' and implementation[position - 1] != "\\":
                 quoted = not quoted
             if not quoted:
-                if c == '(':
+                if c == "(":
                     depth += 1
-                elif c == ')':
+                elif c == ")":
                     depth -= 1
-                elif c == '=' and depth == 0:
+                elif c == "=" and depth == 0:
                     break
             position += 1
         header = implementation[start:position]
-        header = re.sub(r'\?\((\w+)\s*=\s*[^)]+\)', r'?\1', header)
+        header = re.sub(r"\?\((\w+)\s*=\s*[^)]+\)", r"?\1", header)
         params = header.split()
-        assert all(re.fullmatch(r'[?~]?\w+|\(\)', param) for param in params), (name, params)
+        assert all(re.fullmatch(r"[?~]?\w+|\(\)", param) for param in params), (
+            name,
+            params,
+        )
         signature, doc = signatures.pop(name)
-        records.append(dict(name=name, parameters=params, signature=signature, documentation=doc,
-                            convenience="handwritten" if name in {"capture", "capture_text"} else "generated"))
+        records.append(
+            {
+                "name": name,
+                "parameters": params,
+                "signature": signature,
+                "documentation": doc,
+                "convenience": "handwritten"
+                if name in {"capture", "capture_text"}
+                else "generated",
+            }
+        )
     assert not signatures, signatures
     return records
 
 
 def qualify(text):
-    return re.sub(r'(?<![.\w])([A-Z][A-Za-z_]+)\.(?=[A-Za-z_])',
-                  lambda match: match[0] if match[1] == "Libtmux" else "Libtmux." + match[0], text)
+    return re.sub(
+        r"(?<![.\w])([A-Z][A-Za-z_]+)\.(?=[A-Za-z_])",
+        lambda match: match[0] if match[1] == "Libtmux" else "Libtmux." + match[0],
+        text,
+    )
 
 
 def outputs(root):
     records = operations(root)
     result = {"catalog/operations.json": json.dumps(records, indent=2) + "\n"}
-    docs = ["# Native operations", "", "`Libtmux.Operations` constructs commands without I/O. Both native clients",
-            "provide the conveniences below; each submits and awaits that command.",
-            "Use `submit` and `await` separately to retain an operation handle across",
-            "cancellation. Blocking conveniences accept an optional cancellation token.", "",
-            "| Operation | Native command result |", "| --- | --- |"]
+    docs = [
+        "# Native operations",
+        "",
+        "`Libtmux.Operations` constructs commands without I/O. Both native clients",
+        "provide the conveniences below; each submits and awaits that command.",
+        "Use `submit` and `await` separately to retain an operation handle across",
+        "cancellation. Blocking conveniences accept an optional cancellation token.",
+        "",
+        "| Operation | Native command result |",
+        "| --- | --- |",
+    ]
     for row in records:
         returned = row["signature"].removesuffix(" Command.t").rsplit(" -> ", 1)[-1]
-        docs.append(f'| `{row["name"]}` | `{returned}` |')
+        docs.append(f"| `{row['name']}` | `{returned}` |")
     result["docs/operations.md"] = "\n".join(docs) + "\n"
     for backend in ["unix", "eio"]:
         cancel = backend == "unix"
         optional = "?cancel:Cancellation.t -> " if cancel else ""
-        code = ["(* Generated by tools/generate_operations.py from the native Operations API. *)",
-                "module Make (Client : sig type t",
-                f"val run : {optional}t -> 'a Libtmux.Command.t -> ('a, Libtmux.Error.t) result end) = struct"]
+        code = [
+            "(* Generated by tools/generate_operations.py from the native Operations API. *)",
+            "module Make (Client : sig type t",
+            f"val run : {optional}t -> 'a Libtmux.Command.t -> ('a, Libtmux.Error.t) result end) = struct",
+        ]
         declarations = [START]
         for row in records:
             if row["convenience"] != "generated":
                 continue
             params = row["parameters"]
             assert not {"connection", "?cancel"}.intersection(params), row["name"]
-            split = next((i for i, param in enumerate(params) if not param.startswith('?')), len(params))
+            split = next(
+                (i for i, param in enumerate(params) if not param.startswith("?")),
+                len(params),
+            )
             forwarded = " ".join(params)
-            facade = [*(["?cancel"] if cancel else []), *params[:split], "connection", *params[split:]]
-            code.append(f'let {row["name"]} {" ".join(facade)} = Client.run {"?cancel " if cancel else ""}connection (Libtmux.Operations.{row["name"]} {forwarded})')
+            facade = [
+                *(["?cancel"] if cancel else []),
+                *params[:split],
+                "connection",
+                *params[split:],
+            ]
+            code.append(
+                f"let {row['name']} {' '.join(facade)} = Client.run {'?cancel ' if cancel else ''}connection (Libtmux.Operations.{row['name']} {forwarded})"
+            )
             signature = row["signature"].removesuffix(" Command.t").split(" -> ")
             returned = qualify(signature.pop())
             signature = [qualify(part) for part in signature]
@@ -88,15 +130,21 @@ def outputs(root):
             if cancel:
                 signature.insert(0, "?cancel:Cancellation.t")
             signature.append(f"({returned}, Libtmux.Error.t) result")
-            declarations.append(f'  val {row["name"]} : ' + " -> ".join(signature))
+            declarations.append(f"  val {row['name']} : " + " -> ".join(signature))
             if row["documentation"]:
                 declarations.append("  " + qualify(row["documentation"]))
             declarations.append("")
         code.append("end")
         declarations.append(END)
         name = f"{backend}/generated_operations.ml"
-        result[name] = subprocess.run(["ocamlformat", "--name", name, "--impl", "-"],
-                                      input="\n".join(code) + "\n", text=True, capture_output=True, check=True, cwd=root).stdout
+        result[name] = subprocess.run(
+            ["ocamlformat", "--name", name, "--impl", "-"],
+            input="\n".join(code) + "\n",
+            text=True,
+            capture_output=True,
+            check=True,
+            cwd=root,
+        ).stdout
         name = f"{backend}/libtmux_{backend}.mli"
         original = (root / name).read_text()
         if START in original:
@@ -106,8 +154,14 @@ def outputs(root):
             before, after = original.rsplit("  val close :", 1)
             after = "\n\n  val close :" + after
         updated = before + "\n".join(declarations) + after
-        result[name] = subprocess.run(["ocamlformat", "--name", name, "--intf", "-"],
-                                      input=updated, text=True, capture_output=True, check=True, cwd=root).stdout
+        result[name] = subprocess.run(
+            ["ocamlformat", "--name", name, "--intf", "-"],
+            input=updated,
+            text=True,
+            capture_output=True,
+            check=True,
+            cwd=root,
+        ).stdout
     return result
 
 

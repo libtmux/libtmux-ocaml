@@ -1,17 +1,26 @@
 """Outer: a live original daemon cannot authorize an auxiliary on its replacement."""
-from pathlib import Path
+
 import os
 import selectors
 import subprocess
 import sys
+from pathlib import Path
+
 from support.tmux_fixture import TmuxFixture
 
 peer = Path(__file__).resolve().parents[1] / "_build/default/test/binding_peer.exe"
 for binary in sys.argv[1:]:
     for backend in ["unix", "eio"]:
         with TmuxFixture(binary) as original, TmuxFixture(binary) as replacement:
-            process = subprocess.Popen([str(peer), original.binary, str(original.socket), backend],
-                                       stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            process = subprocess.Popen(
+                [str(peer), original.binary, str(original.socket), backend],
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+            assert process.stdin is not None
+            assert process.stdout is not None
+            assert process.stderr is not None
             try:
                 with selectors.DefaultSelector() as ready:
                     ready.register(process.stdout, selectors.EVENT_READ)
@@ -27,7 +36,10 @@ for binary in sys.argv[1:]:
                         stdout, stderr = process.communicate(timeout=1)
                         assert process.returncode == 0, (stdout, stderr)
                         assert stdout == b"REJECT replacement\n"
-                        assert original.server.poll() is None and replacement.server.poll() is None
+                        assert (
+                            original.server.poll() is None
+                            and replacement.server.poll() is None
+                        )
                     finally:
                         os.rename(original.socket, replacement.socket)
                 finally:
@@ -40,12 +52,20 @@ for binary in sys.argv[1:]:
                     stream.close()
             assert original.command("list-clients").stdout == b""
             assert replacement.command("list-clients").stdout == b""
-            print(f"PASS {Path(binary).parent.name}: {backend}: bound stream replacement rejection, teardown")
+            print(
+                f"PASS {Path(binary).parent.name}: {backend}: bound stream replacement rejection, teardown"
+            )
     for mode in ("eio-daemon-exit", "eio-daemon-exit-paused"):
         with TmuxFixture(binary) as fixture:
-            process = subprocess.Popen([str(peer), fixture.binary, str(fixture.socket), mode],
-                                       env=fixture.environment, stdin=subprocess.DEVNULL,
-                                       stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            process = subprocess.Popen(
+                [str(peer), fixture.binary, str(fixture.socket), mode],
+                env=fixture.environment,
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+            assert process.stdout is not None
+            assert process.stderr is not None
             try:
                 with selectors.DefaultSelector() as ready:
                     ready.register(process.stdout, selectors.EVENT_READ)
@@ -54,11 +74,16 @@ for binary in sys.argv[1:]:
                 fixture.command("kill-server")
                 stdout, stderr = process.communicate(timeout=1)
                 assert process.returncode == 0, (stdout, stderr)
-                assert stdout == b"RETAIN daemon disconnection\n" and stderr == b"", (stdout, stderr)
+                assert stdout == b"RETAIN daemon disconnection\n" and stderr == b"", (
+                    stdout,
+                    stderr,
+                )
             finally:
                 if process.poll() is None:
                     process.kill()
                     process.wait(timeout=1)
                 process.stdout.close()
                 process.stderr.close()
-            print(f"PASS {Path(binary).parent.name}: {mode}: daemon-exit cause and retained outcome")
+            print(
+                f"PASS {Path(binary).parent.name}: {mode}: daemon-exit cause and retained outcome"
+            )

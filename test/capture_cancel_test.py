@@ -1,11 +1,11 @@
 """Outer: cancel the public waiter before each real capture transfer command."""
-import os
+
 import argparse
-from pathlib import Path
 import selectors
 import socket
 import subprocess
-import sys
+from pathlib import Path
+
 from support.tmux_fixture import TmuxFixture
 
 root = Path(__file__).resolve().parents[1]
@@ -27,13 +27,29 @@ def readable(stream):
 for binary in args.binaries:
     with TmuxFixture(binary) as fixture:
         fixture.command("split-window", "-d", "")
-        subprocess.run([fixture.binary, "-S", str(fixture.socket), "display-message", "-I", "-t", "%1"],
-                       input=b"%end 1 1 1\r\nhello\r\n", capture_output=True, check=True,
-                       timeout=1, env=fixture.environment)
+        subprocess.run(
+            [
+                fixture.binary,
+                "-S",
+                str(fixture.socket),
+                "display-message",
+                "-I",
+                "-t",
+                "%1",
+            ],
+            input=b"%end 1 1 1\r\nhello\r\n",
+            capture_output=True,
+            check=True,
+            timeout=1,
+            env=fixture.environment,
+        )
         scratch = Path(fixture.directory.name) / "scratch"
         scratch.mkdir()
         fixture.command("set-buffer", "-b", "unrelated", "keep me")
-        cases = [("cancel", step) for step in ["capture-pane", "list-buffers", "save-buffer", "delete-buffer"]]
+        cases = [
+            ("cancel", step)
+            for step in ["capture-pane", "list-buffers", "save-buffer", "delete-buffer"]
+        ]
         if args.backend == "eio":
             cases.append(("close", "list-buffers"))
         else:
@@ -43,10 +59,23 @@ for binary in args.binaries:
             with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as listener:
                 listener.bind(str(path))
                 listener.listen(1)
-                env = dict(fixture.environment, LIBTMUX_TEST_BINARY=fixture.binary,
-                           LIBTMUX_TEST_BARRIER=str(path), LIBTMUX_TEST_CAPTURE_STEP=step)
-                process = subprocess.Popen([str(peer), str(proxy), str(fixture.socket), str(scratch), mode],
-                                           stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env, bufsize=0)
+                env = dict(
+                    fixture.environment,
+                    LIBTMUX_TEST_BINARY=fixture.binary,
+                    LIBTMUX_TEST_BARRIER=str(path),
+                    LIBTMUX_TEST_CAPTURE_STEP=step,
+                )
+                process = subprocess.Popen(
+                    [str(peer), str(proxy), str(fixture.socket), str(scratch), mode],
+                    stdin=subprocess.PIPE,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    env=env,
+                    bufsize=0,
+                )
+                assert process.stdin is not None
+                assert process.stdout is not None
+                assert process.stderr is not None
                 barrier = None
                 try:
                     readable(listener)
@@ -56,7 +85,9 @@ for binary in args.binaries:
                     process.stdin.write(b"CANCEL\n")
                     process.stdin.flush()
                     readable(process.stdout)
-                    expected = b"REQUESTED\n" if args.backend == "unix" else b"CANCELLED\n"
+                    expected = (
+                        b"REQUESTED\n" if args.backend == "unix" else b"CANCELLED\n"
+                    )
                     assert process.stdout.readline() == expected
                     if mode == "close":
                         readable(process.stdout)
@@ -66,12 +97,25 @@ for binary in args.binaries:
                     assert process.returncode == 0, (step, stdout, stderr)
                     if mode == "close":
                         lines = stdout.splitlines()
-                        assert len(lines) == 2 and lines[0].startswith(b"BUFFER libtmux-ocaml-") and lines[1] == b"DRAINED", stdout
+                        assert (
+                            len(lines) == 2
+                            and lines[0].startswith(b"BUFFER libtmux-ocaml-")
+                            and lines[1] == b"DRAINED"
+                        ), stdout
                         buffer = lines[0].removeprefix(b"BUFFER ")
-                        assert buffer in fixture.command("list-buffers", "-F", "#{buffer_name}").stdout.splitlines()
+                        assert (
+                            buffer
+                            in fixture.command(
+                                "list-buffers", "-F", "#{buffer_name}"
+                            ).stdout.splitlines()
+                        )
                         fixture.command("delete-buffer", "-b", buffer)
                     else:
-                        expected = b"CANCELLED\nDRAINED\n" if args.backend == "unix" else b"DRAINED\n"
+                        expected = (
+                            b"CANCELLED\nDRAINED\n"
+                            if args.backend == "unix"
+                            else b"DRAINED\n"
+                        )
                         assert stdout == expected, stdout
                 finally:
                     if barrier is not None:
@@ -83,6 +127,11 @@ for binary in args.binaries:
                         stream.close()
             path.unlink()
             assert list(scratch.iterdir()) == []
-            assert fixture.command("list-buffers", "-F", "#{buffer_name}").stdout == b"unrelated\n"
+            assert (
+                fixture.command("list-buffers", "-F", "#{buffer_name}").stdout
+                == b"unrelated\n"
+            )
             assert fixture.command("list-clients").stdout == b""
-        print(f"PASS {Path(binary).parent.name} {args.backend}: cancellation before capture, size read, save and cleanup")
+        print(
+            f"PASS {Path(binary).parent.name} {args.backend}: cancellation before capture, size read, save and cleanup"
+        )

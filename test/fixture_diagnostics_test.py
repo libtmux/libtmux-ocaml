@@ -4,10 +4,10 @@ import asyncio
 import ctypes
 import errno
 import os
-from pathlib import Path
 import subprocess
-from types import SimpleNamespace
 import unittest
+from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 from support.tmux_fixture import TmuxFixture
@@ -31,37 +31,50 @@ class FixtureDiagnostics(unittest.TestCase):
         for primary in (RuntimeError("consumer failed"), asyncio.CancelledError()):
             with self.subTest(primary=type(primary).__name__):
                 cleanup = subprocess.CalledProcessError(
-                    1, ["fixture-cleanup"], output=b"cleanup\x00\xff", stderr=b"cleanup error\xff",
+                    1,
+                    ["fixture-cleanup"],
+                    output=b"cleanup\x00\xff",
+                    stderr=b"cleanup error\xff",
                 )
-                with self.assertRaises(BaseException) as reported:
-                    with EnteredFixture(cleanup):
-                        raise primary
+                with (
+                    self.assertRaises(BaseException) as reported,
+                    EnteredFixture(cleanup),
+                ):
+                    raise primary
                 self.assertIs(reported.exception, primary)
                 notes = "\n".join(getattr(primary, "__notes__", []))
-                for value in (repr(cleanup), repr(cleanup.stdout), repr(cleanup.stderr)):
+                for value in (
+                    repr(cleanup),
+                    repr(cleanup.stdout),
+                    repr(cleanup.stderr),
+                ):
                     self.assertIn(value, notes)
 
     def test_success_still_reports_cleanup_failure(self):
         cleanup = OSError("fixture cleanup failed")
-        with self.assertRaises(OSError) as reported:
-            with EnteredFixture(cleanup):
-                pass
+        with self.assertRaises(OSError) as reported, EnteredFixture(cleanup):
+            pass
         self.assertIs(reported.exception, cleanup)
 
     def test_setup_failure_survives_cleanup_failure_and_closes_notification(self):
         notification = os.open(os.devnull, os.O_RDONLY | os.O_CLOEXEC)
-        libc = SimpleNamespace(inotify_init1=lambda _: notification, inotify_add_watch=lambda *_: -1)
+        libc = SimpleNamespace(
+            inotify_init1=lambda _: notification, inotify_add_watch=lambda *_: -1
+        )
         fixture = TmuxFixture.__new__(TmuxFixture)
-        fixture.directory = SimpleNamespace(name=Path("owned-fixture"))
+        fixture.directory = SimpleNamespace(name=Path("owned-fixture"))  # ty: ignore[invalid-assignment]  # test double
         cleanup = RuntimeError("fixture cleanup failed")
-        with patch("support.tmux_fixture.ctypes.CDLL", return_value=libc), \
-                patch.object(TmuxFixture, "close", side_effect=cleanup):
+        with (
+            patch("support.tmux_fixture.ctypes.CDLL", return_value=libc),
+            patch.object(TmuxFixture, "close", side_effect=cleanup),
+        ):
             ctypes.set_errno(errno.EACCES)
             with self.assertRaises(BaseException) as reported:
                 fixture.__enter__()
-        self.assertIsInstance(reported.exception, OSError)
-        self.assertEqual(reported.exception.errno, errno.EACCES)
-        self.assertIn(repr(cleanup), "\n".join(reported.exception.__notes__))
+        error = reported.exception
+        assert isinstance(error, OSError), error
+        self.assertEqual(error.errno, errno.EACCES)
+        self.assertIn(repr(cleanup), "\n".join(error.__notes__))
         with self.assertRaises(OSError) as closed:
             os.fstat(notification)
         self.assertEqual(closed.exception.errno, errno.EBADF)

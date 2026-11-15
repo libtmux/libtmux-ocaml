@@ -1,27 +1,44 @@
 """Outer: public blocking workspace execution and journal recovery on owned servers."""
-from pathlib import Path
+
 import selectors
 import subprocess
 import sys
+from pathlib import Path
+
 from support.tmux_fixture import TmuxFixture
 
 peer_name = "workspace_eio_peer" if "--eio" in sys.argv else "workspace_peer"
 peer = Path(__file__).resolve().parents[1] / f"_build/default/test/{peer_name}.exe"
 for binary in [arg for arg in sys.argv[1:] if arg != "--eio"]:
     with TmuxFixture(binary) as fixture:
-        process = subprocess.Popen([str(peer), fixture.binary, str(fixture.socket)],
-                                   env=fixture.environment, stdin=subprocess.PIPE,
-                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.Popen(
+            [str(peer), fixture.binary, str(fixture.socket)],
+            env=fixture.environment,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        assert process.stdin is not None
+        assert process.stdout is not None
+        assert process.stderr is not None
         try:
             with selectors.DefaultSelector() as ready:
                 ready.register(process.stdout, selectors.EVENT_READ)
                 assert ready.select(1), "workspace peer not ready"
                 line = process.stdout.readline()
                 if line == b"CONTEXT_READY\n":
-                    fixture.command("set-hook", "-g", "after-new-session",
-                                    "wait-for workspace-pane-ready ; link-window -t fixture:")
-                    fixture.command("set-hook", "-g", "after-split-window",
-                                    "wait-for workspace-pane-ready")
+                    fixture.command(
+                        "set-hook",
+                        "-g",
+                        "after-new-session",
+                        "wait-for workspace-pane-ready ; link-window -t fixture:",
+                    )
+                    fixture.command(
+                        "set-hook",
+                        "-g",
+                        "after-split-window",
+                        "wait-for workspace-pane-ready",
+                    )
                     process.stdin.write(b"continue\n")
                     process.stdin.flush()
                     assert ready.select(1), "workspace context result not ready"
@@ -37,8 +54,9 @@ for binary in [arg for arg in sys.argv[1:] if arg != "--eio"]:
                     line = process.stdout.readline()
                 if line.startswith(b"SAFETY_READY "):
                     foreign = line.decode().strip().split()[1]
-                    fixture.command("set-hook", "-g", "after-new-window",
-                                    f"join-pane -s {foreign}")
+                    fixture.command(
+                        "set-hook", "-g", "after-new-window", f"join-pane -s {foreign}"
+                    )
                     process.stdin.write(b"continue\n")
                     process.stdin.flush()
                     assert ready.select(1), "workspace safety result not ready"
@@ -55,8 +73,12 @@ for binary in [arg for arg in sys.argv[1:] if arg != "--eio"]:
                     stdout, stderr = process.communicate(timeout=1)
                     raise AssertionError((line, stdout, stderr))
                 fixture.track_panes()
-                fixture.command("set-hook", "-g", "after-new-session",
-                                "wait-for -S workspace-ready ; wait-for workspace-block")
+                fixture.command(
+                    "set-hook",
+                    "-g",
+                    "after-new-session",
+                    "wait-for -S workspace-ready ; wait-for workspace-block",
+                )
                 process.stdin.write(b"continue\n")
                 process.stdin.flush()
                 fixture.command("wait-for", "workspace-ready")
@@ -68,7 +90,10 @@ for binary in [arg for arg in sys.argv[1:] if arg != "--eio"]:
                 fixture.command("wait-for", "-S", "workspace-block")
                 stdout, stderr = process.communicate(timeout=1)
                 assert process.returncode == 0, (stdout, stderr)
-                assert stdout == b"PASS workspace execution, partial compensation, append, races, stale plans, cancellation journal\n"
+                assert (
+                    stdout
+                    == b"PASS workspace execution, partial compensation, append, races, stale plans, cancellation journal\n"
+                )
                 assert stderr == b"", stderr
         finally:
             if process.poll() is None:
@@ -78,4 +103,6 @@ for binary in [arg for arg in sys.argv[1:] if arg != "--eio"]:
                 stream.close()
             fixture.track_panes()
         assert fixture.command("list-clients").stdout == b""
-        print(f"PASS {Path(binary).parent.name}: {peer_name}: workspace executor, compensation and cancellation journal")
+        print(
+            f"PASS {Path(binary).parent.name}: {peer_name}: workspace executor, compensation and cancellation journal"
+        )

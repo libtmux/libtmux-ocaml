@@ -1,13 +1,15 @@
 """Execute literal documentation commands using installed example programs."""
+
+import contextlib
 import ctypes
 import os
-from pathlib import Path
 import re
 import selectors
 import shlex
 import shutil
 import signal
 import subprocess
+from pathlib import Path
 
 
 def prepare(root, temporary, environment):
@@ -19,10 +21,19 @@ def prepare(root, temporary, environment):
     for source in (root / "examples").iterdir():
         if source.name == "dune" or source.suffix == ".ml":
             shutil.copyfile(source, examples / source.name)
-    subprocess.run(["dune", "build", "--root", str(project)], cwd=project,
-                   env=environment, check=True, capture_output=True)
-    library = subprocess.check_output(["opam", "exec", "--", "ocamlfind", "query", "libtmux"],
-                                      cwd=project, env=environment, text=True).strip()
+    subprocess.run(
+        ["dune", "build", "--root", str(project)],
+        cwd=project,
+        env=environment,
+        check=True,
+        capture_output=True,
+    )
+    library = subprocess.check_output(
+        ["opam", "exec", "--", "ocamlfind", "query", "libtmux"],
+        cwd=project,
+        env=environment,
+        text=True,
+    ).strip()
     if Path(library) != Path(environment["OCAMLPATH"]) / "libtmux":
         raise RuntimeError("README commands did not use the independent installation")
     return project
@@ -35,25 +46,50 @@ def run(root, project, binary, environment, document):
     child_file = Path(f"/proc/self/task/{os.getpid()}/children")
     previous_children = set(map(int, child_file.read_text().split()))
     variable, directory_prefix, expected_output = {
-        "docs/recovery.md": ("LIBTMUX_RECOVERY_DIR", "libtmux-ocaml-recovery.",
-                             [b"waiter=cancelled; operation=retained\n",
-                              b"operation=finished; postcondition=recovery-complete\n"]),
-        "docs/hook-recovery.md": ("LIBTMUX_HOOK_RECOVERY_DIR", "libtmux-ocaml-hook-recovery.",
-                                  [b"operation=unknown\n", b"hook failed or emitted output",
-                                   b"reported-window=@1; reported-pane=%1\n",
-                                   b"@1:4:hook-created:1\n", b"cleanup-issues=0; omitted=0\n"]),
-        "docs/workspace-recovery.md": ("LIBTMUX_WORKSPACE_RECOVERY_DIR", "libtmux-ocaml-workspace-recovery.",
-                                       [b"waiter=cancelled\npostcondition=created-session-absent\n",
-                                        b"journal=interrupted\ncompensated-pane=%1\n",
-                                        b"cleanup-issues=0; omitted=0\n", b"workspace-seed\n"]),
-        "docs/streaming.md": ("LIBTMUX_STREAM_RECOVERY_DIR", "libtmux-ocaml-stream-recovery.",
-                              [b"gap=membership-changed; history=unavailable\n",
-                               b"coverage=fresh; cursor-generation=new; future=after-gap\n"]),
+        "docs/recovery.md": (
+            "LIBTMUX_RECOVERY_DIR",
+            "libtmux-ocaml-recovery.",
+            [
+                b"waiter=cancelled; operation=retained\n",
+                b"operation=finished; postcondition=recovery-complete\n",
+            ],
+        ),
+        "docs/hook-recovery.md": (
+            "LIBTMUX_HOOK_RECOVERY_DIR",
+            "libtmux-ocaml-hook-recovery.",
+            [
+                b"operation=unknown\n",
+                b"hook failed or emitted output",
+                b"reported-window=@1; reported-pane=%1\n",
+                b"@1:4:hook-created:1\n",
+                b"cleanup-issues=0; omitted=0\n",
+            ],
+        ),
+        "docs/workspace-recovery.md": (
+            "LIBTMUX_WORKSPACE_RECOVERY_DIR",
+            "libtmux-ocaml-workspace-recovery.",
+            [
+                b"waiter=cancelled\npostcondition=created-session-absent\n",
+                b"journal=interrupted\ncompensated-pane=%1\n",
+                b"cleanup-issues=0; omitted=0\n",
+                b"workspace-seed\n",
+            ],
+        ),
+        "docs/streaming.md": (
+            "LIBTMUX_STREAM_RECOVERY_DIR",
+            "libtmux-ocaml-stream-recovery.",
+            [
+                b"gap=membership-changed; history=unavailable\n",
+                b"coverage=fresh; cursor-generation=new; future=after-gap\n",
+            ],
+        ),
     }[document]
     commands = []
     active = False
-    for block in re.findall(r"```console\n(.*?)```", (root / document).read_text(), re.DOTALL):
-        if block.startswith(f'$ export {variable}='):
+    for block in re.findall(
+        r"```console\n(.*?)```", (root / document).read_text(), re.DOTALL
+    ):
+        if block.startswith(f"$ export {variable}="):
             active = True
         if active:
             if not block.startswith("$ ") or "\n$ " in block:
@@ -67,7 +103,7 @@ def run(root, project, binary, environment, document):
     bindir.mkdir(exist_ok=True)
     wrapper = bindir / "tmux"
     actual = str(Path(binary).resolve(strict=True))
-    wrapper.write_text(f"#!/bin/sh\nexec {shlex.quote(actual)} \"$@\"\n")
+    wrapper.write_text(f'#!/bin/sh\nexec {shlex.quote(actual)} "$@"\n')
     wrapper.chmod(0o700)
     script = ["set -eu"]
     cleanup_inserted = False
@@ -80,26 +116,48 @@ def run(root, project, binary, environment, document):
             script += [f"printf 'DIRECTORY %s\\n' \"${variable}\"", "read answer"]
         if "new-session" in command:
             script += ["printf 'SERVER_READY\\n'", "read answer"]
-    child_environment = {key:value for key,value in environment.items() if key not in {"TMUX", "TMUX_PANE"}}
+    child_environment = {
+        key: value
+        for key, value in environment.items()
+        if key not in {"TMUX", "TMUX_PANE"}
+    }
     child_environment["PATH"] = str(bindir) + os.pathsep + environment["PATH"]
     script_path = project / "walkthrough.sh"
     script_path.write_text("\n".join(script) + "\n")
-    process = subprocess.Popen(["/bin/sh", str(script_path)], cwd=project, env=child_environment,
-                               stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE, bufsize=0)
+    process = subprocess.Popen(
+        ["/bin/sh", str(script_path)],
+        cwd=project,
+        env=child_environment,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        bufsize=0,
+    )
+    assert process.stdin is not None
+    assert process.stdout is not None
+    assert process.stderr is not None
     directory = None
     daemon = None
     pidfds = {}
     output = []
 
     def command(*arguments):
-        return subprocess.run([actual, "-N", "-S", str(directory / "server"), *arguments],
-                              env=child_environment, check=True, capture_output=True, timeout=1).stdout
+        assert directory is not None
+        return subprocess.run(
+            [actual, "-N", "-S", str(directory / "server"), *arguments],
+            env=child_environment,
+            check=True,
+            capture_output=True,
+            timeout=1,
+        ).stdout
 
     def remember():
         nonlocal daemon
         daemon = int(command("display-message", "-p", "#{pid}"))
-        for pid in [daemon, *map(int, command("list-panes", "-a", "-F", "#{pane_pid}").splitlines())]:
+        for pid in [
+            daemon,
+            *map(int, command("list-panes", "-a", "-F", "#{pane_pid}").splitlines()),
+        ]:
             if pid not in pidfds:
                 pidfds[pid] = os.pidfd_open(pid)
 
@@ -114,9 +172,14 @@ def run(root, project, binary, environment, document):
                     break
                 output.append(line)
                 if line.startswith(b"DIRECTORY "):
-                    directory = Path(os.fsdecode(line[len(b"DIRECTORY "):].strip()))
-                    if not directory.name.startswith(directory_prefix) or directory.stat().st_mode & 0o077:
-                        raise RuntimeError("demo did not create a private owned directory")
+                    directory = Path(os.fsdecode(line[len(b"DIRECTORY ") :].strip()))
+                    if (
+                        not directory.name.startswith(directory_prefix)
+                        or directory.stat().st_mode & 0o077
+                    ):
+                        raise RuntimeError(
+                            "demo did not create a private owned directory"
+                        )
                     process.stdin.write(b"continue\n")
                 elif line in {b"SERVER_READY\n", b"BEFORE_CLEANUP\n"}:
                     remember()
@@ -130,13 +193,17 @@ def run(root, project, binary, environment, document):
         for expected in expected_output:
             if expected not in text:
                 raise RuntimeError(("missing documentation result", expected, text))
+        assert directory is not None, f"{document} never reported its directory"
         if directory.exists():
             raise RuntimeError(f"{document} cleanup left its directory")
         for descriptor in pidfds.values():
             with selectors.DefaultSelector() as exited:
                 exited.register(descriptor, selectors.EVENT_READ)
                 if not exited.select(1):
-                    raise RuntimeError(f"{document} cleanup left an owned process alive")
+                    raise RuntimeError(
+                        f"{document} cleanup left an owned process alive"
+                    )
+        assert daemon is not None, f"{document} never started a daemon"
         os.waitpid(daemon, 0)
         daemon = None
         for pid in set(map(int, child_file.read_text().split())) - previous_children:
@@ -158,13 +225,16 @@ def run(root, project, binary, environment, document):
         if process.poll() is None:
             process.kill()
             process.wait(timeout=1)
-        if directory is not None and directory.exists() and daemon is None and (directory / "server").exists():
+        if (
+            directory is not None
+            and directory.exists()
+            and daemon is None
+            and (directory / "server").exists()
+        ):
             remember()
         if daemon is not None:
-            try:
+            with contextlib.suppress(ProcessLookupError):
                 signal.pidfd_send_signal(pidfds[daemon], signal.SIGTERM)
-            except ProcessLookupError:
-                pass
             os.waitpid(daemon, 0)
         for descriptor in pidfds.values():
             os.close(descriptor)

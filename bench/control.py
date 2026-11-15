@@ -1,10 +1,10 @@
 """Measure completed control-lane mutations on fixed, owned tmux fixtures."""
+
 import argparse
 import datetime
 import hashlib
 import json
 import os
-from pathlib import Path
 import platform
 import resource
 import selectors
@@ -14,6 +14,7 @@ import statistics
 import subprocess
 import sys
 import time
+from pathlib import Path
 
 from capture import ROOT, TmuxFixture, source_digest
 from concurrency import child_count, distribution
@@ -47,18 +48,33 @@ def sample(binary, requests, concurrency):
         launches = directory / "client-launches"
         wrapper = directory / "tmux-client"
         wrapper.write_text(
-            "#!/bin/sh\nprintf '%s\\n' \"$$\" >> " + shlex.quote(str(launches))
-            + "\nexec " + shlex.quote(fixture.binary) + ' "$@"\n'
+            "#!/bin/sh\nprintf '%s\\n' \"$$\" >> "
+            + shlex.quote(str(launches))
+            + "\nexec "
+            + shlex.quote(fixture.binary)
+            + ' "$@"\n'
         )
         wrapper.chmod(0o700)
         helpers = {}
         usage_before = resource.getrusage(resource.RUSAGE_CHILDREN)
         process = subprocess.Popen(
-            [str(ROOT / "_build/default/bench/control.exe"), str(wrapper),
-             str(fixture.socket), str(requests), str(concurrency)],
-            cwd=ROOT, env=fixture.environment, stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=0,
+            [
+                str(ROOT / "_build/default/bench/control.exe"),
+                str(wrapper),
+                str(fixture.socket),
+                str(requests),
+                str(concurrency),
+            ],
+            cwd=ROOT,
+            env=fixture.environment,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            bufsize=0,
         )
+        assert process.stdin is not None
+        assert process.stdout is not None
+        assert process.stderr is not None
         try:
             barrier(process, b"READY\n", 1)
             for pid in launches.read_text().splitlines():
@@ -67,7 +83,10 @@ def sample(binary, requests, concurrency):
                 raise RuntimeError("expected one persistent tmux child")
             process.stdin.write(b"continue\n")
             barrier(process, b"DONE\n", 1)
-            if len(launches.read_text().splitlines()) != 1 or child_count(process.pid) != 1:
+            if (
+                len(launches.read_text().splitlines()) != 1
+                or child_count(process.pid) != 1
+            ):
                 raise RuntimeError("mutation phase started another tmux process")
             if len(fixture.command("list-clients").stdout.splitlines()) != 1:
                 raise RuntimeError("mutation phase changed client topology")
@@ -77,27 +96,39 @@ def sample(binary, requests, concurrency):
             if process.returncode or error:
                 raise RuntimeError((process.returncode, output, error))
             result = json.loads(output)
-            expected = [(index, f"@control-bench-{index:04d}", f"value-{index:04d}")
-                        for index in range(requests)]
+            expected = [
+                (index, f"@control-bench-{index:04d}", f"value-{index:04d}")
+                for index in range(requests)
+            ]
             rows = result["rows"]
             if [(row["index"], row["name"], row["value"]) for row in rows] != expected:
                 raise RuntimeError("completed mutations differ from submitted input")
             if len({row["operation_id"] for row in rows}) != requests:
                 raise RuntimeError("mutation handles reused operation IDs")
             verify_started = time.perf_counter()
-            table = fixture.command("show-options", "-t", "$0").stdout.decode().splitlines()
-            actual = dict(line.split(" ", 1) for line in table
-                          if line.startswith("@control-bench-"))
+            table = (
+                fixture.command("show-options", "-t", "$0").stdout.decode().splitlines()
+            )
+            actual = dict(
+                line.split(" ", 1)
+                for line in table
+                if line.startswith("@control-bench-")
+            )
             if actual != {name: value for _, name, value in expected}:
-                raise RuntimeError("server postconditions differ from completed mutations")
+                raise RuntimeError(
+                    "server postconditions differ from completed mutations"
+                )
             if fixture.command("list-clients").stdout:
                 raise RuntimeError("benchmark left clients attached")
             result.update(
                 verification_seconds=time.perf_counter() - verify_started,
-                client_process_launches=1, helper_reaping="PASS",
+                client_process_launches=1,
+                helper_reaping="PASS",
                 helper_observation_start="READY",
-                consumer_and_topology_cpu_seconds=usage_after.ru_utime + usage_after.ru_stime
-                - usage_before.ru_utime - usage_before.ru_stime,
+                consumer_and_topology_cpu_seconds=usage_after.ru_utime
+                + usage_after.ru_stime
+                - usage_before.ru_utime
+                - usage_before.ru_stime,
             )
             for descriptor in helpers.values():
                 with selectors.DefaultSelector() as exited:
@@ -124,7 +155,9 @@ def sample(binary, requests, concurrency):
                         if not exited.select(1):
                             signal.pidfd_send_signal(descriptor, signal.SIGKILL)
                             if not exited.select(1):
-                                raise RuntimeError("owned tmux client survived forced termination")
+                                raise RuntimeError(
+                                    "owned tmux client survived forced termination"
+                                )
                 except BaseException as error:
                     cleanup_errors.append(error)
                 finally:
@@ -141,9 +174,16 @@ def sample(binary, requests, concurrency):
                     raise primary
                 for error in cleanup_errors:
                     primary.add_note("benchmark cleanup: " + repr(error))
-        version = fixture.command("display-message", "-p", "#{version}").stdout.decode().strip()
-    result.update(sample_seconds=time.perf_counter() - started,
-                  owned_teardown="PASS", tmux=version)
+        version = (
+            fixture.command("display-message", "-p", "#{version}")
+            .stdout.decode()
+            .strip()
+        )
+    result.update(
+        sample_seconds=time.perf_counter() - started,
+        owned_teardown="PASS",
+        tmux=version,
+    )
     return result
 
 
@@ -167,21 +207,37 @@ def main():
     binary = str(Path(args.binary).resolve(strict=True))
     executable = ROOT / "_build/default/bench/control.exe"
     result = {
-        "schema": "libtmux.control-benchmark/1", "status": "RUNNING",
+        "schema": "libtmux.control-benchmark/1",
+        "status": "RUNNING",
         "measured_at_utc": datetime.datetime.now(datetime.UTC).isoformat(),
-        "head": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
+        "head": subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
+        ).strip(),
         "source_sha256": source_digest(),
-        "fixture_sha256": hashlib.sha256((ROOT / "test/support/tmux_fixture.py").read_bytes()).hexdigest(),
+        "fixture_sha256": hashlib.sha256(
+            (ROOT / "test/support/tmux_fixture.py").read_bytes()
+        ).hexdigest(),
         "executable_sha256": hashlib.sha256(executable.read_bytes()).hexdigest(),
         "binary_sha256": hashlib.sha256(Path(binary).read_bytes()).hexdigest(),
         "compiler": subprocess.check_output(["ocamlc", "-version"], text=True).strip(),
-        "platform": {"system": platform.system(), "kernel": platform.release(),
-                     "architecture": platform.machine(), "available_cpus": len(os.sched_getaffinity(0)),
-                     "eio_backend_selection": os.environ.get("EIO_BACKEND", "default"),
-                     "load_average_start": list(os.getloadavg())},
-        "workload": {"sessions": 1, "windows": 1, "panes": 1, "clients": 1,
-                     "operation": "set_option", "requests_per_sample": args.requests,
-                     "concurrency": args.concurrency, "samples_per_cell": args.repeat},
+        "platform": {
+            "system": platform.system(),
+            "kernel": platform.release(),
+            "architecture": platform.machine(),
+            "available_cpus": len(os.sched_getaffinity(0)),
+            "eio_backend_selection": os.environ.get("EIO_BACKEND", "default"),
+            "load_average_start": list(os.getloadavg()),
+        },
+        "workload": {
+            "sessions": 1,
+            "windows": 1,
+            "panes": 1,
+            "clients": 1,
+            "operation": "set_option",
+            "requests_per_sample": args.requests,
+            "concurrency": args.concurrency,
+            "samples_per_cell": args.repeat,
+        },
         "samples": {str(value): [] for value in args.concurrency},
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -189,8 +245,14 @@ def main():
         for repetition in range(args.repeat):
             offset = repetition % len(args.concurrency)
             for concurrency in args.concurrency[offset:] + args.concurrency[:offset]:
-                result["samples"][str(concurrency)].append(sample(binary, args.requests, concurrency))
-        versions = {sample_["tmux"] for samples in result["samples"].values() for sample_ in samples}
+                result["samples"][str(concurrency)].append(
+                    sample(binary, args.requests, concurrency)
+                )
+        versions = {
+            sample_["tmux"]
+            for samples in result["samples"].values()
+            for sample_ in samples
+        }
         if len(versions) != 1:
             raise RuntimeError("tmux fixture version changed between samples")
         result["tmux"] = versions.pop()
@@ -198,13 +260,30 @@ def main():
             raise RuntimeError("source changed during benchmark")
         result["summary"] = {
             key: {
-                "median_requests_per_second": statistics.median(args.requests / row["seconds"] for row in samples),
-                "min_requests_per_second": min(args.requests / row["seconds"] for row in samples),
-                "max_requests_per_second": max(args.requests / row["seconds"] for row in samples),
-                "request_latency": distribution([row["seconds"] for sample_ in samples for row in sample_["rows"]]),
-                "admission_latency": distribution([row["admission_seconds"] for sample_ in samples for row in sample_["rows"]]),
-                "median_loop_allocated_bytes": statistics.median(row["loop_allocated_bytes"] for row in samples),
-            } for key, samples in result["samples"].items()
+                "median_requests_per_second": statistics.median(
+                    args.requests / row["seconds"] for row in samples
+                ),
+                "min_requests_per_second": min(
+                    args.requests / row["seconds"] for row in samples
+                ),
+                "max_requests_per_second": max(
+                    args.requests / row["seconds"] for row in samples
+                ),
+                "request_latency": distribution(
+                    [row["seconds"] for sample_ in samples for row in sample_["rows"]]
+                ),
+                "admission_latency": distribution(
+                    [
+                        row["admission_seconds"]
+                        for sample_ in samples
+                        for row in sample_["rows"]
+                    ]
+                ),
+                "median_loop_allocated_bytes": statistics.median(
+                    row["loop_allocated_bytes"] for row in samples
+                ),
+            }
+            for key, samples in result["samples"].items()
         }
         result["status"] = "PASS"
     except BaseException as error:
@@ -217,7 +296,9 @@ def main():
         result["platform"]["load_average_end"] = list(os.getloadavg())
         args.output.write_text(json.dumps(result, indent=2) + "\n")
     print(json.dumps(result["summary"], indent=2))
-    print("PASS unique completed mutations, server postconditions, one persistent client and owned teardown")
+    print(
+        "PASS unique completed mutations, server postconditions, one persistent client and owned teardown"
+    )
 
 
 if __name__ == "__main__":

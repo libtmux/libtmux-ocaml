@@ -1,18 +1,24 @@
 #!/usr/bin/env python3
 """Fault peer: keep a real pidfd target while controlling the two identity replies."""
+
 import json
 import os
-from pathlib import Path
 import re
 import signal
 import subprocess
 import sys
+from pathlib import Path
 
 sequence = 0
 identities = 0
 mode = os.environ["LIBTMUX_TEST_PID_RACE"]
-child = subprocess.Popen([sys.executable, "-c", "import sys; sys.stdin.buffer.read(1)"],
-                         stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+child = subprocess.Popen(
+    [sys.executable, "-c", "import sys; sys.stdin.buffer.read(1)"],
+    stdin=subprocess.PIPE,
+    stdout=subprocess.DEVNULL,
+    stderr=subprocess.DEVNULL,
+)
+assert child.stdin is not None
 
 
 def stop(*_):
@@ -23,7 +29,9 @@ def frame(body):
     global sequence
     sequence += 1
     guard = f"1 {sequence} 1".encode()
-    sys.stdout.buffer.write(b"%begin " + guard + b"\n" + body + b"%end " + guard + b"\n")
+    sys.stdout.buffer.write(
+        b"%begin " + guard + b"\n" + body + b"%end " + guard + b"\n"
+    )
     sys.stdout.buffer.flush()
 
 
@@ -38,7 +46,9 @@ try:
             frame(b"libtmux\rprobe\n")
         elif b"#{q:pid}" in command:
             identities += 1
-            if (mode == "exit-before-open" and identities == 1) or (mode == "exit-before-recheck" and identities == 2):
+            if (mode == "exit-before-open" and identities == 1) or (
+                mode == "exit-before-recheck" and identities == 2
+            ):
                 child.terminate()
                 child.wait(timeout=1)
             pid = child.pid + (1 if mode == "changed-pid" and identities == 2 else 0)
@@ -51,6 +61,13 @@ finally:
     signal.signal(signal.SIGTERM, signal.SIG_IGN)
     child.stdin.close()
     child.wait(timeout=1)
-    Path(os.environ["LIBTMUX_TEST_PID_RECEIPT"]).write_text(json.dumps({
-        "identities": identities, "pid": child.pid, "reaped": True, "mode": mode,
-    }))
+    Path(os.environ["LIBTMUX_TEST_PID_RECEIPT"]).write_text(
+        json.dumps(
+            {
+                "identities": identities,
+                "pid": child.pid,
+                "reaped": True,
+                "mode": mode,
+            }
+        )
+    )

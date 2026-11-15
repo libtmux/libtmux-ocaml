@@ -1,13 +1,16 @@
 """Check source examples and local links in Markdown documentation."""
+
 import argparse
-from pathlib import Path
 import re
 import textwrap
+from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
 MARKER = re.compile(r"^\s*\(\* docs:(begin|end) ([a-z-]+) \*\)\s*$")
-INCLUDE = re.compile(r"<!-- example: ([^\s]+) -->\n\n```(?:ocaml|json)\n(.*?)```", re.DOTALL)
+INCLUDE = re.compile(
+    r"<!-- example: ([^\s]+) -->\n\n```(?:ocaml|json)\n(.*?)```", re.DOTALL
+)
 LINK = re.compile(r"(?<!!)\[[^\]]+\]\(([^\s)]+)\)")
 ASSET = re.compile(r'\b(?:src|srcset)="([^"\s]+)"')
 
@@ -22,7 +25,9 @@ def anchors(path):
         if fenced or not line.startswith("#"):
             continue
         heading = line.lstrip("#").strip().lower()
-        slug = "".join(c for c in heading if c.isalnum() or c in " _-").replace(" ", "-")
+        slug = "".join(c for c in heading if c.isalnum() or c in " _-").replace(
+            " ", "-"
+        )
         duplicate = counts.get(slug, 0)
         counts[slug] = duplicate + 1
         result.add(slug + (f"-{duplicate}" if duplicate else ""))
@@ -76,17 +81,31 @@ def check():
             raise ValueError(f"malformed example include: {document.relative_to(ROOT)}")
         for reference, code in INCLUDE.findall(text):
             if code != snippet(reference):
-                raise ValueError(f"example differs: {document.relative_to(ROOT)}: {reference}")
+                raise ValueError(
+                    f"example differs: {document.relative_to(ROOT)}: {reference}"
+                )
             count += 1
         for destination in LINK.findall(text) + ASSET.findall(text):
             url = urlsplit(destination)
             if url.scheme or url.netloc:
                 continue
-            path = (document.parent / unquote(url.path)).resolve() if url.path else document
+            path = (
+                (document.parent / unquote(url.path)).resolve()
+                if url.path
+                else document
+            )
             if not path.is_relative_to(ROOT) or not path.exists():
-                raise ValueError(f"broken local link: {document.relative_to(ROOT)}: {destination}")
-            if url.fragment and path.suffix == ".md" and unquote(url.fragment) not in anchors(path):
-                raise ValueError(f"missing heading: {document.relative_to(ROOT)}: {destination}")
+                raise ValueError(
+                    f"broken local link: {document.relative_to(ROOT)}: {destination}"
+                )
+            if (
+                url.fragment
+                and path.suffix == ".md"
+                and unquote(url.fragment) not in anchors(path)
+            ):
+                raise ValueError(
+                    f"missing heading: {document.relative_to(ROOT)}: {destination}"
+                )
             links += 1
     if not count:
         raise ValueError("documentation has no checked example includes")

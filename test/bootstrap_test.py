@@ -1,13 +1,15 @@
 """Outer: owned startup, same-connection binding and retained uncertain creation."""
+
 import ctypes
 import os
-from pathlib import Path
 import selectors
 import shlex
 import signal
 import subprocess
 import sys
 import tempfile
+from pathlib import Path
+
 from support.tmux_fixture import TmuxFixture
 
 root = Path(__file__).resolve().parents[1]
@@ -24,11 +26,24 @@ def exercise(binary, socket, environment, fresh, public_backend=None):
     expected = b"PASS bound startup, collision, retained cancellation, healthy daemon\nCLOSED\n"
     if public_backend is not None:
         public_peer = root / f"_build/default/test/workspace{public_backend}_peer.exe"
-        version = subprocess.check_output([binary, "-V"], env=environment).decode().strip().removeprefix("tmux ")
+        version = (
+            subprocess.check_output([binary, "-V"], env=environment)
+            .decode()
+            .strip()
+            .removeprefix("tmux ")
+        )
         arguments = [str(public_peer), binary, str(socket), "--bootstrap", version]
         expected = b"PASS public bootstrap, collision, closed-client journal, healthy daemon\nCLOSED\n"
-    process = subprocess.Popen(arguments, env=environment,
-                               stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    process = subprocess.Popen(
+        arguments,
+        env=environment,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    assert process.stdin is not None
+    assert process.stdout is not None
+    assert process.stderr is not None
     try:
         with selectors.DefaultSelector() as ready:
             ready.register(process.stdout, selectors.EVENT_READ)
@@ -37,8 +52,13 @@ def exercise(binary, socket, environment, fresh, public_backend=None):
         assert len(line) == 3 and line[0] == b"READY", line
         daemon = int(line[1])
         pidfds.extend([os.pidfd_open(daemon), os.pidfd_open(int(line[2]))])
-        result = subprocess.run([binary, "-S", str(socket), "list-panes", "-a", "-F", "#{pane_pid}"],
-                                env=environment, capture_output=True, check=True, timeout=1)
+        result = subprocess.run(
+            [binary, "-S", str(socket), "list-panes", "-a", "-F", "#{pane_pid}"],
+            env=environment,
+            capture_output=True,
+            check=True,
+            timeout=1,
+        )
         for pane in result.stdout.splitlines():
             pidfds.append(os.pidfd_open(int(pane)))
         process.stdin.write(b"continue\n")
@@ -48,12 +68,22 @@ def exercise(binary, socket, environment, fresh, public_backend=None):
         assert stdout == expected, stdout
         assert not stderr, stderr
         # Retain owned creations until PID-checked harness teardown.
-        result = subprocess.run([binary, "-S", str(socket), "list-panes", "-a", "-F", "#{pane_pid}"],
-                                env=environment, capture_output=True, check=True, timeout=1)
+        result = subprocess.run(
+            [binary, "-S", str(socket), "list-panes", "-a", "-F", "#{pane_pid}"],
+            env=environment,
+            capture_output=True,
+            check=True,
+            timeout=1,
+        )
         for pane in result.stdout.splitlines():
             pidfds.append(os.pidfd_open(int(pane)))
-        result = subprocess.run([binary, "-S", str(socket), "list-clients"],
-                                env=environment, capture_output=True, check=True, timeout=1)
+        result = subprocess.run(
+            [binary, "-S", str(socket), "list-clients"],
+            env=environment,
+            capture_output=True,
+            check=True,
+            timeout=1,
+        )
         assert result.stdout == b"", result
     finally:
         if process.poll() is None:
@@ -62,13 +92,32 @@ def exercise(binary, socket, environment, fresh, public_backend=None):
         for stream in [process.stdin, process.stdout, process.stderr]:
             stream.close()
         if fresh and daemon is None and socket.exists():
-            result = subprocess.run([binary, "-N", "-S", str(socket), "display-message", "-p", "#{pid}"],
-                                    env=environment, capture_output=True, timeout=1, check=True)
+            result = subprocess.run(
+                [binary, "-N", "-S", str(socket), "display-message", "-p", "#{pid}"],
+                env=environment,
+                capture_output=True,
+                timeout=1,
+                check=True,
+            )
             daemon = int(result.stdout)
             pidfds.append(os.pidfd_open(daemon))
         if fresh and daemon is not None:
-            result = subprocess.run([binary, "-N", "-S", str(socket), "list-panes", "-a", "-F", "#{pane_pid}"],
-                                    env=environment, capture_output=True, timeout=1, check=True)
+            result = subprocess.run(
+                [
+                    binary,
+                    "-N",
+                    "-S",
+                    str(socket),
+                    "list-panes",
+                    "-a",
+                    "-F",
+                    "#{pane_pid}",
+                ],
+                env=environment,
+                capture_output=True,
+                timeout=1,
+                check=True,
+            )
             for pane in result.stdout.splitlines():
                 pidfds.append(os.pidfd_open(int(pane)))
         if fresh and daemon is not None:
@@ -95,21 +144,37 @@ for binary in sys.argv[1:]:
     with tempfile.TemporaryDirectory(prefix="libtmux-ocaml-bootstrap-") as directory:
         directory = Path(directory)
         wrapper = directory / "tmux"
-        wrapper.write_text(f"#!/bin/sh\nexec {shlex.quote(actual)} -f /dev/null \"$@\"\n")
+        wrapper.write_text(f'#!/bin/sh\nexec {shlex.quote(actual)} -f /dev/null "$@"\n')
         wrapper.chmod(0o700)
-        environment = {key:value for key,value in os.environ.items() if key not in {"TMUX", "TMUX_PANE"}}
+        environment = {
+            key: value
+            for key, value in os.environ.items()
+            if key not in {"TMUX", "TMUX_PANE"}
+        }
         exercise(str(wrapper), directory / "server", environment, True)
-    print(f"PASS {Path(binary).parent.name}: fresh/existing bootstrap, collision, cancelled startup receipt, teardown")
+    print(
+        f"PASS {Path(binary).parent.name}: fresh/existing bootstrap, collision, cancelled startup receipt, teardown"
+    )
     for public_backend in ["", "_eio"]:
         with TmuxFixture(actual) as fixture:
             try:
-                exercise(actual, fixture.socket, fixture.environment, False, public_backend)
+                exercise(
+                    actual, fixture.socket, fixture.environment, False, public_backend
+                )
             finally:
                 fixture.track_panes()
-        with tempfile.TemporaryDirectory(prefix="libtmux-ocaml-public-bootstrap-") as directory:
+        with tempfile.TemporaryDirectory(
+            prefix="libtmux-ocaml-public-bootstrap-"
+        ) as directory:
             directory = Path(directory)
             wrapper = directory / "tmux"
-            wrapper.write_text(f"#!/bin/sh\nexec {shlex.quote(actual)} -f /dev/null \"$@\"\n")
+            wrapper.write_text(
+                f'#!/bin/sh\nexec {shlex.quote(actual)} -f /dev/null "$@"\n'
+            )
             wrapper.chmod(0o700)
-            exercise(str(wrapper), directory / "server", environment, True, public_backend)
-        print(f"PASS {Path(binary).parent.name}: public {'Eio' if public_backend else 'Unix'} fresh/existing bootstrap, collision and retained journal")
+            exercise(
+                str(wrapper), directory / "server", environment, True, public_backend
+            )
+        print(
+            f"PASS {Path(binary).parent.name}: public {'Eio' if public_backend else 'Unix'} fresh/existing bootstrap, collision and retained journal"
+        )

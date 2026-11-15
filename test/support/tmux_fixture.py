@@ -1,13 +1,14 @@
 """Owned Linux tmux fixtures. Readiness and teardown use kernel events."""
 
+import contextlib
 import ctypes
 import os
-from pathlib import Path
 import selectors
 import signal
 import stat
 import subprocess
 import tempfile
+from pathlib import Path
 
 
 class TmuxFixture:
@@ -16,18 +17,22 @@ class TmuxFixture:
         self.directory = tempfile.TemporaryDirectory(prefix="libtmux-ocaml-")
         self.socket = Path(self.directory.name) / "server"
         self.environment = {
-            key: value for key, value in os.environ.items()
+            key: value
+            for key, value in os.environ.items()
             if key not in {"TMUX", "TMUX_PANE"}
         }
         self.server = None
         self.pidfd = None
         self.pane_pidfds = {}
-        self.log = tempfile.TemporaryFile()
+        self.log = tempfile.TemporaryFile()  # noqa: SIM115  # closed in __exit__
 
     def command(self, *arguments, check=True):
         return subprocess.run(
             [self.binary, "-S", str(self.socket), *arguments],
-            env=self.environment, capture_output=True, check=check, timeout=1,
+            env=self.environment,
+            capture_output=True,
+            check=check,
+            timeout=1,
         )
 
     def __enter__(self):
@@ -37,14 +42,18 @@ class TmuxFixture:
             raise OSError(ctypes.get_errno(), "inotify_init1")
         try:
             watch = libc.inotify_add_watch(
-                notification, os.fsencode(self.directory.name), 0x100 | 0x80,
+                notification,
+                os.fsencode(self.directory.name),
+                0x100 | 0x80,
             )
             if watch < 0:
                 raise OSError(ctypes.get_errno(), "inotify_add_watch")
             self.server = subprocess.Popen(
                 [self.binary, "-D", "-S", str(self.socket), "-f", "/dev/null"],
-                env=self.environment, stdin=subprocess.DEVNULL,
-                stdout=self.log, stderr=self.log,
+                env=self.environment,
+                stdin=subprocess.DEVNULL,
+                stdout=self.log,
+                stderr=self.log,
             )
             self.pidfd = os.pidfd_open(self.server.pid)
             with selectors.DefaultSelector() as ready:
@@ -74,12 +83,12 @@ class TmuxFixture:
             os.close(notification)
 
     def track_panes(self):
-        for value in self.command("list-panes", "-a", "-F", "#{pane_pid}").stdout.splitlines():
+        for value in self.command(
+            "list-panes", "-a", "-F", "#{pane_pid}"
+        ).stdout.splitlines():
             if value and int(value) > 0 and int(value) not in self.pane_pidfds:
-                try:
+                with contextlib.suppress(ProcessLookupError):
                     self.pane_pidfds[int(value)] = os.pidfd_open(int(value))
-                except ProcessLookupError:
-                    pass
 
     def close(self):
         try:

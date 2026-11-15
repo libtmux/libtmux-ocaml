@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 """Fault only the short-lived read process; control connections use real tmux."""
+
 import os
 import socket
 import subprocess
@@ -10,7 +11,9 @@ arguments = sys.argv[1:]
 if "show-environment" not in arguments:
     os.execv(binary, [binary, *arguments])
 
-result = subprocess.run([binary, *arguments], capture_output=True, timeout=1)
+result = subprocess.run(
+    [binary, *arguments], capture_output=True, timeout=1, check=False
+)
 output = result.stdout
 mode = os.environ["LIBTMUX_TEST_READ_MODE"]
 if mode == "truncated":

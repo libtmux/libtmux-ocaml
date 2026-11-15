@@ -1,9 +1,11 @@
 """Outer: byte-stream continuity and bounded subscribers against exact tmux releases."""
+
 import os
-from pathlib import Path
 import selectors
 import subprocess
 import sys
+from pathlib import Path
+
 from support.tmux_fixture import TmuxFixture
 
 peer = Path(__file__).resolve().parents[1] / "_build/default/test/streaming_peer.exe"
@@ -27,16 +29,38 @@ for binary in sys.argv[1:]:
                 "    elif key == b'C': os.write(1, b'xxfuture\\x00matchyy')\n"
                 "    elif key == b'R': os.write(1, b'\\x1bc\\x1b[Hpresent-value')\n"
             )
-            fixture.command("respawn-pane", "-k", "-t", "%0", "/usr/bin/python3", str(program))
+            fixture.command(
+                "respawn-pane", "-k", "-t", "%0", "/usr/bin/python3", str(program)
+            )
             fixture.track_panes()
             fixture.command("wait-for", "output-ready")
-            process = subprocess.Popen([str(peer), fixture.binary, str(fixture.socket), backend],
-                                       env=fixture.environment, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                                       stderr=subprocess.PIPE, bufsize=0)
+            process = subprocess.Popen(
+                [str(peer), fixture.binary, str(fixture.socket), backend],
+                env=fixture.environment,
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                bufsize=0,
+            )
+            assert process.stdin is not None
+            assert process.stdout is not None
+            assert process.stderr is not None
             try:
                 with selectors.DefaultSelector() as ready:
                     ready.register(process.stdout, selectors.EVENT_READ)
-                    for expected in [b"READY\n", b"EVENT_LIMIT\n", b"CHANGE\n", b"RECOVER\n", b"FUTURE\n", b"RENDER\n", b"DETACH\n", b"RECOVER_AGAIN\n", b"CAPACITY\n", b"CANCEL_READY\n", b"LANE_CAPACITY\n"]:
+                    for expected in [
+                        b"READY\n",
+                        b"EVENT_LIMIT\n",
+                        b"CHANGE\n",
+                        b"RECOVER\n",
+                        b"FUTURE\n",
+                        b"RENDER\n",
+                        b"DETACH\n",
+                        b"RECOVER_AGAIN\n",
+                        b"CAPACITY\n",
+                        b"CANCEL_READY\n",
+                        b"LANE_CAPACITY\n",
+                    ]:
                         assert ready.select(1), "streaming peer did not progress"
                         line = process.stdout.readline()
                         assert line == expected, (line, process.stderr.read())
@@ -45,7 +69,9 @@ for binary in sys.argv[1:]:
                         elif expected == b"EVENT_LIMIT\n":
                             os.write(control, b"B")
                         elif expected == b"CHANGE\n":
-                            fixture.command("split-window", "-d", "-t", "%0", "exec cat")
+                            fixture.command(
+                                "split-window", "-d", "-t", "%0", "exec cat"
+                            )
                             fixture.track_panes()
                         elif expected == b"RECOVER\n":
                             os.write(control, b"B")
@@ -54,24 +80,41 @@ for binary in sys.argv[1:]:
                         elif expected == b"RENDER\n":
                             os.write(control, b"R")
                         elif expected == b"DETACH\n":
-                            rows = fixture.command("list-clients", "-F", "#{client_name}|#{client_flags}").stdout.splitlines()
-                            lanes = [row.split(b"|", 1)[0] for row in rows if b"ignore-size" in row]
+                            rows = fixture.command(
+                                "list-clients", "-F", "#{client_name}|#{client_flags}"
+                            ).stdout.splitlines()
+                            lanes = [
+                                row.split(b"|", 1)[0]
+                                for row in rows
+                                if b"ignore-size" in row
+                            ]
                             assert len(lanes) == 1, rows
-                            fixture.command("detach-client", "-t", lanes[0].decode() + ":")
+                            fixture.command(
+                                "detach-client", "-t", lanes[0].decode() + ":"
+                            )
                         elif expected == b"RECOVER_AGAIN\n":
                             os.write(control, b"B")
                         elif expected == b"CANCEL_READY\n":
                             process.stdin.write(b"CANCEL\n")
                         elif expected == b"LANE_CAPACITY\n":
-                            assert len(fixture.command("list-clients").stdout.splitlines()) == 8
+                            assert (
+                                len(fixture.command("list-clients").stdout.splitlines())
+                                == 8
+                            )
                             fixture.track_panes()
                             process.stdin.write(b"CHECKED\n")
                         else:
-                            assert len(fixture.command("list-clients").stdout.splitlines()) == 2
+                            assert (
+                                len(fixture.command("list-clients").stdout.splitlines())
+                                == 2
+                            )
                             process.stdin.write(b"CHECKED\n")
                 stdout, stderr = process.communicate(timeout=1)
                 assert process.returncode == 0, (binary, backend, stdout, stderr)
-                assert stdout == b"PASS bytes, cursors, shared lanes, overflow, coverage and closure\n", stdout
+                assert (
+                    stdout
+                    == b"PASS bytes, cursors, shared lanes, overflow, coverage and closure\n"
+                ), stdout
                 assert fixture.command("list-clients").stdout == b""
             finally:
                 if process.poll() is None:
@@ -80,4 +123,6 @@ for binary in sys.argv[1:]:
                 for stream in [process.stdin, process.stdout, process.stderr]:
                     stream.close()
                 os.close(control)
-            print(f"PASS {Path(binary).parent.name} {backend}: byte stream and subscriber isolation")
+            print(
+                f"PASS {Path(binary).parent.name} {backend}: byte stream and subscriber isolation"
+            )
