@@ -12,8 +12,8 @@ from support import readme_walkthrough
 from support.tmux_fixture import TmuxFixture
 
 root = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(root))
-from tools.docs_snippets import snippet
+sys.path.insert(0, str(root / "scripts/docs_snippets"))
+from docs_snippets import snippet
 
 
 def run_hook_recovery(runtime, binary, environment):

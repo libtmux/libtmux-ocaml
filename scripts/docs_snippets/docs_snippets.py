@@ -1,3 +1,8 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = []
+# ///
 """Check source examples and local links in Markdown documentation."""
 
 import argparse
@@ -6,7 +11,7 @@ import textwrap
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 MARKER = re.compile(r"^\s*\(\* docs:(begin|end) ([a-z-]+) \*\)\s*$")
 INCLUDE = re.compile(
     r"<!-- example: ([^\s]+) -->\n\n```(?:ocaml|json)\n(.*?)```", re.DOTALL
@@ -15,9 +20,9 @@ LINK = re.compile(r"(?<!!)\[[^\]]+\]\(([^\s)]+)\)")
 ASSET = re.compile(r'\b(?:src|srcset)="([^"\s]+)"')
 
 
-def anchors(path):
-    result = set()
-    counts = {}
+def anchors(path: Path) -> set[str]:
+    result: set[str] = set()
+    counts: dict[str, int] = {}
     fenced = False
     for line in path.read_text().splitlines():
         if line.startswith("```"):
@@ -34,10 +39,17 @@ def anchors(path):
     return result
 
 
-def snippet(reference):
+def snippet(reference: str, root: Path = ROOT) -> str:
+    """Return the source text a documentation include must repeat.
+
+    A reference is a path relative to the repository root, optionally followed
+    by `#region` to select the lines between `docs:begin` and `docs:end`
+    markers.
+    """
+    root = root.resolve()
     name, _, region = reference.partition("#")
-    path = (ROOT / name).resolve()
-    if not path.is_relative_to(ROOT) or path.suffix not in {".ml", ".json"}:
+    path = (root / name).resolve()
+    if not path.is_relative_to(root) or path.suffix not in {".ml", ".json"}:
         raise ValueError(f"invalid example source: {reference}")
     if path.suffix == ".json":
         if region:
@@ -46,7 +58,7 @@ def snippet(reference):
     lines = path.read_text().splitlines(keepends=True)
     selected = []
     active = not region
-    seen = set()
+    seen: set[str] = set()
     for line in lines:
         marker = MARKER.fullmatch(line.rstrip("\n"))
         if marker:
@@ -69,20 +81,22 @@ def snippet(reference):
     return textwrap.dedent("".join(selected)).strip() + "\n"
 
 
-def check():
+def check(root: Path = ROOT) -> None:
+    """Check every documentation include and local link under `root`."""
+    root = root.resolve()
     count = 0
     links = 0
-    documents = [ROOT / "README.md", *sorted((ROOT / "docs").glob("*.md"))]
+    documents = [root / "README.md", *sorted((root / "docs").glob("*.md"))]
     packages = ("lib", "unix", "eio", "json", "workspace", "cli")
-    documents += [ROOT / package / "README.md" for package in packages]
+    documents += [root / package / "README.md" for package in packages]
     for document in documents:
         text = document.read_text()
         if text.count("<!-- example:") != len(INCLUDE.findall(text)):
-            raise ValueError(f"malformed example include: {document.relative_to(ROOT)}")
+            raise ValueError(f"malformed example include: {document.relative_to(root)}")
         for reference, code in INCLUDE.findall(text):
-            if code != snippet(reference):
+            if code != snippet(reference, root):
                 raise ValueError(
-                    f"example differs: {document.relative_to(ROOT)}: {reference}"
+                    f"example differs: {document.relative_to(root)}: {reference}"
                 )
             count += 1
         for destination in LINK.findall(text) + ASSET.findall(text):
@@ -94,9 +108,9 @@ def check():
                 if url.path
                 else document
             )
-            if not path.is_relative_to(ROOT) or not path.exists():
+            if not path.is_relative_to(root) or not path.exists():
                 raise ValueError(
-                    f"broken local link: {document.relative_to(ROOT)}: {destination}"
+                    f"broken local link: {document.relative_to(root)}: {destination}"
                 )
             if (
                 url.fragment
@@ -104,7 +118,7 @@ def check():
                 and unquote(url.fragment) not in anchors(path)
             ):
                 raise ValueError(
-                    f"missing heading: {document.relative_to(ROOT)}: {destination}"
+                    f"missing heading: {document.relative_to(root)}: {destination}"
                 )
             links += 1
     if not count:

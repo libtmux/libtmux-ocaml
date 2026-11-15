@@ -79,7 +79,7 @@ README and guide snippets name regions in the compiled programs under
 is authoritative; this check rejects drift:
 
 ```console
-$ python3 tools/docs_snippets.py
+$ uv run scripts/docs_snippets/docs_snippets.py
 ```
 
 The installed-consumer test installs libraries into a separate prefix, builds

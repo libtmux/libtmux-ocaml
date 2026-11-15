@@ -38,4 +38,4 @@ extend-select = ["B", "C4", "I", "RUF", "SIM", "UP"]
 
 [tool.ty.environment]
 python-version = "3.11"
-extra-paths = ["test"]
+extra-paths = ["test", "scripts/docs_snippets"]
