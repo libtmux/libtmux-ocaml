@@ -18,3 +18,12 @@
   cancellation when secondary resource cleanup fails.
 - Escalate owned-helper shutdown after a 200 ms cooperative grace while other
   fibers can run, including failed and cancelled connection setup.
+- Add `Client.kill_server`: stop the daemon the client is bound to, report
+  success when that daemon exits, and close the client.
+- Add `with_private_daemon`: run a function against a foreground tmux daemon in
+  its own `0700` directory, with an optional config file and an optional first
+  session. It stops and reaps the daemon, checks that nothing answers and
+  removes the directory on every exit, including Eio cancellation. It keeps the
+  directory when the daemon still answers.
+- Add `?config_file` to `Workspace.submit_bootstrap`, passed to tmux as `-f`
+  when the new-session command starts the server.

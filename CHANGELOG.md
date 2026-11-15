@@ -3,6 +3,9 @@
 ## Unreleased
 
 - Support every tmux release from 3.3a through 3.8.
+- Add `Client.kill_server` and `with_private_daemon` to the blocking and Eio
+  clients, and `?config_file` to `Workspace.submit_bootstrap`, so a program
+  starts, uses and stops its own private tmux daemon without a shell.
 - Add the workspace packages: `libtmux-workspace` plans and applies layouts,
   `libtmux-json` encodes them and their receipts, and `libtmux-workspace-cli`
   runs them from the shell.

@@ -16,3 +16,12 @@
   including failed connection setup and terminal cancellation.
 - Use `poll` for client and terminal readiness so descriptors above the
   `Unix.select` ceiling remain usable.
+- Add `Client.kill_server`: stop the daemon the client is bound to, report
+  success when that daemon exits, and close the client.
+- Add `with_private_daemon`: run a function against a foreground tmux daemon in
+  its own `0700` directory, with an optional config file and an optional first
+  session. It stops and reaps the daemon, checks that nothing answers and
+  removes the directory on every exit, and keeps the directory when the
+  daemon still answers. Add the `Cleanup.Remove_directory` phase.
+- Add `?config_file` to `Workspace.submit_bootstrap`, passed to tmux as `-f`
+  when the new-session command starts the server.
