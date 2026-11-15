@@ -14,6 +14,7 @@ type phase =
   | Cancel_workers
   | Release_hook
   | Notify_waiters
+  | Remove_directory
 
 type issue = {
   phase : phase;

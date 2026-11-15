@@ -97,6 +97,7 @@ module Command = struct
     | Kill_session of Session.target
     | Kill_window of Window.target
     | Kill_pane of Pane.target
+    | Kill_server
     | Select_window_at of Session.target * int
     | Unlink_window_at of {
         session : Session.target;
@@ -320,6 +321,7 @@ module Operations = struct
   let kill_session session = Command.Mutate (Kill_session session)
   let kill_window window = Command.Mutate (Kill_window window)
   let kill_pane pane = Command.Mutate (Kill_pane pane)
+  let kill_server = Command.Mutate Kill_server
 
   let select_window_at session ~index =
     Command.Mutate (Select_window_at (session, index))

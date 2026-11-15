@@ -200,3 +200,8 @@
  (name stream_close_peer)
  (modules stream_close_peer)
  (libraries libtmux libtmux-unix unix))
+
+(executable
+ (name private_daemon_peer)
+ (modules private_daemon_peer)
+ (libraries libtmux libtmux-workspace libtmux-unix libtmux-eio eio_main unix))

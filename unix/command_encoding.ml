@@ -240,6 +240,7 @@ let mutation c = function
   | Command.Kill_session target -> ("kill-session", [ "-t"; session c target ])
   | Kill_window target -> ("kill-window", [ "-t"; window c target ])
   | Kill_pane target -> ("kill-pane", [ "-t"; pane c target ])
+  | Kill_server -> ("kill-server", [])
   | Select_window_at (target, number) ->
       ("select-window", [ "-t"; at c target number ])
   | Unlink_window_at { session; index; allow_kill } ->

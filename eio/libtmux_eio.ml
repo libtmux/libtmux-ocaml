@@ -268,7 +268,9 @@ module Client = struct
     t.release <- Eio.Switch.on_release_cancellable sw (fun () -> close_exn t);
     worker ~sw t (fun () ->
         Eio_unix.await_readable connection.pidfd;
-        close_exn ~cause:(Error.Disconnected "bound daemon exited") t);
+        (* [kill_server] expects this exit and closes the client itself. *)
+        if not connection.exit_expected then
+          close_exn ~cause:(Error.Disconnected "bound daemon exited") t);
     worker ~sw t (fun () ->
         let rec pump () =
           if not t.closing then (
@@ -466,7 +468,7 @@ module Workspace = struct
       plan
 
   let submit_bootstrap ?(cleanup = Cleanup.create ()) ?(binary = "tmux")
-      ?timeout ~sw ~process_mgr ~mono_clock plan =
+      ?config_file ?timeout ~sw ~process_mgr ~mono_clock plan =
     if Option.is_some (P.source plan) then Error Error.Stale_target
     else
       let bootstrap receipt config =
@@ -476,7 +478,7 @@ module Workspace = struct
             in
             let width, height = Libtmux_workspace.Config.dimensions config in
             let connection, created =
-              Libtmux_unix__Bootstrap.start receipt ?timeout
+              Libtmux_unix__Bootstrap.start receipt ?timeout ?config_file
                 ~io:(Runtime.create ~cleanup ~sw ~process_mgr ~mono_clock)
                 ~binary ~endpoint:(P.endpoint plan)
                 ~name:(Libtmux_workspace.Config.session config)
@@ -517,3 +519,12 @@ module Workspace = struct
               !(t.current);
           t.closed <- true))
 end
+
+let with_private_daemon ?(cleanup = Cleanup.create ()) ?(binary = "tmux")
+    ?config_file ?root ?session ?timeout ~process_mgr ~mono_clock use =
+  protect (fun () ->
+      Eio.Switch.run (fun sw ->
+          Libtmux_unix__Private_daemon.run
+            ~io:(Runtime.create ~cleanup ~sw ~process_mgr ~mono_clock)
+            ~finalize:Eio.Cancel.protect ~binary ?config_file ?root ?session
+            ?timeout use))

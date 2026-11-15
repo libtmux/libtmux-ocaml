@@ -885,6 +885,7 @@ module Command : sig
     | Kill_session of Session.target
     | Kill_window of Window.target
     | Kill_pane of Pane.target
+    | Kill_server
     | Select_window_at of Session.target * int
     | Unlink_window_at of {
         session : Session.target;
@@ -1275,6 +1276,12 @@ module Operations : sig
   val kill_pane : Pane.target -> unit Command.t
   (** Destroy the target pane and its running process. tmux removes a window
       that becomes empty and may remove its now-empty sessions. *)
+
+  val kill_server : unit Command.t
+  (** Stop the whole tmux server: destroy every session and window and close
+      every client. The command has no reply. A backend reports success when the
+      daemon it is bound to has exited, then retires its own connection; other
+      clients of that daemon see it disconnect. *)
 
   val select_window_at : Session.target -> index:int -> unit Command.t
   (** Operate on the session's current index at execution, not an old link

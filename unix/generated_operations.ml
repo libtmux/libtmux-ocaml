@@ -126,6 +126,9 @@ struct
   let kill_pane ?cancel connection pane =
     Client.run ?cancel connection (Libtmux.Operations.kill_pane pane)
 
+  let kill_server ?cancel connection =
+    Client.run ?cancel connection Libtmux.Operations.kill_server
+
   let select_window_at ?cancel connection session ~index =
     Client.run ?cancel connection
       (Libtmux.Operations.select_window_at session ~index)

@@ -45,6 +45,7 @@ type t = {
   mutable lane_slots : int;
   mutable cleanup_buffers : string list;
   mutable on_close : unit -> unit;
+  mutable exit_expected : bool;
 }
 
 let stop lane =
@@ -245,6 +246,7 @@ let connect_process ?(timeout = 1.) ~io ~binary ~arguments ~initial endpoint =
       lane_slots = 1;
       cleanup_buffers = [];
       on_close = (fun () -> ());
+      exit_expected = false;
     }
   with exn ->
     let bt = Printexc.get_raw_backtrace () in
@@ -291,6 +293,25 @@ let no_output t ?acknowledged name arguments =
       ~finally:(fun () -> close t)
       (fun () ->
         fail (Error.Outcome_unknown ("unexpected output from " ^ name)))
+
+(* tmux sends no reply: the daemon exits. Success is that exit, read from the
+   pidfd taken at connection time, so a reused PID cannot count. The connection
+   is retired either way, as after any request that loses its daemon. *)
+let kill_server t =
+  check t;
+  let deadline = Linux.now () +. t.timeout in
+  (* A backend that watches the pidfd must not report this exit as a loss. *)
+  t.exit_expected <- true;
+  Cleanup.protect
+    ~finally:(fun () -> close t)
+    (fun () ->
+      let command = protocol (P.Command.render "kill-server" []) in
+      Runtime_io.write t.lane.io t.lane.process ~pidfd:(Some t.pidfd) ~deadline
+        (command ^ "\n");
+      while Linux.pidfd_alive t.pidfd do
+        Runtime_io.check t.lane.io ~deadline;
+        t.lane.io.wait ~read:[ t.pidfd ] ~write:[] ~deadline
+      done)
 
 let exclusive t f =
   owner t;

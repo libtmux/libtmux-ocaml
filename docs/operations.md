@@ -40,6 +40,7 @@ cancellation. Blocking conveniences accept an optional cancellation token.
 | `kill_session` | `unit` |
 | `kill_window` | `unit` |
 | `kill_pane` | `unit` |
+| `kill_server` | `unit` |
 | `select_window_at` | `unit` |
 | `unlink_window_at` | `unit` |
 | `link_window` | `unit` |

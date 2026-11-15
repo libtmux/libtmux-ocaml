@@ -44,8 +44,8 @@ let reported body =
       }
   | _ -> fail (Error.Malformed_data "invalid bootstrap creation row")
 
-let start t ?timeout ~io ~binary ~endpoint ~name ~window_name ~spawn ~width
-    ~height () =
+let start t ?timeout ?config_file ~io ~binary ~endpoint ~name ~window_name
+    ~spawn ~width ~height () =
   if t.state <> Queued then
     fail (Error.Invalid_input "bootstrap was already admitted");
   let flags, args = Command_encoding.spawn spawn in
@@ -90,7 +90,7 @@ let start t ?timeout ~io ~binary ~endpoint ~name ~window_name ~spawn ~width
     let connection =
       C.connect_process ?timeout ~io ~binary ~initial
         ~arguments:
-          (endpoint_arguments ~start_server:true ~binary endpoint
+          (endpoint_arguments ~start_server:true ?config_file ~binary endpoint
           @ [ "-C"; "new-session" ] @ arguments)
         endpoint
     in

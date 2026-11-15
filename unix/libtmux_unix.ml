@@ -181,8 +181,8 @@ module Workspace = struct
             in
             f { base with check; wait })
 
-  let create ?client ?(cleanup = Cleanup.create ()) ?(binary = "tmux") ?timeout
-      ~owned plan =
+  let create ?client ?(cleanup = Cleanup.create ()) ?(binary = "tmux")
+      ?config_file ?timeout ~owned plan =
     let base = Runtime_io.blocking ~cleanup () in
     let current = ref client and cancel = ref None in
     let protect f =
@@ -218,7 +218,7 @@ module Workspace = struct
           let width, height = Libtmux_workspace.Config.dimensions config in
           let connection, created =
             cancel_io base !cancel (fun io ->
-                Bootstrap.start receipt ?timeout ~io ~binary
+                Bootstrap.start receipt ?timeout ?config_file ~io ~binary
                   ~endpoint:(P.endpoint plan)
                   ~name:(Libtmux_workspace.Config.session config)
                   ~window_name:first.name ~spawn:(List.hd first.panes).spawn
@@ -253,12 +253,12 @@ module Workspace = struct
 
   let submit client plan = create ~client ~owned:false plan
 
-  let submit_bootstrap ?cleanup ?binary ?timeout plan =
+  let submit_bootstrap ?cleanup ?binary ?config_file ?timeout plan =
     if Option.is_some (P.source plan) then Error Libtmux.Error.Stale_target
     else
       Result.join
         (Runtime_io.protect (fun () ->
-             create ?cleanup ?binary ?timeout ~owned:true plan))
+             create ?cleanup ?binary ?config_file ?timeout ~owned:true plan))
 
   let inspect t =
     Runtime_io.protect (fun () ->
@@ -292,3 +292,11 @@ module Workspace = struct
               (fun client -> Runtime_io.get (Client.close client))
               !(t.current)))
 end
+
+let with_private_daemon ?(cleanup = Cleanup.create ()) ?(binary = "tmux")
+    ?config_file ?root ?session ?timeout use =
+  Runtime_io.protect (fun () ->
+      Private_daemon.run
+        ~io:(Runtime_io.blocking ~cleanup ())
+        ~finalize:(fun f -> f ())
+        ~binary ?config_file ?root ?session ?timeout use)

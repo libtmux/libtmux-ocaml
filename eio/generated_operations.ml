@@ -112,6 +112,9 @@ struct
   let kill_pane connection pane =
     Client.run connection (Libtmux.Operations.kill_pane pane)
 
+  let kill_server connection =
+    Client.run connection Libtmux.Operations.kill_server
+
   let select_window_at connection session ~index =
     Client.run connection (Libtmux.Operations.select_window_at session ~index)
 

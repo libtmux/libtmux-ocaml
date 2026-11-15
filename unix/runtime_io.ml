@@ -235,13 +235,16 @@ let check io ~deadline =
 (* Runtime checks can yield, allowing close to recycle a descriptor meanwhile. *)
 let check_process process = if not (process.is_open ()) then fail Error.Closed
 
-let endpoint_arguments ?(start_server = false) ~binary endpoint =
+let endpoint_arguments ?(start_server = false) ?config_file ~binary endpoint =
   let endpoint =
     match Endpoint.kind endpoint with
     | Named_socket name -> [ "-L"; name ]
     | Socket_path path -> [ "-S"; path ]
   in
-  [ binary; "-u" ] @ (if start_server then [] else [ "-N" ]) @ endpoint
+  [ binary; "-u" ]
+  @ (if start_server then [] else [ "-N" ])
+  @ endpoint
+  @ match config_file with None -> [] | Some file -> [ "-f"; file ]
 
 let arguments ~binary endpoint =
   endpoint_arguments ~binary endpoint

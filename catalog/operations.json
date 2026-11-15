@@ -348,6 +348,13 @@
     "convenience": "generated"
   },
   {
+    "name": "kill_server",
+    "parameters": [],
+    "signature": "unit Command.t",
+    "documentation": "(** Stop the whole tmux server: destroy every session and window and close\n      every client. The command has no reply. A backend reports success when the\n      daemon it is bound to has exited, then retires its own connection; other\n      clients of that daemon see it disconnect. *)",
+    "convenience": "generated"
+  },
+  {
     "name": "select_window_at",
     "parameters": [
       "session",

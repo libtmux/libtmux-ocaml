@@ -6,7 +6,9 @@
     resources; tmux applies its configured daemon lifetime.
 
     See {!Client} for acquisition and commands, {!Operation} for cancellation
-    outcomes, and {!Subscription} for bounded future output. The
+    outcomes, and {!Subscription} for bounded future output.
+    {!val-with_private_daemon} starts a daemon the caller owns for one scope.
+    The
     {{:https://github.com/libtmux/libtmux-ocaml/blob/master/docs/control.md}control
      guide} explains binding, completion and recovery. *)
 
@@ -29,6 +31,7 @@ module Cleanup : sig
     | Cancel_workers
     | Release_hook
     | Notify_waiters
+    | Remove_directory
 
   type issue = Cleanup.issue = {
     phase : phase;
@@ -253,6 +256,7 @@ end
     observe it.
 
     - Sessions: {!Client.rename_session} and {!Client.kill_session}
+    - Server: {!Client.kill_server} stops the daemon and closes this client
     - Windows: {!Client.rename_window}, {!Client.select_window_at},
       {!Client.link_window}, {!Client.unlink_window_at},
       {!Client.move_window_at}, {!Client.resize_window},
@@ -713,6 +717,13 @@ module Client : sig
   (** Destroy the target pane and its running process. tmux removes a window
       that becomes empty and may remove its now-empty sessions. *)
 
+  val kill_server :
+    ?cancel:Cancellation.t -> t -> (unit, Libtmux.Error.t) result
+  (** Stop the whole tmux server: destroy every session and window and close
+      every client. The command has no reply. A backend reports success when the
+      daemon it is bound to has exited, then retires its own connection; other
+      clients of that daemon see it disconnect. *)
+
   val select_window_at :
     ?cancel:Cancellation.t ->
     t ->
@@ -891,12 +902,16 @@ module Workspace : sig
   val submit_bootstrap :
     ?cleanup:Cleanup.t ->
     ?binary:string ->
+    ?config_file:string ->
     ?timeout:float ->
     Libtmux_workspace.Plan.t ->
     (t, Libtmux.Error.t) result
   (** Allocate a handle for a missing-endpoint plan. Awaiting it starts control
       new-session and binds the same connection. The handle owns its new client;
-      it never acquires ownership of the daemon. *)
+      it never acquires ownership of the daemon. [config_file] is passed to tmux
+      as [-f] when the new-session command starts the server, so it replaces the
+      default configuration files; a daemon already listening on the endpoint
+      has read its own configuration and ignores it. *)
 
   val await :
     ?cancel:Cancellation.t ->
@@ -926,3 +941,37 @@ module Workspace : sig
   (** Release an owned client through {!Client.close}. Active await returns
       Busy. Completed journals remain readable after close. *)
 end
+
+val with_private_daemon :
+  ?cleanup:Cleanup.t ->
+  ?binary:string ->
+  ?config_file:string ->
+  ?root:string ->
+  ?session:string ->
+  ?timeout:float ->
+  (Libtmux.Endpoint.t -> 'a) ->
+  ('a, Libtmux.Error.t) result
+(** Run [f] against a tmux daemon this call starts and owns, then stop it. The
+    daemon listens on a socket in a fresh directory, created mode [0700] under
+    [root] (default: the system temporary directory) and named with the prefix
+    [libtmux-ocaml-]. It reads [config_file], or nothing when none is given,
+    instead of any default configuration. Neither [TMUX] nor [TMUX_PANE] reaches
+    it. A [root] whose socket path would exceed the 107 bytes of a Unix socket
+    address returns {!Libtmux.Error.Invalid_input} before anything is created.
+
+    [f] receives the {!Libtmux.Endpoint.t} once the socket answers, within
+    [timeout] seconds (default 5). The daemon stays alive until it is stopped,
+    even with no session. {!Client.connect} needs a session to attach to, so
+    pass [session] to start the daemon with one detached session of that name,
+    with a single window named [main] running [/bin/cat -u], or create the first
+    session with {!Workspace.submit_bootstrap}. Close every client made for
+    [endpoint] before [f] returns.
+
+    On every exit of [f], including an exception, the daemon is terminated and
+    reaped, the call checks that nothing answers the socket, and the directory
+    is removed. An exception from [f] propagates after cleanup, and a cleanup
+    failure never replaces it; failures are retained in [cleanup]. When [f]
+    returns, a cleanup failure is the result. A daemon that still answers, or
+    one that cannot be reaped, leaves the directory in place and returns
+    {!Libtmux.Error.Filesystem} or the cleanup error with its path. Normal
+    return gives [Ok] of the value of [f]. *)

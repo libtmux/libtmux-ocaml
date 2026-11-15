@@ -10,6 +10,7 @@
 #include <math.h>
 #include <poll.h>
 #include <stdint.h>
+#include <sys/inotify.h>
 #include <sys/random.h>
 #include <sys/syscall.h>
 #include <time.h>
@@ -65,6 +66,18 @@ CAMLprim value libtmux_pidfd_alive(value fd) {
   if (count < 0) caml_uerror("poll(pidfd)", Nothing);
   if (item.revents & POLLNVAL) caml_unix_error(EBADF, "poll(pidfd)", Nothing);
   return Val_bool(count == 0);
+}
+
+CAMLprim value libtmux_inotify_watch(value path) {
+  CAMLparam1(path);
+  int fd = inotify_init1(IN_CLOEXEC | IN_NONBLOCK);
+  if (fd < 0) caml_uerror("inotify_init1", Nothing);
+  if (inotify_add_watch(fd, String_val(path), IN_CREATE | IN_MOVED_TO) < 0) {
+    int error = errno;
+    close(fd);
+    caml_unix_error(error, "inotify_add_watch", path);
+  }
+  CAMLreturn(Val_int(fd));
 }
 
 CAMLprim value libtmux_monotonic_ns(value unit) {

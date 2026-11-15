@@ -323,6 +323,7 @@ let execute : type a. a operation -> a =
   | Send_text _ -> action ()
   | Send_keys _ -> action ()
   | Signal _ -> action ()
+  | Mutate Kill_server -> C.kill_server c
   | Mutate _ -> action ()
   | Create_session _ -> creation ()
   | Create_window _ -> creation ()

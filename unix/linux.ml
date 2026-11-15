@@ -1,5 +1,6 @@
 external pidfd_open : int -> Unix.file_descr = "libtmux_pidfd_open"
 external pidfd_alive : Unix.file_descr -> bool = "libtmux_pidfd_alive"
+external inotify_watch : string -> Unix.file_descr = "libtmux_inotify_watch"
 external monotonic_ns : unit -> int64 = "libtmux_monotonic_ns"
 external random_bytes : unit -> string = "libtmux_random_bytes"
 
