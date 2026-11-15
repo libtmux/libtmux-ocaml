@@ -1,0 +1,31 @@
+[project]
+name = "libtmux-ocaml-scripts"
+version = "0"
+description = "Support scripts and outer test drivers for libtmux for OCaml"
+requires-python = ">=3.11"
+
+[dependency-groups]
+dev = ["pytest==9.2.0", "ruff==0.17.4", "ty==0.0.101"]
+
+[tool.pytest.ini_options]
+testpaths = ["scripts"]
+addopts = "--doctest-modules --import-mode=importlib -p no:cacheprovider"
+pythonpath = [
+    "scripts/docs_snippets",
+    "scripts/export_api",
+    "scripts/generate",
+    "scripts/bench",
+]
+markers = [
+    "native: starts a real tmux; set TMUX_BINARY to its path",
+]
+
+[tool.ruff]
+target-version = "py311"
+
+[tool.ruff.lint]
+extend-select = ["B", "C4", "I", "RUF", "SIM", "UP"]
+
+[tool.ty.environment]
+python-version = "3.11"
+extra-paths = ["test", "scripts/docs_snippets", "scripts/export_api", "scripts/generate", "scripts/bench"]

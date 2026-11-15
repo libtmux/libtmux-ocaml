@@ -1,5 +1,6 @@
 # Build and tool output
 /_build/
+/compile_commands.json
 /_opam/
 /.opam-switch/
 /build/
@@ -36,3 +37,8 @@ Thumbs.db
 CLAUDE.local.md
 .claude/settings.local.json
 __pycache__/
+
+# Python tooling
+/.venv/
+/.ruff_cache/
+/.pytest_cache/
