@@ -77,6 +77,7 @@ let local_version binary =
 
 let () =
   let binary = if Array.length Sys.argv = 2 then Sys.argv.(1) else "tmux" in
+  (* docs:begin private-daemon *)
   let snapshot =
     get
       (Libtmux_unix.with_private_daemon ~binary (fun endpoint ->
@@ -99,6 +100,7 @@ let () =
            | Endpoint.Socket_path socket -> Printf.printf "socket=%s\n" socket
            | Endpoint.Named_socket _ -> ());
            snapshot))
+    (* docs:end private-daemon *)
   in
   assert (Iarray.length (Snapshot.sessions snapshot) = 1);
   assert (Iarray.length (Snapshot.windows snapshot) = 1);

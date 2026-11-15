@@ -67,6 +67,55 @@ $ eval "$(opam env --switch=. --set-switch)"
 
 More: [installation guide](docs/getting-started.md), for use from another Dune project.
 
+## Start and stop a private server
+
+### [`with_private_daemon`][unix-private-daemon]: a tmux daemon the program owns
+
+One call starts tmux on a fresh socket in its own directory, runs your function
+and then stops the daemon and removes the directory, also after an exception.
+[`Libtmux_eio.with_private_daemon`][eio-private-daemon] does the same under Eio
+cancellation, and [`Client.kill_server`][unix-kill-server] stops a daemon early.
+The daemon starts with no session, so the
+[bootstrap program](examples/showcase_bootstrap.ml) creates the first one with
+[`Workspace.submit_bootstrap`][unix-bootstrap]:
+
+<!-- example: examples/showcase_bootstrap.ml#private-daemon -->
+
+```ocaml
+let snapshot =
+  get
+    (Libtmux_unix.with_private_daemon ~binary (fun endpoint ->
+         let execution =
+           bootstrap ~binary ~version:(local_version binary)
+             ~directory:(Sys.getcwd ()) endpoint
+         in
+         let snapshot =
+           protect
+             ~finally:(fun () -> get (Workspace.close execution))
+             (fun () ->
+               let receipt = get (Workspace.await execution) in
+               require_success receipt;
+               let client = Option.get (Workspace.client execution) in
+               get (Client.capture client))
+         in
+         (match Endpoint.kind endpoint with
+         | Endpoint.Socket_path socket -> Printf.printf "socket=%s\n" socket
+         | Endpoint.Named_socket _ -> ());
+         snapshot))
+```
+
+```console
+$ opam exec -- dune exec examples/showcase_bootstrap.exe -- tmux
+```
+
+```text
+socket=/tmp/libtmux-ocaml-c75807/server
+bootstrapped: 1 session, 1 window, 1 pane
+```
+
+Pass `~config_file` to run the daemon with your own tmux configuration, or
+`~session` to start it with one session. More: [bootstrap guide](docs/bootstrap.md).
+
 ## Read a real tmux graph
 
 ### [`Client.capture`][unix-capture]: sessions, window links and panes
@@ -335,6 +384,194 @@ scrollback. More: [operations](docs/operations.md), including
 [`kill_session`][unix-kill-session], [`read_option`][unix-read-option] and
 [`set_hook`][unix-set-hook].
 
+## Change settings, rearrange panes and steer clients
+
+### [`Client.set_option`][unix-set-option]: options, environment and hooks
+
+[`Client.set_environment`][unix-set-environment] and
+[`Client.set_hook`][unix-set-hook] take the same scopes. Each has a matching
+`unset_*`, `read_*` and `capture_*` call. The
+[options program](examples/showcase_options.ml) sets, reads and removes a server
+option, an environment variable and a hook:
+
+<!-- example: examples/showcase_options.ml#options-and-environment -->
+
+```ocaml
+let integer client scope name =
+  match get (Client.read_option client scope name) with
+  | Some (Options.Scalar (Options.Integer value)) -> Int64.to_int value
+  | _ -> failwith (name ^ " is not an integer")
+
+let tune_options client (initial : Created.t) =
+  let server = Options.Server and session = Options.Session initial.session in
+  get
+    (Client.set_option client server ~name:"escape-time" (Options.Integer 13L));
+  assert (integer client server "escape-time" = 13);
+  (* Unsetting restores tmux's default, which differs between releases. *)
+  get (Client.unset_option client server "escape-time");
+  assert (integer client server "escape-time" <> 13);
+  get (Client.set_option client session ~name:"@project" (Options.Text "ocaml"));
+  assert (
+    Options.lookup (get (Client.capture_options client session)) "@project"
+    <> None);
+  get (Client.clear_option_array client server "command-alias")
+
+let tune_environment client =
+  let lookup () =
+    Environment.lookup
+      (get (Client.capture_environment client Environment.Global))
+      "LIBTMUX_DEMO"
+  in
+  get
+    (Client.set_environment client Environment.Global ~name:"LIBTMUX_DEMO" "one");
+  assert (lookup () = Some (Environment.Value "one"));
+  (* A removal marker masks a global value; unsetting drops the entry. *)
+  get (Client.remove_environment client Environment.Global "LIBTMUX_DEMO");
+  assert (lookup () = Some Environment.Removed);
+  get (Client.unset_environment client Environment.Global "LIBTMUX_DEMO");
+  assert (lookup () = None)
+```
+
+```console
+$ opam exec -- dune exec examples/showcase_options.exe -- tmux
+```
+
+```text
+socket=/tmp/libtmux-ocaml-3f9a1c/server
+configured: options, hooks and environment
+```
+
+[`Client.remove_environment`][unix-remove-environment] stores a marker that
+masks a global value; unsetting drops the entry. More: [options](docs/options.md).
+
+### [`Client.swap_panes`][unix-swap-panes]: swap, zoom, move and break panes
+
+[`Client.rotate_panes`][unix-rotate-panes], [`Client.zoom_pane`][unix-zoom-pane],
+[`Client.move_pane`][unix-move-pane] and [`Client.break_pane`][unix-break-pane]
+change a window's arrangement; the [panes program](examples/showcase_panes.ml)
+also respawns a pane and clears its history:
+
+<!-- example: examples/showcase_panes.ml#arrange-panes -->
+
+```ocaml
+let find client target =
+  Snapshot.find_pane (get (Client.capture client)) (Pane.Target.id target)
+  |> Option.get
+
+let panes_in client (window : Window.target) =
+  Window.panes
+    (Snapshot.find_window
+       (get (Client.capture client))
+       (Window.Target.id window)
+    |> Option.get)
+
+let arrange client (initial : Created.t) spawn =
+  let right =
+    get (Client.split_pane client initial.pane ~direction:Geometry.Right ~spawn)
+  in
+  let below =
+    get (Client.split_pane client right.pane ~direction:Geometry.Below ~spawn)
+  in
+  assert (Iarray.length (panes_in client initial.window) = 3);
+  (* Swap two panes, rotate all three and choose the active one. *)
+  let left target = Pane.left (find client target) in
+  let before = left initial.pane in
+  get (Client.swap_panes client initial.pane right.pane);
+  assert (left initial.pane <> before);
+  get (Client.rotate_panes client initial.window `Forward);
+  get (Client.select_pane client right.pane);
+  assert (Pane.active (find client right.pane));
+  (* Zoom one pane over the window, restore it and cycle the layout. *)
+  get (Client.zoom_pane client right.pane);
+  let zoomed = find client right.pane in
+  assert (Pane.width zoomed = Window.width (Pane.window zoomed));
+  get (Client.zoom_pane client right.pane);
+  get (Client.cycle_layout client initial.window `Next);
+  (* Move a pane beside another, then break it into a new window. *)
+  get
+    (Client.move_pane client below.pane ~beside:initial.pane
+       ~direction:Geometry.Below);
+  let broken =
+    get
+      (Client.break_pane client below.pane ~name:"broken"
+         ~session:initial.session ~index:5)
+  in
+  assert (broken.window_index = 5);
+  assert (Iarray.length (panes_in client initial.window) = 2)
+```
+
+```console
+$ opam exec -- dune exec examples/showcase_panes.exe -- tmux
+```
+
+```text
+socket=/tmp/libtmux-ocaml-8d2e47/server
+arranged: swap, rotate, zoom, cycle, move, break, respawn
+```
+
+tmux can constrain geometry; capture again to read the result.
+
+### [`Client.switch_client_at`][unix-switch-client]: steer another client
+
+A function ending in `_at` addresses the client bearing a name when the command
+runs. The [clients program](examples/showcase_clients.ml) steers a second
+control client with
+[`Client.resize_control_client_at`][unix-resize-control-client],
+[`Client.refresh_client_at`][unix-refresh-client] and
+[`Client.request_detach_client_at`][unix-detach-client]:
+
+<!-- example: examples/showcase_clients.ml#steer-client -->
+
+```ocaml
+let same a b = Client_name.to_string a = Client_name.to_string b
+
+let names client =
+  Snapshot.clients (get (Client.capture client))
+  |> Iarray.to_list
+  |> List.map Client_observation.current_name
+
+let observed client name =
+  Snapshot.clients (get (Client.capture client))
+  |> Iarray.to_seq
+  |> Seq.find (fun observation ->
+      same (Client_observation.current_name observation) name)
+
+(* A second control client is the one this program steers. *)
+let connect_second ~binary client =
+  let before = names client in
+  let second =
+    get (Client.connect ~binary (Source.endpoint (Client.source client)))
+  in
+  let name =
+    List.find (fun name -> not (List.exists (same name) before)) (names client)
+  in
+  (second, name)
+
+let steer client name (other : Created.t) =
+  get (Client.resize_control_client_at client name ~width:100 ~height:30);
+  get (Client.refresh_client_at client name);
+  get (Client.switch_client_at client name ~session:other.session);
+  let steered = Option.get (observed client name) in
+  assert (Client_observation.width steered = 100);
+  assert (
+    Session.Id.equal
+      (Session.id (Option.get (Client_observation.session steered)))
+      (Session.Target.id other.session));
+  get (Client.request_detach_client_at client name);
+  assert (observed client name = None)
+```
+
+```console
+$ opam exec -- dune exec examples/showcase_clients.exe -- tmux
+```
+
+```text
+socket=/tmp/libtmux-ocaml-b61c05/server
+steered: resized, refreshed, switched and detached
+```
+
+A request to detach confirms that tmux processed it, not that the peer exited.
+
 ## Send literal input and observe the reply with Eio
 
 ### [`Client.subscribe`][subscribe]: subscribe before sending input
@@ -466,3 +703,19 @@ Licensed under [MIT](LICENSE).
 [unix-kill-session]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-kill_session/
 [unix-read-option]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-read_option/
 [unix-set-hook]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-set_hook/
+[unix-set-environment]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-set_environment/
+[unix-remove-environment]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-remove_environment/
+[unix-rotate-panes]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-rotate_panes/
+[unix-zoom-pane]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-zoom_pane/
+[unix-move-pane]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-move_pane/
+[unix-break-pane]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-break_pane/
+[unix-resize-control-client]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-resize_control_client_at/
+[unix-refresh-client]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-refresh_client_at/
+[unix-set-option]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-set_option/
+[unix-swap-panes]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-swap_panes/
+[unix-switch-client]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-switch_client_at/
+[unix-detach-client]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-request_detach_client_at/
+[unix-private-daemon]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix/#val-with_private_daemon
+[eio-private-daemon]: https://libtmux.org/en/ocaml/latest/reference/libtmux_eio/#val-with_private_daemon
+[unix-kill-server]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-client-kill_server/
+[unix-bootstrap]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix-workspace-submit_bootstrap/

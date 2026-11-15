@@ -150,6 +150,60 @@
       ],
       "expected_stdout_line": "layout: 3 horizontal panes",
       "success_exit_code": 0
+    },
+    {
+      "capability": "options",
+      "title": "Change options, hooks and environment",
+      "file": "examples/showcase_options.ml",
+      "whole_file": true,
+      "command": [
+        "opam",
+        "exec",
+        "--",
+        "dune",
+        "exec",
+        "examples/showcase_options.exe",
+        "--",
+        "tmux"
+      ],
+      "expected_stdout_line": "configured: options, hooks and environment",
+      "success_exit_code": 0
+    },
+    {
+      "capability": "panes",
+      "title": "Rearrange panes",
+      "file": "examples/showcase_panes.ml",
+      "whole_file": true,
+      "command": [
+        "opam",
+        "exec",
+        "--",
+        "dune",
+        "exec",
+        "examples/showcase_panes.exe",
+        "--",
+        "tmux"
+      ],
+      "expected_stdout_line": "arranged: swap, rotate, zoom, cycle, move, break, respawn",
+      "success_exit_code": 0
+    },
+    {
+      "capability": "clients",
+      "title": "Steer another client",
+      "file": "examples/showcase_clients.ml",
+      "whole_file": true,
+      "command": [
+        "opam",
+        "exec",
+        "--",
+        "dune",
+        "exec",
+        "examples/showcase_clients.exe",
+        "--",
+        "tmux"
+      ],
+      "expected_stdout_line": "steered: resized, refreshed, switched and detached",
+      "success_exit_code": 0
     }
   ]
 }

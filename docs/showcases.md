@@ -29,6 +29,9 @@ The watch program also needs `libtmux-eio` and `eio_main`. The
 | Create a window and recapture its name | [Create](../examples/showcase_create_window.ml) | `created: logs` |
 | Move a window to another session's index | [Move](../examples/showcase_move_window.ml) | `moved: build at 7` |
 | Apply and verify horizontal pane geometry | [Layout](../examples/showcase_layout.ml) | `layout: 3 horizontal panes` |
+| Change options, hooks and environment | [Options](../examples/showcase_options.ml) | `configured: options, hooks and environment` |
+| Swap, rotate, zoom, move, break and respawn panes | [Panes](../examples/showcase_panes.ml) | `arranged: swap, rotate, zoom, cycle, move, break, respawn` |
+| Resize, refresh, switch and detach another client | [Clients](../examples/showcase_clients.ml) | `steered: resized, refreshed, switched and detached` |
 
 All programs print their temporary socket path before the outcome. The
 [bootstrap walkthrough](bootstrap.md) explains the missing-endpoint precondition
@@ -80,6 +83,25 @@ Split a window and apply an even horizontal layout:
 
 ```console
 $ opam exec -- dune exec examples/showcase_layout.exe -- tmux
+```
+
+Set, read and unset options, environment variables and a hook:
+
+```console
+$ opam exec -- dune exec examples/showcase_options.exe -- tmux
+```
+
+Swap, rotate and zoom panes, move one beside another, break it out and respawn
+another:
+
+```console
+$ opam exec -- dune exec examples/showcase_panes.exe -- tmux
+```
+
+Resize, switch and detach a second client from the first:
+
+```console
+$ opam exec -- dune exec examples/showcase_clients.exe -- tmux
 ```
 
 They need tmux 3.3a or newer. [`showcase.json`](../examples/showcase.json) lists
