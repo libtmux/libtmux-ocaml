@@ -177,7 +177,48 @@ module Relation : sig
 end
 
 (** A captured session and its ordered window-link contexts. A session can
-    contain repeated links to the same global window. *)
+    contain repeated links to the same global window.
+
+    {1 What is on here}
+
+    A session is an observation: every function here reads captured data and
+    performs no I/O. Acting on a session goes through {!Operations}. The members
+    fall into a few groups:
+
+    {b Identifying a session.} {!Session.id} returns the tmux ID as a
+    {!Session.Id.t}, {!Session.name} returns the name and {!Session.attached}
+    returns the number of clients attached, all as captured. {!Session.Id}
+    parses and prints IDs.
+
+    {!Session.id}, {!Session.name}, {!Session.attached} and {!Session.Id}
+
+    {b Reaching windows.} {!Session.window_links} returns every captured link in
+    capture order, including repeated links to one window. {!Session.windows}
+    returns the distinct windows in first-link order.
+
+    {!Session.window_links} and {!Session.windows}
+
+    {b Comparing observations.} {!Session.same_entity} compares IDs within one
+    {!Source.t} generation. {!Session.same_observation} also requires the same
+    snapshot, so use these rather than polymorphic equality.
+
+    {!Session.same_entity} and {!Session.same_observation}
+
+    {b Addressing a session in an action.} {!Session.val-target} returns a
+    {!Session.Target.t}, which drops the snapshot graph but stays bound to its
+    {!Source.t}; {!Session.Target.of_id} builds one from an ID. Pass it to an
+    operation such as {!Operations.rename_session}, {!Operations.create_window}
+    or {!Operations.kill_session}. {!Session.source} returns the source the
+    observation came from.
+
+    {!Session.val-target}, {!Session.Target} and {!Session.source}
+
+    {b Filtering a snapshot.} {!Session.Fields} holds the descriptors that
+    {!Expr} predicates compare, one for each captured scalar, and
+    {!Session.Relations} holds the edges that {!Expr.Rel} follows. Evaluating a
+    predicate with {!Query.matching} is local.
+
+    {!Session.Fields} and {!Session.Relations} *)
 module rec Session : sig
   type t
 
@@ -226,7 +267,54 @@ module rec Session : sig
 end
 
 (** A global window shared by its session links. Window index and current state
-    belong to a link, while panes and geometry belong to the window. *)
+    belong to a link, while panes and geometry belong to the window.
+
+    {1 What is on here}
+
+    A window is an observation: every function here reads captured data and
+    performs no I/O. Acting on a window goes through {!Operations}. The members
+    fall into a few groups:
+
+    {b Identifying a window.} {!Window.id} returns the tmux ID as a
+    {!Window.Id.t} and {!Window.name} returns the name as captured. {!Window.Id}
+    parses and prints IDs. The index and current state belong to a
+    {!Window_link.t}, not to the window.
+
+    {!Window.id}, {!Window.name} and {!Window.Id}
+
+    {b Reading size and layout.} {!Window.width} and {!Window.height} return the
+    size in cells. {!Window.layout} returns the layout string tmux reported;
+    apply a new one with {!Operations.select_layout}.
+
+    {!Window.width}, {!Window.height} and {!Window.layout}
+
+    {b Reaching panes and links.} {!Window.panes} returns the window's captured
+    panes. {!Window.links} returns each link that places the window in a
+    session; one window can be linked into several sessions.
+
+    {!Window.panes} and {!Window.links}
+
+    {b Comparing observations.} {!Window.same_entity} compares IDs within one
+    {!Source.t} generation. {!Window.same_observation} also requires the same
+    snapshot, so use these rather than polymorphic equality.
+
+    {!Window.same_entity} and {!Window.same_observation}
+
+    {b Addressing a window in an action.} {!Window.val-target} returns a
+    {!Window.Target.t}, which drops the snapshot graph but stays bound to its
+    {!Source.t}; {!Window.Target.of_id} builds one from an ID. Pass it to an
+    operation such as {!Operations.rename_window}, {!Operations.resize_window}
+    or {!Operations.kill_window}. {!Window.source} returns the source the
+    observation came from.
+
+    {!Window.val-target}, {!Window.Target} and {!Window.source}
+
+    {b Filtering a snapshot.} {!Window.Fields} holds the descriptors that
+    {!Expr} predicates compare, one for each captured scalar, and
+    {!Window.Relations} holds the edges that {!Expr.Rel} follows. Evaluating a
+    predicate with {!Query.matching} is local.
+
+    {!Window.Fields} and {!Window.Relations} *)
 and Window : sig
   type t
 
@@ -302,7 +390,60 @@ end
 
 (** A captured pane with local geometry, process metadata and a window
     relationship. Use {!Pane.val-target} for explicit actions; reading the
-    observation never refreshes it. *)
+    observation never refreshes it.
+
+    {1 What is on here}
+
+    A pane is an observation: every function here reads captured data and
+    performs no I/O. Acting on a pane goes through {!Operations}. The members
+    fall into a few groups:
+
+    {b Identifying a pane.} {!Pane.id} returns the tmux ID as a {!Pane.Id.t},
+    {!Pane.index} returns the position in its window and {!Pane.title} returns
+    the title, all as captured. {!Pane.Id} parses and prints IDs.
+
+    {!Pane.id}, {!Pane.index}, {!Pane.title} and {!Pane.Id}
+
+    {b Reading the process.} {!Pane.current_command} and {!Pane.current_path}
+    return the command name and working directory tmux reported. {!Pane.pid}
+    returns the process ID, absent when tmux reports no process. {!Pane.active}
+    tells whether the pane was its window's active pane and {!Pane.dead} whether
+    tmux reported it dead.
+
+    {!Pane.current_command}, {!Pane.current_path}, {!Pane.pid}, {!Pane.active}
+    and {!Pane.dead}
+
+    {b Reading geometry.} {!Pane.width} and {!Pane.height} return the size in
+    cells. {!Pane.left} and {!Pane.top} return the position in the window.
+
+    {!Pane.width}, {!Pane.height}, {!Pane.left} and {!Pane.top}
+
+    {b Reaching the window.} {!Pane.window} returns the window that holds the
+    pane in the same snapshot. {!Window.panes} goes the other way.
+
+    {!Pane.window}
+
+    {b Comparing observations.} {!Pane.same_entity} compares IDs within one
+    {!Source.t} generation. {!Pane.same_observation} also requires the same
+    snapshot, so use these rather than polymorphic equality.
+
+    {!Pane.same_entity} and {!Pane.same_observation}
+
+    {b Addressing a pane in an action.} {!Pane.val-target} returns a
+    {!Pane.Target.t}, which drops the snapshot graph but stays bound to its
+    {!Source.t}; {!Pane.Target.of_id} builds one from an ID. Pass it to an
+    operation such as {!Operations.send_text}, {!Operations.send_keys},
+    {!Operations.split_pane} or {!Operations.kill_pane}. {!Pane.source} returns
+    the source the observation came from.
+
+    {!Pane.val-target}, {!Pane.Target} and {!Pane.source}
+
+    {b Filtering a snapshot.} {!Pane.Fields} holds the descriptors that {!Expr}
+    predicates compare, one for each captured scalar, and {!Pane.Relations}
+    holds the edge that {!Expr.Rel} follows to the window. Evaluating a
+    predicate with {!Query.matching} is local.
+
+    {!Pane.Fields} and {!Pane.Relations} *)
 and Pane : sig
   type t
 
