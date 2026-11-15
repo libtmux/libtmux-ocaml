@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Support every tmux release from 3.3a through 3.8.
+- Add the workspace packages: `libtmux-workspace` plans and applies layouts,
+  `libtmux-json` encodes them and their receipts, and `libtmux-workspace-cli`
+  runs them from the shell.
 - Pause observed panes before releasing a stream lane so tmux 3.2 through 3.8
   do not abort when a subscription closes while its pane is still printing.
 - Preserve rendered-wait errors and cancellation when subscription cleanup
