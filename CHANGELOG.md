@@ -27,3 +27,6 @@
   grace and reap the child in blocking and Eio clients.
 - Support high-numbered file descriptors in the blocking client and terminal
   attachment, including cancellation and readiness deadlines.
+- Group the `Session`, `Window`, `Pane` and `Operations` reference docs by task,
+  as the `Libtmux_unix.Client` docs are, so each page opens with a directory of
+  what its members do.
