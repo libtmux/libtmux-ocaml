@@ -10,6 +10,8 @@ Follow the active implementation epic and retain its remaining acceptance gates.
   [.github/CONTRIBUTING.md](.github/CONTRIBUTING.md).
 - Documentation, comments, and commit messages:
   [.github/WRITING.md](.github/WRITING.md).
+- Support scripts: what may stay, their language, layout and checks:
+  [.github/SCRIPTS.md](.github/SCRIPTS.md).
 
 Each guide owns its subject. `CLAUDE.md` is a relative symlink to this file.
 
