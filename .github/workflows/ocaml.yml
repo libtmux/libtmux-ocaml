@@ -41,6 +41,8 @@ jobs:
         env:
           LIBTMUX_API_EXPORT: '1'
         run: opam exec -- uv run scripts/export_api/export_api.py --output _build/docs/ocaml.json
+      - name: Check owner capability directories
+        run: opam exec -- python3 test/api_directory_test.py _build/docs/ocaml.json
       - name: Check support script formatting
         run: uv run ruff format --check scripts test
       - name: Lint support scripts
