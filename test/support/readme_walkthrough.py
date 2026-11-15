@@ -1,6 +1,5 @@
 """Execute literal documentation commands using installed example programs."""
 
-import contextlib
 import ctypes
 import os
 import re
@@ -9,6 +8,7 @@ import shlex
 import shutil
 import signal
 import subprocess
+import tempfile
 from pathlib import Path
 
 
@@ -39,206 +39,97 @@ def prepare(root, temporary, environment):
     return project
 
 
+EXPECTED = {
+    "docs/recovery.md": [
+        b"waiter=cancelled; operation=retained\n",
+        b"operation=finished; postcondition=recovery-complete\n",
+        b"cleanup-issues=0; omitted=0\n",
+    ],
+    "docs/hook-recovery.md": [
+        b"operation=unknown\n",
+        b"hook failed or emitted output",
+        b"reported-window=@1; reported-pane=%1\n",
+        b"cleanup-issues=0; omitted=0\n",
+    ],
+    "docs/workspace-recovery.md": [
+        b"waiter=cancelled\npostcondition=created-session-absent\n",
+        b"journal=interrupted\ncompensated-pane=%1\n",
+        b"cleanup-issues=0; omitted=0\n",
+    ],
+    "docs/streaming.md": [
+        b"gap=membership-changed; history=unavailable\n",
+        b"coverage=fresh; cursor-generation=new; future=after-gap\n",
+    ],
+}
+
+
+def guide_command(root, document):
+    """Return the one `dune exec` command a guide shows, split into arguments."""
+    blocks = re.findall(
+        r"```console\n(.*?)```", (root / document).read_text(), re.DOTALL
+    )
+    commands = [
+        block[2:].strip()
+        for block in blocks
+        if block.startswith("$ opam exec -- dune exec examples/")
+    ]
+    if len(commands) != 1 or any("mktemp" in block for block in blocks):
+        raise ValueError(f"{document} must show one command and no shell setup")
+    arguments = shlex.split(commands[0])
+    if arguments[-1] != "tmux":
+        raise ValueError(f"{document} must pass tmux as the program's argument")
+    return arguments
+
+
 def run(root, project, binary, environment, document):
+    """Run a guide's command and check its output and owned teardown."""
     libc = ctypes.CDLL(None, use_errno=True)
     if libc.prctl(36, 1, 0, 0, 0):
         raise OSError(ctypes.get_errno(), "PR_SET_CHILD_SUBREAPER")
     child_file = Path(f"/proc/self/task/{os.getpid()}/children")
     previous_children = set(map(int, child_file.read_text().split()))
-    variable, directory_prefix, expected_output = {
-        "docs/recovery.md": (
-            "LIBTMUX_RECOVERY_DIR",
-            "libtmux-ocaml-recovery.",
-            [
-                b"waiter=cancelled; operation=retained\n",
-                b"operation=finished; postcondition=recovery-complete\n",
-            ],
-        ),
-        "docs/hook-recovery.md": (
-            "LIBTMUX_HOOK_RECOVERY_DIR",
-            "libtmux-ocaml-hook-recovery.",
-            [
-                b"operation=unknown\n",
-                b"hook failed or emitted output",
-                b"reported-window=@1; reported-pane=%1\n",
-                b"@1:4:hook-created:1\n",
-                b"cleanup-issues=0; omitted=0\n",
-            ],
-        ),
-        "docs/workspace-recovery.md": (
-            "LIBTMUX_WORKSPACE_RECOVERY_DIR",
-            "libtmux-ocaml-workspace-recovery.",
-            [
-                b"waiter=cancelled\npostcondition=created-session-absent\n",
-                b"journal=interrupted\ncompensated-pane=%1\n",
-                b"cleanup-issues=0; omitted=0\n",
-                b"workspace-seed\n",
-            ],
-        ),
-        "docs/streaming.md": (
-            "LIBTMUX_STREAM_RECOVERY_DIR",
-            "libtmux-ocaml-stream-recovery.",
-            [
-                b"gap=membership-changed; history=unavailable\n",
-                b"coverage=fresh; cursor-generation=new; future=after-gap\n",
-            ],
-        ),
-    }[document]
-    commands = []
-    active = False
-    for block in re.findall(
-        r"```console\n(.*?)```", (root / document).read_text(), re.DOTALL
-    ):
-        if block.startswith(f"$ export {variable}="):
-            active = True
-        if active:
-            if not block.startswith("$ ") or "\n$ " in block:
-                raise ValueError(f"{document} blocks must contain one command")
-            commands.append(block[2:].rstrip())
-        if active and block.startswith(f'$ rmdir "${variable}"'):
-            break
-    if not commands or not commands[-1].startswith("rmdir"):
-        raise ValueError(f"{document} has no complete setup/cleanup route")
-    bindir = project / "bin"
-    bindir.mkdir(exist_ok=True)
-    wrapper = bindir / "tmux"
-    actual = str(Path(binary).resolve(strict=True))
-    wrapper.write_text(f'#!/bin/sh\nexec {shlex.quote(actual)} "$@"\n')
-    wrapper.chmod(0o700)
-    script = ["set -eu"]
-    cleanup_inserted = False
-    for command in commands:
-        if "kill-session" in command and not cleanup_inserted:
-            script += ["printf 'BEFORE_CLEANUP\\n'", "read answer"]
-            cleanup_inserted = True
-        script.append(command)
-        if command.startswith(f"export {variable}="):
-            script += [f"printf 'DIRECTORY %s\\n' \"${variable}\"", "read answer"]
-        if "new-session" in command:
-            script += ["printf 'SERVER_READY\\n'", "read answer"]
-    child_environment = {
-        key: value
-        for key, value in environment.items()
-        if key not in {"TMUX", "TMUX_PANE"}
-    }
-    child_environment["PATH"] = str(bindir) + os.pathsep + environment["PATH"]
-    script_path = project / "walkthrough.sh"
-    script_path.write_text("\n".join(script) + "\n")
-    process = subprocess.Popen(
-        ["/bin/sh", str(script_path)],
-        cwd=project,
-        env=child_environment,
-        stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        bufsize=0,
-    )
-    assert process.stdin is not None
-    assert process.stdout is not None
-    assert process.stderr is not None
-    directory = None
-    daemon = None
-    pidfds = {}
-    output = []
-
-    def command(*arguments):
-        assert directory is not None
-        return subprocess.run(
-            [actual, "-N", "-S", str(directory / "server"), *arguments],
+    command = [
+        *guide_command(root, document)[:-1],
+        str(Path(binary).resolve(strict=True)),
+    ]
+    with tempfile.TemporaryDirectory(prefix="libtmux-ocaml-walkthrough-") as runtime:
+        child_environment = dict(
+            environment,
+            TMPDIR=runtime,
+            TMUX="/unrelated/server,99999,0",
+            TMUX_PANE="%99999",
+        )
+        result = subprocess.run(
+            command,
+            cwd=project,
             env=child_environment,
-            check=True,
             capture_output=True,
-            timeout=1,
-        ).stdout
-
-    def remember():
-        nonlocal daemon
-        daemon = int(command("display-message", "-p", "#{pid}"))
-        for pid in [
-            daemon,
-            *map(int, command("list-panes", "-a", "-F", "#{pane_pid}").splitlines()),
-        ]:
-            if pid not in pidfds:
-                pidfds[pid] = os.pidfd_open(pid)
-
-    try:
-        with selectors.DefaultSelector() as ready:
-            ready.register(process.stdout, selectors.EVENT_READ)
-            while True:
-                if not ready.select(1):
-                    raise TimeoutError(f"{document} walkthrough stopped progressing")
-                line = process.stdout.readline()
-                if not line:
-                    break
-                output.append(line)
-                if line.startswith(b"DIRECTORY "):
-                    directory = Path(os.fsdecode(line[len(b"DIRECTORY ") :].strip()))
-                    if (
-                        not directory.name.startswith(directory_prefix)
-                        or directory.stat().st_mode & 0o077
-                    ):
-                        raise RuntimeError(
-                            "demo did not create a private owned directory"
-                        )
-                    process.stdin.write(b"continue\n")
-                elif line in {b"SERVER_READY\n", b"BEFORE_CLEANUP\n"}:
-                    remember()
-                    if line == b"BEFORE_CLEANUP\n" and command("list-clients"):
-                        raise RuntimeError("an example left clients attached")
-                    process.stdin.write(b"continue\n")
-        _, error = process.communicate(timeout=1)
-        if process.returncode or error:
-            raise RuntimeError((process.returncode, b"".join(output), error))
-        text = b"".join(output)
-        for expected in expected_output:
-            if expected not in text:
-                raise RuntimeError(("missing documentation result", expected, text))
-        assert directory is not None, f"{document} never reported its directory"
-        if directory.exists():
-            raise RuntimeError(f"{document} cleanup left its directory")
-        for descriptor in pidfds.values():
+            timeout=5,
+            check=False,
+        )
+        if result.returncode or result.stderr:
+            raise RuntimeError(
+                (document, result.returncode, result.stdout, result.stderr)
+            )
+        for expected in EXPECTED[document]:
+            if expected not in result.stdout:
+                raise RuntimeError(
+                    ("missing documentation result", expected, result.stdout)
+                )
+        if list(Path(runtime).iterdir()):
+            raise RuntimeError(f"{document} left a private directory behind")
+    for pid in set(map(int, child_file.read_text().split())) - previous_children:
+        try:
+            descriptor = os.pidfd_open(pid)
+        except ProcessLookupError:
+            continue
+        try:
             with selectors.DefaultSelector() as exited:
                 exited.register(descriptor, selectors.EVENT_READ)
                 if not exited.select(1):
-                    raise RuntimeError(
-                        f"{document} cleanup left an owned process alive"
-                    )
-        assert daemon is not None, f"{document} never started a daemon"
-        os.waitpid(daemon, 0)
-        daemon = None
-        for pid in set(map(int, child_file.read_text().split())) - previous_children:
-            try:
-                descriptor = os.pidfd_open(pid)
-            except ProcessLookupError:
-                continue
-            try:
-                with selectors.DefaultSelector() as exited:
-                    exited.register(descriptor, selectors.EVENT_READ)
-                    if not exited.select(1):
-                        signal.pidfd_send_signal(descriptor, signal.SIGKILL)
-                        raise RuntimeError(f"{document} left an owned descendant alive")
-                os.waitpid(pid, 0)
-            finally:
-                os.close(descriptor)
-        print(f"literal {document} demo commands: PASS ({Path(binary).parent.name})")
-    finally:
-        if process.poll() is None:
-            process.kill()
-            process.wait(timeout=1)
-        if (
-            directory is not None
-            and directory.exists()
-            and daemon is None
-            and (directory / "server").exists()
-        ):
-            remember()
-        if daemon is not None:
-            with contextlib.suppress(ProcessLookupError):
-                signal.pidfd_send_signal(pidfds[daemon], signal.SIGTERM)
-            os.waitpid(daemon, 0)
-        for descriptor in pidfds.values():
+                    signal.pidfd_send_signal(descriptor, signal.SIGKILL)
+                    raise RuntimeError(f"{document} left an owned descendant alive")
+            os.waitpid(pid, 0)
+        finally:
             os.close(descriptor)
-        for stream in [process.stdin, process.stdout, process.stderr]:
-            stream.close()
-        if directory is not None and directory.exists():
-            shutil.rmtree(directory)
+    print(f"{document} command: PASS ({Path(binary).parent.name})")

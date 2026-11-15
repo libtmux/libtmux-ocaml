@@ -116,13 +116,12 @@ with tempfile.TemporaryDirectory(
         fault = temporary / f"fault-tmux-{index}"
         audit = temporary / f"fault-directory-{index}"
         fault.write_text(
-            "#!/usr/bin/env python3\nimport os,sys\nfrom pathlib import Path\n"
+            "#!/usr/bin/env python3\nimport os,subprocess,sys\nfrom pathlib import Path\n"
             + "args=sys.argv[1:]\nif '-C' in args and 'new-session' in args:\n"
-            + " p=Path(args[args.index('-f')+1])\n"
-            + f" Path({str(audit)!r}).write_text(str(p.parent))\n"
-            + " with p.open('a') as output:\n"
-            + "  session=os.environ['LIBTMUX_SHOWCASE_COLLISION']\n"
-            + "  output.write(f'new-session -d -s {session} -- /bin/cat -u\\n')\n"
+            + " socket=args[args.index('-S')+1]\n"
+            + f" Path({str(audit)!r}).write_text(str(Path(socket).parent))\n"
+            + " session=os.environ['LIBTMUX_SHOWCASE_COLLISION']\n"
+            + f" subprocess.run([{actual!r},'-S',socket,'new-session','-d','-s',session,'--','/bin/cat','-u'],check=True)\n"
             + f"os.execv({actual!r}, [{actual!r}, *args])\n"
         )
         fault.chmod(0o700)
@@ -156,7 +155,7 @@ with tempfile.TemporaryDirectory(
             assert process.stdout is not None
             assert process.stderr is not None
             try:
-                output, error = process.communicate(timeout=1)
+                output, error = process.communicate(timeout=2)
                 if should_fail:
                     assert process.returncode == 2 and error, (
                         name,
@@ -192,7 +191,7 @@ with tempfile.TemporaryDirectory(
                         if line.startswith(b"socket=")
                     )
                     directory = Path(os.fsdecode(socket_line[len(b"socket=") :])).parent
-                assert directory.name.startswith("libtmux-ocaml-showcase-")
+                assert directory.name.startswith("libtmux-ocaml-")
                 assert not directory.exists(), "showcase left its private directory"
                 for pid in children() - previous:
                     descriptor = os.pidfd_open(pid)

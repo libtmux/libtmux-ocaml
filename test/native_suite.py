@@ -30,6 +30,7 @@ for name in [
     "stream_fault",
     "stream_close",
     "bootstrap",
+    "private_daemon",
     "workspace",
 ]:
     started = time.monotonic()
@@ -61,6 +62,7 @@ if os.environ.get("EIO_BACKEND") != "posix":
         ("capture_cancel", []),
         ("streaming", []),
         ("bootstrap", []),
+        ("private_daemon", []),
         ("workspace", ["--eio"]),
     ]:
         subprocess.run(

@@ -34,7 +34,6 @@ extend-select = ["B", "C4", "I", "RUF", "SIM", "UP"]
 "test/installed_consumer_diagnostics_test.py" = ["B023", "BLE001"]
 # Helper closures are defined inside a loop and called in the same iteration.
 "test/workspace_cli_test.py" = ["B023"]
-"test/workspace_docs_test.py" = ["B023"]
 
 [tool.ty.environment]
 python-version = "3.11"
