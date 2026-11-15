@@ -18,13 +18,14 @@ import subprocess
 import sys
 import time
 from pathlib import Path
+from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "test"))
 from support.tmux_fixture import TmuxFixture
 
 
-def source_digest():
+def source_digest() -> str:
     digest = hashlib.sha256()
     names = subprocess.check_output(
         ["git", "ls-files", "--cached", "--others", "--exclude-standard", "-z"],
@@ -43,10 +44,15 @@ def source_digest():
     return digest.hexdigest()
 
 
-def sample(fixture, backend, iterations):
-    def daemon_cpu():
+def sample(
+    fixture: TmuxFixture, backend: str, iterations: int
+) -> tuple[float, dict[str, Any], int, float, float]:
+    server = fixture.server
+    assert server is not None
+
+    def daemon_cpu() -> float:
         fields = (
-            (Path("/proc") / str(fixture.server.pid) / "stat")
+            (Path("/proc") / str(server.pid) / "stat")
             .read_text()
             .rsplit(") ", 1)[1]
             .split()
@@ -110,7 +116,7 @@ def sample(fixture, backend, iterations):
             stream.close()
 
 
-def main():
+def main() -> None:
     whole_start = time.perf_counter()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("binary")

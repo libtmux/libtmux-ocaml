@@ -32,7 +32,7 @@ def clean_git_environment(monkeypatch: pytest.MonkeyPatch) -> None:
 # Stub exporter: tmp repository with a fake compiler-backed exporter
 
 
-def symbol(identifier: str, **fields: Any) -> dict[str, Any]:
+def symbol(identifier: str, **fields: object) -> dict[str, Any]:
     return {
         "id": identifier,
         "apiScope": "exported",

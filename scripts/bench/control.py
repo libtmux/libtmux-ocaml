@@ -20,13 +20,14 @@ import subprocess
 import sys
 import time
 from pathlib import Path
+from typing import Any
 
 from capture import ROOT, TmuxFixture, source_digest
 from concurrency import child_count, distribution
 
 
 class BenchmarkFixture(TmuxFixture):
-    def close(self):
+    def close(self) -> None:
         primary = sys.exception()
         try:
             super().close()
@@ -36,7 +37,8 @@ class BenchmarkFixture(TmuxFixture):
             primary.add_note("fixture cleanup: " + repr(cleanup))
 
 
-def barrier(process, expected, timeout):
+def barrier(process: subprocess.Popen[bytes], expected: bytes, timeout: float) -> None:
+    assert process.stdout is not None
     with selectors.DefaultSelector() as ready:
         ready.register(process.stdout, selectors.EVENT_READ)
         if not ready.select(timeout):
@@ -46,7 +48,7 @@ def barrier(process, expected, timeout):
         raise RuntimeError(("unexpected benchmark stage", actual))
 
 
-def sample(binary, requests, concurrency):
+def sample(binary: str, requests: int, concurrency: int) -> dict[str, Any]:
     started = time.perf_counter()
     with BenchmarkFixture(binary) as fixture:
         directory = Path(fixture.directory.name)
@@ -192,7 +194,7 @@ def sample(binary, requests, concurrency):
     return result
 
 
-def main():
+def main() -> None:
     started = time.perf_counter()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("binary")

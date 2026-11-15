@@ -6,6 +6,7 @@
 """Bounded mixed Eio load with source-held outcomes and owned process sampling."""
 
 import argparse
+import contextlib
 import ctypes
 import datetime
 import hashlib
@@ -20,13 +21,13 @@ import statistics
 import subprocess
 import sys
 import time
+from collections.abc import Iterable
 from pathlib import Path
+from typing import Any
 
 from capture import ROOT, source_digest
 
 sys.path.insert(0, str(ROOT / "test"))
-import contextlib
-
 from support.tmux_fixture import TmuxFixture
 
 
@@ -34,7 +35,7 @@ class InjectedFailure(RuntimeError):
     pass
 
 
-def children(pid):
+def children(pid: int) -> set[int]:
     result = set()
     try:
         for task in (Path("/proc") / str(pid) / "task").iterdir():
@@ -47,7 +48,7 @@ def children(pid):
     return result
 
 
-def descendants(pid):
+def descendants(pid: int) -> set[int]:
     result, pending = set(), list(children(pid))
     while pending:
         child = pending.pop()
@@ -57,7 +58,7 @@ def descendants(pid):
     return result
 
 
-def process_sample(pid):
+def process_sample(pid: int) -> dict[str, Any]:
     base = Path("/proc") / str(pid)
     try:
         stat = (base / "stat").read_text().rsplit(") ", 1)[1].split()
@@ -77,16 +78,16 @@ def process_sample(pid):
 
 
 class Ownership:
-    def __init__(self):
-        self.pidfds = {}
+    def __init__(self) -> None:
+        self.pidfds: dict[int, int] = {}
 
-    def remember(self, pids):
+    def remember(self, pids: Iterable[int]) -> None:
         for pid in pids:
             if pid not in self.pidfds:
                 with contextlib.suppress(ProcessLookupError):
                     self.pidfds[pid] = os.pidfd_open(pid)
 
-    def verify_exit(self):
+    def verify_exit(self) -> dict[str, Any]:
         errors, exited, reaped, forced = [], [], [], []
         for pid, descriptor in self.pidfds.items():
             try:
@@ -144,7 +145,13 @@ class Ownership:
         }
 
 
-def sample_resources(fixture, process, ownership, event):
+def sample_resources(
+    fixture: TmuxFixture,
+    process: subprocess.Popen[bytes],
+    ownership: Ownership,
+    event: dict[str, Any],
+) -> dict[str, Any]:
+    assert fixture.server is not None
     command_children = descendants(process.pid)
     pane_children = descendants(fixture.server.pid)
     ownership.remember(command_children | pane_children)
@@ -173,7 +180,9 @@ def sample_resources(fixture, process, ownership, event):
     }
 
 
-def observed_maxima(samples, *, include_clients=True):
+def observed_maxima(
+    samples: list[dict[str, Any]], *, include_clients: bool = True
+) -> dict[str, Any]:
     result = {}
     if include_clients:
         result["attached_clients"] = max(
@@ -201,7 +210,7 @@ def observed_maxima(samples, *, include_clients=True):
     return result
 
 
-def provenance():
+def provenance() -> dict[str, Any]:
     files = [
         "bench/mixed.ml",
         "scripts/bench/mixed.py",
@@ -222,7 +231,9 @@ def provenance():
     }
 
 
-def workload(fixture, ownership, args):
+def workload(
+    fixture: TmuxFixture, ownership: Ownership, args: argparse.Namespace
+) -> dict[str, Any]:
     command = [
         str(ROOT / "_build/default/bench/mixed.exe"),
         fixture.binary,
@@ -245,6 +256,7 @@ def workload(fixture, ownership, args):
     assert process.stdin is not None
     assert process.stdout is not None
     assert process.stderr is not None
+    assert fixture.server is not None
     ownership.remember({process.pid})
     samples, progress, error, pending, result = [], [], bytearray(), bytearray(), None
     started = time.perf_counter()
@@ -404,7 +416,7 @@ def workload(fixture, ownership, args):
                 raise exc
 
 
-def validate(sample, args):
+def validate(sample: dict[str, Any], args: argparse.Namespace) -> dict[str, Any]:
     result = sample["result"]
     completions = result["completion_observations"]
     if len(completions) != args.rounds * 64:
@@ -508,7 +520,7 @@ def validate(sample, args):
     }
 
 
-def core_diagnostics(fixture, args):
+def core_diagnostics(fixture: TmuxFixture, args: argparse.Namespace) -> dict[str, Any]:
     if fixture.server is None or fixture.server.poll() is None:
         return {"core_present": None, "status": "daemon_exit_not_observed"}
     uses_pid = Path("/proc/sys/kernel/core_uses_pid").read_text().strip()
@@ -570,7 +582,7 @@ def core_diagnostics(fixture, args):
     return record
 
 
-def main():
+def main() -> None:
     started = time.perf_counter()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("binary")

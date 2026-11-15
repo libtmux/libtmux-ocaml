@@ -19,6 +19,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
+from typing import Any
 
 from capture import ROOT, source_digest
 
@@ -26,14 +27,15 @@ sys.path.insert(0, str(ROOT / "test"))
 from support.tmux_fixture import TmuxFixture
 
 
-def child_count(pid):
+def child_count(pid: int) -> int:
     children = set()
     for task in (Path("/proc") / str(pid) / "task").iterdir():
         children.update((task / "children").read_text().split())
     return len(children)
 
 
-def stage(process, expected, response):
+def stage(process: subprocess.Popen[bytes], expected: bytes, response: bytes) -> int:
+    assert process.stdin is not None and process.stdout is not None
     with selectors.DefaultSelector() as ready:
         ready.register(process.stdout, selectors.EVENT_READ)
         if not ready.select(1):
@@ -47,7 +49,7 @@ def stage(process, expected, response):
     return count
 
 
-def sample(fixture, args):
+def sample(fixture: TmuxFixture, args: argparse.Namespace) -> dict[str, Any]:
     started = time.perf_counter()
     usage_before = resource.getrusage(resource.RUSAGE_CHILDREN)
     process = subprocess.Popen(
@@ -111,7 +113,7 @@ def sample(fixture, args):
             stream.close()
 
 
-def distribution(values):
+def distribution(values: list[float]) -> dict[str, float]:
     ordered = sorted(values)
     return {
         "count": len(values),
@@ -122,7 +124,7 @@ def distribution(values):
     }
 
 
-def main():
+def main() -> None:
     started = time.perf_counter()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("binary")

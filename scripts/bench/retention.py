@@ -22,7 +22,7 @@ from capture import ROOT, TmuxFixture, source_digest
 MODES = ["discard", "snapshots", "panes", "latest-pane", "summaries", "targets"]
 
 
-def main():
+def main() -> None:
     started = time.perf_counter()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("binary")

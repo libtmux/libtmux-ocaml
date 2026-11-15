@@ -9,10 +9,13 @@ import shutil
 import signal
 import subprocess
 import tempfile
+from collections.abc import Mapping
 from pathlib import Path
 
+PR_SET_CHILD_SUBREAPER = 36
 
-def prepare(root, temporary, environment):
+
+def prepare(root: Path, temporary: Path, environment: Mapping[str, str]) -> Path:
     project = temporary / "readme-walkthrough"
     project.mkdir()
     (project / "dune-project").write_text("(lang dune 3.24)\n")
@@ -63,7 +66,7 @@ EXPECTED = {
 }
 
 
-def guide_command(root, document):
+def guide_command(root: Path, document: str) -> list[str]:
     """Return the one `dune exec` command a guide shows, split into arguments."""
     blocks = re.findall(
         r"```console\n(.*?)```", (root / document).read_text(), re.DOTALL
@@ -81,10 +84,16 @@ def guide_command(root, document):
     return arguments
 
 
-def run(root, project, binary, environment, document):
+def run(
+    root: Path,
+    project: Path,
+    binary: str,
+    environment: Mapping[str, str],
+    document: str,
+) -> None:
     """Run a guide's command and check its output and owned teardown."""
     libc = ctypes.CDLL(None, use_errno=True)
-    if libc.prctl(36, 1, 0, 0, 0):
+    if libc.prctl(PR_SET_CHILD_SUBREAPER, 1, 0, 0, 0):
         raise OSError(ctypes.get_errno(), "PR_SET_CHILD_SUBREAPER")
     child_file = Path(f"/proc/self/task/{os.getpid()}/children")
     previous_children = set(map(int, child_file.read_text().split()))

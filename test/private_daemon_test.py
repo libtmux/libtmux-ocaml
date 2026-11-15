@@ -13,13 +13,15 @@ peer = root / "_build/default/test/private_daemon_peer.exe"
 BOGUS = {"TMUX": "/unrelated/server,99999,0", "TMUX_PANE": "%99999"}
 
 
-def exited(descriptor):
+def exited(descriptor: int) -> bool:
     with selectors.DefaultSelector() as ready:
         ready.register(descriptor, selectors.EVENT_READ)
         return bool(ready.select(1))
 
 
-def run(binary, backend, mode, *extra, workdir):
+def run(
+    binary: str, backend: str, mode: str, *extra: str, workdir: Path
+) -> subprocess.Popen[bytes]:
     environment = dict(os.environ, **BOGUS)
     return subprocess.Popen(
         [str(peer), binary, backend, mode, *extra],
@@ -31,7 +33,7 @@ def run(binary, backend, mode, *extra, workdir):
     )
 
 
-def tmux(binary, socket, *arguments):
+def tmux(binary: str, socket: Path, *arguments: str) -> bytes:
     environment = {k: v for k, v in os.environ.items() if k not in BOGUS}
     return subprocess.run(
         [binary, "-N", "-S", str(socket), *arguments],
@@ -42,7 +44,7 @@ def tmux(binary, socket, *arguments):
     ).stdout
 
 
-def serve(binary, backend, mode, workdir):
+def serve(binary: str, backend: str, mode: str, workdir: Path) -> None:
     """Run a mode that holds its daemon open, then check the teardown."""
     process = run(binary, backend, mode, workdir=workdir)
     stdin, stdout = process.stdin, process.stdout
@@ -88,7 +90,9 @@ def serve(binary, backend, mode, workdir):
             os.close(descriptor)
 
 
-def once(binary, backend, mode, *extra, workdir):
+def once(
+    binary: str, backend: str, mode: str, *extra: str, workdir: Path
+) -> list[bytes]:
     """Run a mode that finishes without a handshake and return its output."""
     process = run(binary, backend, mode, *extra, workdir=workdir)
     out, err = process.communicate(timeout=3)
@@ -96,7 +100,7 @@ def once(binary, backend, mode, *extra, workdir):
     return out.splitlines()
 
 
-def check(binary):
+def check(binary: str) -> None:
     name = Path(binary).resolve().parents[1].name
     with tempfile.TemporaryDirectory(prefix="libtmux-ocaml-private-test-") as work:
         workdir = Path(work)
