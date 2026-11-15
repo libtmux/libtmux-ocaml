@@ -163,8 +163,8 @@ use signed 32-bit bounds. Regex, relationship documents, numeric membership
 and native extension fields remain unsupported in this wire schema.
 
 Reproduce native checks with the commands in
-[CONTRIBUTING.md](../.github/CONTRIBUTING.md). The fixture builders use official
-release archives and retain archive and binary digests under `scratch/tmux/`.
+[CONTRIBUTING.md](../.github/CONTRIBUTING.md), against binaries built from the
+official release archives.
 
 Environment reads use a bounded read-only process on the same daemon. The
 client checks its reported PID and the original pidfd after collecting the

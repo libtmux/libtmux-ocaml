@@ -58,15 +58,14 @@ exercise a mounted filesystem using an owned temporary directory:
 $ opam exec -- python3 test/workspace_document_test.py
 ```
 
-`ocaml/setup-ocaml` caches opam and the switch. The tmux composite action caches
-only an installed prefix, keyed by source, runner image/version, architecture,
-compiler, package versions and build/probe recipes. Dependencies are installed
-before validating either hits or misses. A restored binary must match its hash,
-report the exact release and pass an owned-daemon probe with verified teardown.
-Rejected caches rebuild; no broad restore key reuses a binary from another
-environment. Save a validated installation before running library tests.
+`ocaml/setup-ocaml` caches opam and the switch. The shared
+[build-tmux action](https://github.com/libtmux/.github/tree/30f81842b1e639ea4e25f93f1f2543504178e228/actions/build-tmux)
+builds each pinned tmux release, validates a restored binary and caches the
+installed prefix. This repository adds one probe of its own: `test/fixture_test.py`,
+the first check `native_suite.py` runs, starts the owned pidfd fixture, checks
+that the daemon reports the version the binary does and verifies teardown on
+success, failure and cancellation.
 
-The cache design adapts the [Go port's pinned implementation](https://github.com/libtmux/libtmux-go/blob/d8ea6f77ede9f75e96af78719c8c1707fc47bdfb/.github/scripts/tmux_build.py).
 The APIs and testing styles follow the primary documentation for
 [setup-ocaml](https://github.com/ocaml/setup-ocaml/tree/ff66428f72b64472e749b22e0ad4dded4b2ddca6),
 [Alcotest](https://github.com/mirage/alcotest/tree/1.9.1),

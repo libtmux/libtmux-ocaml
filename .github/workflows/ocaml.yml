@@ -75,20 +75,20 @@ jobs:
           ocaml-compiler: ocaml-base-compiler.5.5.2
       - name: Install test dependencies
         run: opam install . --deps-only --with-test --yes
-      - uses: ./.github/actions/build-tmux
+      - uses: libtmux/.github/actions/build-tmux@30f81842b1e639ea4e25f93f1f2543504178e228
         id: tmux
         with:
           ref: ${{ matrix.tmux }}
       - name: Build and exercise native clients
         env:
-          TMUX_BINARY: ${{ steps.tmux.outputs.prefix }}/bin/tmux
+          TMUX_BINARY: ${{ steps.tmux.outputs.binary }}
         run: |
           opam exec -- dune build @all @install
           opam exec -- python3 test/native_suite.py "$TMUX_BINARY"
           opam exec -- python3 test/installed_consumer.py "$TMUX_BINARY"
       - name: Execute installed documentation and standalone programs
         env:
-          TMUX_BINARY: ${{ steps.tmux.outputs.prefix }}/bin/tmux
+          TMUX_BINARY: ${{ steps.tmux.outputs.binary }}
         run: |
           opam exec -- python3 test/workspace_docs_test.py "$TMUX_BINARY"
           opam exec -- python3 test/showcase_test.py "$TMUX_BINARY"

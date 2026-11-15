@@ -2,6 +2,7 @@
 
 import asyncio
 from pathlib import Path
+import subprocess
 import sys
 import time
 
@@ -10,11 +11,16 @@ from support.tmux_fixture import TmuxFixture
 
 def check(binary):
     started = time.monotonic()
+    reported = subprocess.run(
+        [binary, "-V"], capture_output=True, check=True, text=True
+    ).stdout.strip()
     for outcome in (None, RuntimeError, asyncio.CancelledError):
         fixture = TmuxFixture(binary)
         try:
             with fixture:
                 assert fixture.command("list-sessions", "-F", "#{session_name}").stdout == b"fixture\n"
+                connected = fixture.command("display-message", "-p", "#{version}").stdout.decode().strip()
+                assert reported == f"tmux {connected}", (reported, connected)
                 if outcome:
                     raise outcome()
         except BaseException as error:

@@ -157,18 +157,21 @@ under one hour; reduce workloads when necessary.
 
 ## Owned tmux fixtures
 
-Build the exact Linux release fixtures outside validation loops:
+Fixture tests take the path of an exact tmux release binary. Build 3.3a and
+3.8 outside validation loops from the
+[official release archives](https://github.com/tmux/tmux/releases). CI builds
+the same releases with the shared
+[build-tmux action](https://github.com/libtmux/.github/tree/30f81842b1e639ea4e25f93f1f2543504178e228/actions/build-tmux),
+which pins each archive's SHA256.
 
-```console
-$ python3 tools/setup_tmux.py 3.3a 3.8
-```
-
-Verify fixture cleanup after success, failure and cancellation:
+Verify fixture cleanup after success, failure and cancellation, and that the
+daemon reports the version the binary does. This probe stays in this repository
+because the shared action does not exercise the owned pidfd fixture:
 
 ```console
 $ /usr/bin/time -p python3 test/fixture_test.py \
-    scratch/tmux/tmux-3.3a/tmux \
-    scratch/tmux/tmux-3.8/tmux
+    /path/to/tmux-3.3a/bin/tmux \
+    /path/to/tmux-3.8/bin/tmux
 ```
 
 Supported tmux releases span 3.3a–3.8, including intermediate releases. The

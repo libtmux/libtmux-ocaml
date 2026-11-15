@@ -296,7 +296,9 @@ let () = Eio_main.run (fun env -> Eio.Switch.run (fun sw ->
         (runtime / f"configuration_{backend}.ml").write_text(module + common + connect)
     subprocess.run(["dune", "build", "--root", str(runtime)], cwd=runtime, env=environment, check=True)
     walkthrough = readme_walkthrough.prepare(root, temporary, environment)
-    binaries = sys.argv[1:] or [root / f"scratch/tmux/tmux-{version}/tmux" for version in ["3.3a", "3.8"]]
+    binaries = sys.argv[1:]
+    if not binaries:
+        raise SystemExit("usage: installed_consumer.py /path/to/tmux...")
     for binary in binaries:
         run_hook_recovery(runtime, binary, environment)
         run_workspace_recovery(runtime, binary, environment)

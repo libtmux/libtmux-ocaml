@@ -36,5 +36,3 @@ subprocess.run([sys.executable, str(root / "test/pid_race_test.py")],
 for backend in ("linux", "posix"):
     subprocess.run([str(root / "_build/default/test/ownership_peer.exe")],
                    cwd=root, env=os.environ | {"EIO_BACKEND": backend}, check=True, timeout=1)
-subprocess.run([sys.executable, str(root / "test/tmux_cache_test.py"), binary],
-               cwd=root, check=True, timeout=5)
