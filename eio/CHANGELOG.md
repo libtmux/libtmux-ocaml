@@ -27,3 +27,6 @@
   directory when the daemon still answers.
 - Add `?config_file` to `Workspace.submit_bootstrap`, passed to tmux as `-f`
   when the new-session command starts the server.
+- Add `Workspace`: apply a workspace plan through an existing client, or
+  bootstrap a missing endpoint with `Workspace.submit_bootstrap` and bind the
+  same connection. A handle retains its journal after cancellation and close.
