@@ -143,6 +143,48 @@ $ /usr/bin/time -p mise exec -- opam exec -- uv run \
     --check
 ```
 
+Check the formatting, lint and types of the Python support scripts and outer
+test drivers. [SCRIPTS.md](SCRIPTS.md) sets the policy. These run through
+`uv`, which pins the tools in `pyproject.toml`:
+
+```console
+$ /usr/bin/time -p uv run ruff format --check scripts test
+```
+
+```console
+$ /usr/bin/time -p uv run ruff check scripts test
+```
+
+```console
+$ /usr/bin/time -p uv run ty check scripts test
+```
+
+Build the optional API exporter. Its compiler-backed tests run only when the
+pytest command below sets `LIBTMUX_API_EXPORT=1`, and skip otherwise:
+
+```console
+$ LIBTMUX_API_EXPORT=1 /usr/bin/time -p mise exec -- opam exec -- dune build \
+    tools/api_export.exe
+```
+
+Run the script tests and doctests. The generator tests need `ocamlformat`, so
+run them under `opam exec`:
+
+```console
+$ LIBTMUX_API_EXPORT=1 /usr/bin/time -p mise exec -- opam exec -- uv run pytest \
+    scripts
+```
+
+Smoke-test each benchmark driver on its smallest workload against an owned
+tmux binary. This needs the benchmark executables from `dune build @all`:
+
+```console
+$ TMUX_BINARY=/path/to/tmux-3.8/bin/tmux \
+    /usr/bin/time -p mise exec -- opam exec -- uv run pytest \
+    -m native \
+    scripts/bench
+```
+
 ## Validation loops
 
 Measure the whole command, including startup and setup. Libraries should aim
