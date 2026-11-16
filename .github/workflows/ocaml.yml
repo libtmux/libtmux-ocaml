@@ -22,44 +22,51 @@ jobs:
         with:
           ocaml-compiler: ocaml-base-compiler.5.5.2
       - name: Install development dependencies
-        run: |
-          opam install . --deps-only --with-test --with-doc --yes
-          opam install ocamlformat.0.29.0 --yes
-      - name: Verify exact toolchain and authored manifests
-        run: |
-          test "$(opam exec -- ocamlc -version)" = 5.5.2
-          test "$(opam exec -- dune --version)" = 3.24.2
-          test "$(opam --version)" = 2.6.1
-          opam lint ./*.opam
-      - name: Build, typed assertions, expectations and properties
-        run: |
-          opam exec -- dune build @all @install @doc
-          opam exec -- dune runtest --force
+        run: opam install . --deps-only --with-test --with-doc --yes
+      - name: Install ocamlformat
+        run: opam install ocamlformat.0.29.0 --yes
+      - name: Verify the exact toolchain
+        run: uv run scripts/toolchain/check_toolchain.py
+      - name: Lint the authored manifests
+        run: opam lint ./*.opam
+      - name: Build all targets, installation files and documentation
+        run: opam exec -- dune build @all @install @doc
+      - name: Run typed assertions, expectations and properties
+        run: opam exec -- dune runtest --force
+      - name: Build the public interface exporter
+        env:
+          LIBTMUX_API_EXPORT: '1'
+        run: opam exec -- dune build tools/api_export.exe
       - name: Export and verify public typed interfaces
         env:
           LIBTMUX_API_EXPORT: '1'
-        run: |
-          opam exec -- dune build tools/api_export.exe
-          opam exec -- uv run scripts/export_api/export_api.py --output _build/docs/ocaml.json
-      - name: Check support scripts
+        run: opam exec -- uv run scripts/export_api/export_api.py --output _build/docs/ocaml.json
+      - name: Check support script formatting
+        run: uv run ruff format --check scripts test
+      - name: Lint support scripts
+        run: uv run ruff check scripts test
+      - name: Type-check support scripts
+        run: uv run ty check scripts test
+      - name: Test support scripts
         env:
           LIBTMUX_API_EXPORT: '1'
-        run: |
-          uv run ruff format --check scripts test
-          uv run ruff check scripts test
-          uv run ty check scripts test
-          opam exec -- uv run pytest scripts
+        run: opam exec -- uv run pytest scripts
       - name: Verify workspace document bounds and input backends
         run: opam exec -- python3 test/workspace_document_test.py
-      - name: Verify format and generated catalogs
-        run: |
-          uv run scripts/docs_snippets/docs_snippets.py
-          git ls-files -z -- '*.ml' '*.mli' | xargs -0 opam exec -- ocamlformat --check
-          opam exec -- uv run scripts/generate/generate_fields.py --check
-          opam exec -- uv run scripts/generate/generate_options.py --check
-          opam exec -- uv run scripts/generate/generate_formats.py --check
-          opam exec -- uv run scripts/generate/generate_operations.py --check
-          git diff --exit-code
+      - name: Check documentation snippets and links
+        run: uv run scripts/docs_snippets/docs_snippets.py
+      - name: Check OCaml formatting
+        run: opam exec -- dune build @fmt
+      - name: Check the generated field catalog
+        run: opam exec -- uv run scripts/generate/generate_fields.py --check
+      - name: Check the generated option catalog
+        run: opam exec -- uv run scripts/generate/generate_options.py --check
+      - name: Check the generated format catalog
+        run: opam exec -- uv run scripts/generate/generate_formats.py --check
+      - name: Check the generated operation catalog
+        run: opam exec -- uv run scripts/generate/generate_operations.py --check
+      - name: Check the tree has no uncommitted changes
+        run: git diff --exit-code
       - name: Retain failed build diagnostics
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -88,23 +95,28 @@ jobs:
         id: tmux
         with:
           ref: ${{ matrix.tmux }}
-      - name: Build and exercise native clients
+      - name: Build all targets and installation files
+        run: opam exec -- dune build @all @install
+      - name: Exercise the native clients
         env:
           TMUX_BINARY: ${{ steps.tmux.outputs.binary }}
-        run: |
-          opam exec -- dune build @all @install
-          opam exec -- python3 test/native_suite.py "$TMUX_BINARY"
-          opam exec -- python3 test/installed_consumer.py "$TMUX_BINARY"
+        run: opam exec -- python3 test/native_suite.py "$TMUX_BINARY"
+      - name: Exercise the installed consumer
+        env:
+          TMUX_BINARY: ${{ steps.tmux.outputs.binary }}
+        run: opam exec -- python3 test/installed_consumer.py "$TMUX_BINARY"
       - name: Smoke-test the benchmark drivers
         env:
           TMUX_BINARY: ${{ steps.tmux.outputs.binary }}
         run: opam exec -- uv run pytest -m native scripts/bench
-      - name: Execute installed documentation and standalone programs
+      - name: Execute the installed workspace documentation
         env:
           TMUX_BINARY: ${{ steps.tmux.outputs.binary }}
-        run: |
-          opam exec -- python3 test/workspace_docs_test.py "$TMUX_BINARY"
-          opam exec -- python3 test/showcase_test.py "$TMUX_BINARY"
+        run: opam exec -- python3 test/workspace_docs_test.py "$TMUX_BINARY"
+      - name: Execute the standalone showcase programs
+        env:
+          TMUX_BINARY: ${{ steps.tmux.outputs.binary }}
+        run: opam exec -- python3 test/showcase_test.py "$TMUX_BINARY"
       - name: Retain failed build diagnostics
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
