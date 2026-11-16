@@ -68,6 +68,19 @@ $ mise exec -- opam install ocamlformat.0.29.0
 
 ## Checks
 
+Check that the installed OCaml, dune and opam are the pinned versions:
+
+```console
+$ /usr/bin/time -p mise exec -- opam exec -- uv run \
+    scripts/toolchain/check_toolchain.py
+```
+
+Check OCaml formatting:
+
+```console
+$ /usr/bin/time -p mise exec -- opam exec -- dune build @fmt
+```
+
 Check the native manifest offline:
 
 ```console

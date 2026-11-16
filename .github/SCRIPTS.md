@@ -42,3 +42,44 @@ inline (PEP 723) and run scripts with `uv run`.
 
 - GitHub Actions `run:` lines that call one command.
 - Test data that is not a comparison, such as workspace files a loader reads.
+
+## Tmux stand-ins
+
+A test or driver that needs a program in place of tmux uses
+[`test/tmux_standin.ml`](../test/tmux_standin.ml), an OCaml executable that
+`LIBTMUX_STANDIN_*` environment variables configure: it replies with fixed text,
+or runs the real tmux after adding `-f FILE`, recording its arguments or its
+process ID. Link it under the name the program under test expects. A test
+whose own Python file must act as tmux, such as `test/shutdown_test.py`, is
+executable with a `python3` shebang. No `#!/bin/sh` shim stands in for tmux.
+
+Start cost decides the language. On the maintainer's x86-64 WSL2 host with tmux
+3.8, `hyperfine -N --warmup 3 --runs 30` measured one `-V` call as:
+
+| Program | Mean per call |
+| --- | --- |
+| tmux alone | 0.93 ms |
+| `sh` exec shim | 1.3 ms |
+| OCaml stand-in | 1.7 ms |
+| Python stand-in (`#!/usr/bin/env python3`) | 14.0 ms |
+| Python stand-in (`uv run --script`) | 42.3 ms |
+
+The CLI driver gives each command a 1 s deadline, and a command makes several
+tmux calls. The OCaml stand-in adds under a millisecond to each; Python adds 13
+ms or more.
+
+## Exceptions
+
+- `scripts/bench/concurrency.py` and `scripts/bench/mixed.py` start panes with
+  `/bin/sh -c 'stty -echo; exec /bin/cat -u MARKER -'`. The pane must lose
+  terminal echo before `cat` runs, tmux has no option for that, and `stty`
+  cannot be chained to `cat` without a shell. The command runs inside the pane
+  under test, not in place of tmux, so the start-cost measure above does not
+  apply.
+- `pyproject.toml` exempts the outer drivers listed there from `ANN`, and the
+  drivers run as `python3 test/NAME.py` without a PEP 723 header, because they
+  predate this policy. [#17](https://github.com/libtmux/libtmux-ocaml/issues/17)
+  kept them as tests, not scripts. Annotating them and running them with
+  `uv run` is open work in
+  [#27](https://github.com/libtmux/libtmux-ocaml/issues/27). Annotate a driver
+  when rewriting it and drop its `ANN` entry.

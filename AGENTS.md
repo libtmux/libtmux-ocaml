@@ -15,6 +15,21 @@ Follow the active implementation epic and retain its remaining acceptance gates.
 
 Each guide owns its subject. `CLAUDE.md` is a relative symlink to this file.
 
+## Checks
+
+[.github/CONTRIBUTING.md](.github/CONTRIBUTING.md) lists every command and its
+budget. Before handing off a change to a script or an outer test driver, run:
+
+- `uv run ruff format --check scripts test`
+- `uv run ruff check scripts test`
+- `uv run ty check scripts test`
+- `opam exec -- uv run pytest scripts`; set `LIBTMUX_API_EXPORT=1` to include
+  the compiler-backed exporter tests and `TMUX_BINARY` with `-m native` for
+  the benchmark smoke tests.
+
+For OCaml sources, run `opam exec -- dune build @fmt` and
+`opam exec -- dune build @all @install`.
+
 ## Change discipline
 
 - Inspect Git state and preserve unrelated work and existing symlink targets.

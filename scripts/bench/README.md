@@ -22,9 +22,9 @@ recorded results and how to read them.
 ## Who runs it
 
 Maintainers run the drivers by hand when they change the runtime, and keep each
-run under ten minutes. CI does not run them. A smoke test for each driver, on
-the smallest workload its options allow, runs with `-m native` against a tmux
-release binary.
+run under ten minutes. CI does not run the measurements. The native job runs a
+smoke test for each driver, on the smallest workload its options allow, with
+`pytest -m native` against each tmux release binary.
 
 ## Run
 
