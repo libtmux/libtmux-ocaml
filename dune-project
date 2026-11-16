@@ -3,3 +3,6 @@
 (name libtmux)
 
 (using mdx 0.4)
+
+(formatting
+ (enabled_for ocaml))
