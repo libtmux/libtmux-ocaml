@@ -1,7 +1,7 @@
 """Tests for the public interface exporter.
 
-The script's own checks run against temporary Git repositories with a stub
-exporter. The compiler-backed extraction tests run only with
+The script's own checks run against temporary Git repositories with a canned
+exporter reply. The compiler-backed extraction tests run only with
 LIBTMUX_API_EXPORT=1, as the Dune stanza that builds tools/api_export.exe does.
 """
 
@@ -20,6 +20,7 @@ import pytest
 
 REPOSITORY = Path(__file__).resolve().parents[3]
 EXPORTER = REPOSITORY / export_api.EXPORTER
+REAL_CHECK_OUTPUT = subprocess.check_output
 
 
 @pytest.fixture(autouse=True)
@@ -62,8 +63,9 @@ def git(repository: Path, *arguments: str) -> str:
 class Repository:
     """A committed library tree whose exporter prints a canned artifact."""
 
-    def __init__(self, path: Path) -> None:
+    def __init__(self, path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         self.path = path
+        self.monkeypatch = monkeypatch
         for name, text in {
             "lib/demo.mli": "val run : unit -> unit\n",
             "tools/api_export.ml": "(* exporter *)\n",
@@ -107,17 +109,23 @@ class Repository:
             "_build/default/tools/artifact.json",
             json.dumps({"compiler": "5.5.2", "schema": "stub/1", "symbols": symbols}),
         )
-        stub = self.path / export_api.EXPORTER
-        stub.write_text('#!/bin/sh\ncat "$(dirname "$0")/artifact.json"\n')
-        stub.chmod(0o755)
+        exporter = str(self.path / export_api.EXPORTER)
+        canned = self.path / "_build/default/tools/artifact.json"
+
+        def check_output(command: list[str], cwd: Path | None = None) -> bytes:
+            if command[0] == exporter:
+                return canned.read_bytes()
+            return REAL_CHECK_OUTPUT(command, cwd=cwd)
+
+        self.monkeypatch.setattr(export_api.subprocess, "check_output", check_output)
 
     def export(self, revision: str | None = None) -> tuple[dict[str, Any], int]:
         return export_api.export(self.path, revision)
 
 
 @pytest.fixture
-def repository(tmp_path: Path) -> Repository:
-    library = Repository(tmp_path)
+def repository(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Repository:
+    library = Repository(tmp_path, monkeypatch)
     artifact, interfaces = library.export()  # the unmodified tree exports cleanly
     assert interfaces == 1 and artifact["symbols"]
     return library

@@ -45,7 +45,7 @@ $ opam exec -- uv run scripts/export_api/export_api.py \
 ```
 
 Run the tests. Those that need no OCaml build use temporary Git repositories
-and a stub exporter:
+and a canned exporter reply:
 
 ```console
 $ uv run pytest scripts/export_api
