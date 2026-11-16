@@ -10,6 +10,9 @@ root = Path(__file__).resolve().parents[1]
 if len(sys.argv) != 2:
     raise SystemExit("usage: native_suite.py /path/to/tmux")
 binary = str(Path(sys.argv[1]).resolve(strict=True))
+# A driver's deadline is a bound, not a target: far above its run time, so a
+# loaded runner does not fail a healthy driver, and finite, so a hung one fails
+# the job instead of stalling it.
 for name in [
     "fixture",
     "plan",

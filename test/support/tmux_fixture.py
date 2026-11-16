@@ -27,6 +27,8 @@ class TmuxFixture:
         self.log = tempfile.TemporaryFile()  # noqa: SIM115  # closed in __exit__
 
     def command(self, *arguments, check=True):
+        # A call to a running server answers in milliseconds; the bound only
+        # catches a hung one.
         return subprocess.run(
             [self.binary, "-S", str(self.socket), *arguments],
             env=self.environment,
