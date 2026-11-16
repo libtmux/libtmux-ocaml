@@ -31,7 +31,10 @@ module type Backend = sig
     type t
 
     val submit : C.t -> P.t -> (t, Error.t) result
-    val submit_bootstrap : binary:string -> P.t -> (t, Error.t) result
+
+    val submit_bootstrap :
+      ?config_file:string -> binary:string -> P.t -> (t, Error.t) result
+
     val client : t -> C.t option
     val await : ?compensate_on_failure:bool -> t -> (X.receipt, Error.t) result
     val inspect : t -> (X.receipt, Error.t) result
@@ -46,7 +49,7 @@ module Make (B : Backend) = struct
   module C = B.C
   module W = B.W
 
-  let run_bootstrap ~binary ~endpoint ~version =
+  let run_bootstrap ~config_file ~binary ~endpoint ~version =
     let cfg =
       config ~session:"workspace-public-bootstrap"
         [ window "editor" [ pane (); pane () ]; window "logs" [ pane () ] ]
@@ -56,7 +59,7 @@ module Make (B : Backend) = struct
       | Ok plan -> plan
       | Error error -> failwith (Format.asprintf "%a" P.pp_error error)
     in
-    let operation = get (W.submit_bootstrap ~binary plan) in
+    let operation = get (W.submit_bootstrap ?config_file ~binary plan) in
     assert ((get (W.inspect operation)).status = X.Queued);
     assert (Option.is_none (W.client operation));
     let receipt = get (W.await operation) in
@@ -87,7 +90,7 @@ module Make (B : Backend) = struct
       (fun () ->
         assert (Source.server_pid (C.source probe) = Source.server_pid source);
         ignore (get (C.capture probe));
-        let collision = get (W.submit_bootstrap ~binary plan) in
+        let collision = get (W.submit_bootstrap ?config_file ~binary plan) in
         let receipt = get (W.await collision) in
         assert (receipt.status = X.Partial);
         assert (Iarray.length receipt.cleanup = 0);

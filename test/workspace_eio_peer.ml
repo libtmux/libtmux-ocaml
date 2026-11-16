@@ -25,8 +25,8 @@ let () =
             module W = struct
               include W
 
-              let submit_bootstrap ~binary plan =
-                W.submit_bootstrap ~binary ~sw
+              let submit_bootstrap ?config_file ~binary plan =
+                W.submit_bootstrap ?config_file ~binary ~sw
                   ~process_mgr:(Eio.Stdenv.process_mgr env)
                   ~mono_clock:(Eio.Stdenv.mono_clock env)
                   plan
@@ -52,6 +52,10 @@ let () =
           end) in
           let binary = Sys.argv.(1)
           and endpoint = Endpoint.socket_path Sys.argv.(2) in
-          if Array.length Sys.argv = 5 && Sys.argv.(3) = "--bootstrap" then
-            Exercise.run_bootstrap ~binary ~endpoint ~version:Sys.argv.(4)
+          if Array.length Sys.argv >= 5 && Sys.argv.(3) = "--bootstrap" then
+            let config_file =
+              if Array.length Sys.argv > 5 then Some Sys.argv.(5) else None
+            in
+            Exercise.run_bootstrap ~config_file ~binary ~endpoint
+              ~version:Sys.argv.(4)
           else Exercise.run ~binary ~endpoint))

@@ -14,7 +14,8 @@ module Exercise = Workspace_scenarios.Make (struct
   module W = struct
     include W
 
-    let submit_bootstrap ~binary plan = W.submit_bootstrap ~binary plan
+    let submit_bootstrap ?config_file ~binary plan =
+      W.submit_bootstrap ?config_file ~binary plan
 
     let await ?compensate_on_failure operation =
       W.await ?compensate_on_failure operation
@@ -40,6 +41,9 @@ end)
 
 let () =
   let binary = Sys.argv.(1) and endpoint = Endpoint.socket_path Sys.argv.(2) in
-  if Array.length Sys.argv = 5 && Sys.argv.(3) = "--bootstrap" then
-    Exercise.run_bootstrap ~binary ~endpoint ~version:Sys.argv.(4)
+  if Array.length Sys.argv >= 5 && Sys.argv.(3) = "--bootstrap" then
+    let config_file =
+      if Array.length Sys.argv > 5 then Some Sys.argv.(5) else None
+    in
+    Exercise.run_bootstrap ~config_file ~binary ~endpoint ~version:Sys.argv.(4)
   else Exercise.run ~binary ~endpoint

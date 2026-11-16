@@ -3,8 +3,10 @@ module B = Libtmux_unix__Bootstrap
 module C = Libtmux_unix__Connection
 module Io = Libtmux_unix__Runtime_io
 
+let config_file = if Array.length Sys.argv > 3 then Some Sys.argv.(3) else None
+
 let start receipt io name =
-  B.start receipt ~io ~binary:Sys.argv.(1)
+  B.start receipt ?config_file ~io ~binary:Sys.argv.(1)
     ~endpoint:(Endpoint.socket_path Sys.argv.(2))
     ~name ~window_name:"editor"
     ~spawn:(Spawn.make (Shell "exec cat"))

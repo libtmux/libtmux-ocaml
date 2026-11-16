@@ -3,7 +3,6 @@
 import ctypes
 import os
 import selectors
-import shlex
 import signal
 import subprocess
 import sys
@@ -19,10 +18,11 @@ if libc.prctl(36, 1, 0, 0, 0) != 0:
     raise OSError(ctypes.get_errno(), "PR_SET_CHILD_SUBREAPER")
 
 
-def exercise(binary, socket, environment, fresh, public_backend=None):
+def exercise(binary, socket, environment, fresh, public_backend=None, config_file=None):
     daemon = None
     pidfds = []
-    arguments = [str(peer), binary, str(socket)]
+    extra = [config_file] if config_file else []
+    arguments = [str(peer), binary, str(socket), *extra]
     expected = b"PASS bound startup, collision, retained cancellation, healthy daemon\nCLOSED\n"
     if public_backend is not None:
         public_peer = root / f"_build/default/test/workspace{public_backend}_peer.exe"
@@ -32,7 +32,14 @@ def exercise(binary, socket, environment, fresh, public_backend=None):
             .strip()
             .removeprefix("tmux ")
         )
-        arguments = [str(public_peer), binary, str(socket), "--bootstrap", version]
+        arguments = [
+            str(public_peer),
+            binary,
+            str(socket),
+            "--bootstrap",
+            version,
+            *extra,
+        ]
         expected = b"PASS public bootstrap, collision, closed-client journal, healthy daemon\nCLOSED\n"
     process = subprocess.Popen(
         arguments,
@@ -143,15 +150,12 @@ for binary in sys.argv[1:]:
             fixture.track_panes()
     with tempfile.TemporaryDirectory(prefix="libtmux-ocaml-bootstrap-") as directory:
         directory = Path(directory)
-        wrapper = directory / "tmux"
-        wrapper.write_text(f'#!/bin/sh\nexec {shlex.quote(actual)} -f /dev/null "$@"\n')
-        wrapper.chmod(0o700)
         environment = {
             key: value
             for key, value in os.environ.items()
             if key not in {"TMUX", "TMUX_PANE"}
         }
-        exercise(str(wrapper), directory / "server", environment, True)
+        exercise(actual, directory / "server", environment, True, None, "/dev/null")
     print(
         f"PASS {Path(binary).parent.name}: fresh/existing bootstrap, collision, cancelled startup receipt, teardown"
     )
@@ -167,13 +171,13 @@ for binary in sys.argv[1:]:
             prefix="libtmux-ocaml-public-bootstrap-"
         ) as directory:
             directory = Path(directory)
-            wrapper = directory / "tmux"
-            wrapper.write_text(
-                f'#!/bin/sh\nexec {shlex.quote(actual)} -f /dev/null "$@"\n'
-            )
-            wrapper.chmod(0o700)
             exercise(
-                str(wrapper), directory / "server", environment, True, public_backend
+                actual,
+                directory / "server",
+                environment,
+                True,
+                public_backend,
+                "/dev/null",
             )
         print(
             f"PASS {Path(binary).parent.name}: public {'Eio' if public_backend else 'Unix'} fresh/existing bootstrap, collision and retained journal"
