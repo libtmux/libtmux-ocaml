@@ -49,7 +49,7 @@ with tempfile.TemporaryDirectory(prefix="libtmux-ocaml-workspace-docs-") as temp
     environment["PATH"] = os.pathsep.join([str(prefix / "bin"), environment["PATH"]])
     environment["TMPDIR"] = str(runtime)
     resolved = subprocess.check_output(
-        ["opam", "exec", "--", "sh", "-c", "command -v tmux-workspace"],
+        ["opam", "exec", "--", "which", "tmux-workspace"],
         cwd=root,
         env=environment,
         text=True,

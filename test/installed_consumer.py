@@ -2,6 +2,7 @@
 
 import os
 import re
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -84,14 +85,18 @@ let () =
         )
         if block.startswith('$ eval "$(opam env')
     )
-    switch = subprocess.check_output(
-        ["/bin/sh", "-c", activation + '\nprintf "%s" "$OPAMSWITCH"'],
+    # The README evaluates the output of `opam env ...`; run that command and
+    # read the switch it exports.
+    (opam_arguments,) = re.findall(r"\$\(opam env ([^)]*)\)", activation)
+    exports = subprocess.check_output(
+        ["opam", "env", *shlex.split(opam_arguments)],
         cwd=root,
         env=environment,
         text=True,
-    ).strip()
-    assert switch, "README switch activation did not export OPAMSWITCH"
-    environment["OPAMSWITCH"] = switch
+    )
+    exported = re.search(r"^OPAMSWITCH='?([^';\n]+)", exports, re.MULTILINE)
+    assert exported, "README switch activation did not export OPAMSWITCH"
+    environment["OPAMSWITCH"] = exported.group(1)
     for key in ("DUNE_SOURCEROOT", "DUNE_WORKSPACE"):
         environment.pop(key, None)
     for package in packages:
