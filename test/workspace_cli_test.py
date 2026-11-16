@@ -5,7 +5,6 @@ import ctypes
 import json
 import os
 import selectors
-import shlex
 import signal
 import subprocess
 import sys
@@ -16,6 +15,7 @@ from typing import Any
 from support.tmux_fixture import TmuxFixture
 
 root = Path(__file__).resolve().parents[1]
+standin = root / "_build/default/test/tmux_standin.exe"
 libc = ctypes.CDLL(None, use_errno=True)
 if libc.prctl(36, 1, 0, 0, 0) != 0:
     raise OSError(ctypes.get_errno(), "PR_SET_CHILD_SUBREAPER")
@@ -55,22 +55,26 @@ with tempfile.TemporaryDirectory(prefix="libtmux-ocaml-cli-install-") as install
             document = directory / "project.json"
             audit = directory / "binary-calls"
             wrapper = directory / "tmux"
-            wrapper.write_text(
-                "#!/bin/sh\n"
-                f"printf '%s\\n' \"$*\" >> {shlex.quote(str(audit))}\n"
-                f'exec {shlex.quote(actual)} -f /dev/null "$@"\n'
-            )
-            wrapper.chmod(0o700)
+            wrapper.symlink_to(standin)
             environment = dict(
                 fixture.environment,
                 PATH=str(directory) + os.pathsep + os.environ["PATH"],
+                LIBTMUX_STANDIN_TMUX=actual,
+                LIBTMUX_STANDIN_CONFIG="/dev/null",
+                LIBTMUX_STANDIN_AUDIT=str(audit),
             )
 
             def write(value):
                 document.write_text(json.dumps(value))
 
             def command(
-                name, *args, expected=0, json_output=True, endpoint=None, program=None
+                name,
+                *args,
+                expected=0,
+                json_output=True,
+                endpoint=None,
+                program=None,
+                reply=None,
             ):
                 argv = [str(cli), name]
                 if json_output:
@@ -83,7 +87,9 @@ with tempfile.TemporaryDirectory(prefix="libtmux-ocaml-cli-install-") as install
                 result = subprocess.run(
                     argv,
                     cwd=directory,
-                    env=environment,
+                    env=environment
+                    if reply is None
+                    else dict(environment, LIBTMUX_STANDIN_REPLY=reply),
                     capture_output=True,
                     timeout=1,
                     check=False,
@@ -159,12 +165,13 @@ with tempfile.TemporaryDirectory(prefix="libtmux-ocaml-cli-install-") as install
             assert not missing.exists(), "plan created a daemon"
             assert audit.read_text().splitlines() == ["-V"]
             bad_version = directory / "bad-version"
-            bad_version.write_text(
-                "#!/bin/sh\nprintf '%s\\n' " + shlex.quote("tmux " + "x" * 512) + "\n"
-            )
-            bad_version.chmod(0o700)
+            bad_version.symlink_to(standin)
             malformed = command(
-                "plan", program=bad_version, endpoint=missing, expected=6
+                "plan",
+                program=bad_version,
+                reply="tmux " + "x" * 512,
+                endpoint=missing,
+                expected=6,
             )
             assert malformed["error"]["code"] == "malformed_data"
             assert not missing.exists()
@@ -383,15 +390,12 @@ with tempfile.TemporaryDirectory(prefix="libtmux-ocaml-cli-install-") as install
             )
             socket = directory / "server"
             wrapper = directory / "tmux"
-            wrapper.write_text(
-                f'#!/bin/sh\nexec {shlex.quote(actual)} -f /dev/null "$@"\n'
-            )
-            wrapper.chmod(0o700)
+            wrapper.symlink_to(standin)
             environment = {
                 key: value
                 for key, value in os.environ.items()
                 if key not in {"TMUX", "TMUX_PANE"}
-            }
+            } | {"LIBTMUX_STANDIN_TMUX": actual, "LIBTMUX_STANDIN_CONFIG": "/dev/null"}
             child_file = Path(f"/proc/self/task/{os.getpid()}/children")
             before = set(map(int, child_file.read_text().split()))
             pane_pidfds = []

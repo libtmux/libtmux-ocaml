@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Outer: owned-child TERM grace, escalation and reaping require real processes."""
 
 import contextlib
@@ -80,11 +81,7 @@ def line(stream, timeout=1):
 
 def run_case(fixture, backend, mode, stopped, eio_backend=None):
     path = Path(fixture.directory.name) / "shutdown-barrier"
-    proxy = Path(fixture.directory.name) / "shutdown-tmux"
-    proxy.write_text(
-        f"#!/bin/sh\nexec '{sys.executable}' '{Path(__file__).resolve()}' \"$@\"\n"
-    )
-    proxy.chmod(0o700)
+    proxy = Path(__file__).resolve()
     peer = Path(__file__).resolve().parents[1] / "_build/default/test/shutdown_peer.exe"
     master, slave = pty.openpty()
     process = None

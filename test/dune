@@ -205,3 +205,8 @@
  (name private_daemon_peer)
  (modules private_daemon_peer)
  (libraries libtmux libtmux-workspace libtmux-unix libtmux-eio eio_main unix))
+
+(executable
+ (name tmux_standin)
+ (modules tmux_standin)
+ (libraries unix))

@@ -13,7 +13,6 @@ import os
 import platform
 import resource
 import selectors
-import shlex
 import signal
 import statistics
 import subprocess
@@ -54,14 +53,8 @@ def sample(binary: str, requests: int, concurrency: int) -> dict[str, Any]:
         directory = Path(fixture.directory.name)
         launches = directory / "client-launches"
         wrapper = directory / "tmux-client"
-        wrapper.write_text(
-            "#!/bin/sh\nprintf '%s\\n' \"$$\" >> "
-            + shlex.quote(str(launches))
-            + "\nexec "
-            + shlex.quote(fixture.binary)
-            + ' "$@"\n'
-        )
-        wrapper.chmod(0o700)
+        # The stand-in records its process ID, which the real tmux keeps.
+        wrapper.symlink_to(ROOT / "_build/default/test/tmux_standin.exe")
         helpers = {}
         usage_before = resource.getrusage(resource.RUSAGE_CHILDREN)
         process = subprocess.Popen(
@@ -73,7 +66,11 @@ def sample(binary: str, requests: int, concurrency: int) -> dict[str, Any]:
                 str(concurrency),
             ],
             cwd=ROOT,
-            env=fixture.environment,
+            env=fixture.environment
+            | {
+                "LIBTMUX_STANDIN_TMUX": fixture.binary,
+                "LIBTMUX_STANDIN_LAUNCHES": str(launches),
+            },
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
