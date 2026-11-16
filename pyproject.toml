@@ -15,6 +15,7 @@ pythonpath = [
     "scripts/export_api",
     "scripts/generate",
     "scripts/bench",
+    "scripts/toolchain",
 ]
 markers = [
     "native: starts a real tmux; set TMUX_BINARY to its path",
@@ -51,4 +52,4 @@ extend-select = ["ANN", "B", "C4", "I", "RUF", "SIM", "UP"]
 
 [tool.ty.environment]
 python-version = "3.11"
-extra-paths = ["test", "scripts/docs_snippets", "scripts/export_api", "scripts/generate", "scripts/bench"]
+extra-paths = ["test", "scripts/docs_snippets", "scripts/export_api", "scripts/generate", "scripts/bench", "scripts/toolchain"]
