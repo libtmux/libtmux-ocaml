@@ -251,12 +251,12 @@ end
     than when a snapshot was captured. {!Client.kill_window} destroys the
     window, all its session links and every pane in it, while
     {!Client.unlink_window_at} removes one link and tmux rejects removing a
-    window's last link unless [allow_kill] is true. Resize and layout functions
-    request a geometry: tmux can constrain the result, so capture again to
-    observe it.
+    window's last link unless [allow_kill] is true. {!Client.kill_server} stops
+    the daemon and closes this client. Resize and layout functions request a
+    geometry: tmux can constrain the result, so capture again to observe it.
 
     - Sessions: {!Client.rename_session} and {!Client.kill_session}
-    - Server: {!Client.kill_server} stops the daemon and closes this client
+    - Server: {!Client.kill_server}
     - Windows: {!Client.rename_window}, {!Client.select_window_at},
       {!Client.link_window}, {!Client.unlink_window_at},
       {!Client.move_window_at}, {!Client.resize_window},
