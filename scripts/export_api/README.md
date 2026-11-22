@@ -48,12 +48,15 @@ Run the tests. Those that need no OCaml build use temporary Git repositories
 and a canned exporter reply:
 
 ```console
-$ uv run pytest scripts/export_api
+$ uv run --project scripts --locked pytest scripts/export_api
 ```
 
 Run the compiler-backed extraction tests as well. They compile fixture
 interfaces and run the built exporter, so they need `ocamlc` on `PATH`:
 
 ```console
-$ LIBTMUX_API_EXPORT=1 opam exec -- uv run pytest scripts/export_api
+$ LIBTMUX_API_EXPORT=1 opam exec -- uv run \
+    --project scripts \
+    --locked \
+    pytest scripts/export_api
 ```

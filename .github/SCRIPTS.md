@@ -76,10 +76,10 @@ ms or more.
   cannot be chained to `cat` without a shell. The command runs inside the pane
   under test, not in place of tmux, so the start-cost measure above does not
   apply.
-- `pyproject.toml` exempts the outer drivers listed there from `ANN`, and the
-  drivers run as `python3 test/NAME.py` without a PEP 723 header, because they
-  predate this policy. [#17](https://github.com/libtmux/libtmux-ocaml/issues/17)
-  kept them as tests, not scripts. Annotating them and running them with
-  `uv run` is open work in
+- `scripts/pyproject.toml` exempts the outer drivers listed there from `ANN`,
+  and the drivers run as `python3 test/NAME.py` without a PEP 723 header,
+  because they predate this policy.
+  [#17](https://github.com/libtmux/libtmux-ocaml/issues/17) kept them as tests,
+  not scripts. Annotating them and running them with `uv run` is open work in
   [#27](https://github.com/libtmux/libtmux-ocaml/issues/27). Annotate a driver
   when rewriting it and drop its `ANN` entry.

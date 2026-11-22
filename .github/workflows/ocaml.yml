@@ -44,15 +44,15 @@ jobs:
       - name: Check owner capability directories
         run: opam exec -- python3 test/api_directory_test.py _build/docs/ocaml.json
       - name: Check support script formatting
-        run: uv run ruff format --check scripts test
+        run: uv run --project scripts --locked ruff format --check --config scripts/pyproject.toml scripts test
       - name: Lint support scripts
-        run: uv run ruff check scripts test
+        run: uv run --project scripts --locked ruff check --config scripts/pyproject.toml scripts test
       - name: Type-check support scripts
-        run: uv run ty check scripts test
+        run: uv run --project scripts --locked ty check --project scripts scripts test
       - name: Test support scripts
         env:
           LIBTMUX_API_EXPORT: '1'
-        run: opam exec -- uv run pytest scripts
+        run: opam exec -- uv run --project scripts --locked pytest scripts
       - name: Verify workspace document bounds and input backends
         run: opam exec -- python3 test/workspace_document_test.py
       - name: Check documentation snippets and links
@@ -110,7 +110,7 @@ jobs:
       - name: Smoke-test the benchmark drivers
         env:
           TMUX_BINARY: ${{ steps.tmux.outputs.binary }}
-        run: opam exec -- uv run pytest -m native scripts/bench
+        run: opam exec -- uv run --project scripts --locked pytest -m native scripts/bench
       - name: Execute the installed workspace documentation
         env:
           TMUX_BINARY: ${{ steps.tmux.outputs.binary }}

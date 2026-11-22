@@ -57,5 +57,10 @@ $ opam exec -- dune build \
 
 ```console
 $ TMUX_BINARY=/path/to/tmux-3.8/bin/tmux \
-    opam exec -- uv run pytest -m native scripts/bench
+    opam exec -- uv run \
+    --project scripts \
+    --locked \
+    pytest \
+    -m native \
+    scripts/bench
 ```
