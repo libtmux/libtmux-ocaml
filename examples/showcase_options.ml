@@ -19,25 +19,23 @@ let tune_options client (initial : Created.t) =
   (* Unsetting restores tmux's default, which differs between releases. *)
   get (Client.unset_option client server "escape-time");
   assert (integer client server "escape-time" <> 13);
-  get (Client.set_option client session ~name:"@project" (Options.Text "ocaml"));
+  let name = "@project" in
+  get (Client.set_option client session ~name (Options.Text "ocaml"));
   assert (
-    Options.lookup (get (Client.capture_options client session)) "@project"
-    <> None);
+    Options.lookup (get (Client.capture_options client session)) name <> None);
   get (Client.clear_option_array client server "command-alias")
 
 let tune_environment client =
+  let global = Environment.Global and name = "LIBTMUX_DEMO" in
   let lookup () =
-    Environment.lookup
-      (get (Client.capture_environment client Environment.Global))
-      "LIBTMUX_DEMO"
+    Environment.lookup (get (Client.capture_environment client global)) name
   in
-  get
-    (Client.set_environment client Environment.Global ~name:"LIBTMUX_DEMO" "one");
+  get (Client.set_environment client global ~name "one");
   assert (lookup () = Some (Environment.Value "one"));
   (* A removal marker masks a global value; unsetting drops the entry. *)
-  get (Client.remove_environment client Environment.Global "LIBTMUX_DEMO");
+  get (Client.remove_environment client global name);
   assert (lookup () = Some Environment.Removed);
-  get (Client.unset_environment client Environment.Global "LIBTMUX_DEMO");
+  get (Client.unset_environment client global name);
   assert (lookup () = None)
 (* docs:end options-and-environment *)
 
