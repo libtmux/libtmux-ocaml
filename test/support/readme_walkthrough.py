@@ -108,6 +108,8 @@ def run(
             TMUX="/unrelated/server,99999,0",
             TMUX_PANE="%99999",
         )
+        for key in ("LIBTMUX_SOCKET", "LIBTMUX_SOCKET_PATH"):
+            child_environment.pop(key, None)
         result = subprocess.run(
             command,
             cwd=project,

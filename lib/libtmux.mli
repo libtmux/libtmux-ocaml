@@ -24,23 +24,38 @@
     {{:https://github.com/libtmux/libtmux-ocaml/blob/master/docs/queries.md}query
      guide} for native predicates and typed expressions. *)
 
-(** An explicit socket description. Constructing an endpoint neither reads the
-    environment nor starts a daemon. {!Source.t} adds the observed daemon and
-    connection generation. *)
+(** Socket descriptions and default server selection. Explicit constructors
+    neither read the environment nor start a daemon; {!Endpoint.from_env}
+    resolves selector variables without starting a daemon. {!Source.t} adds the
+    observed daemon and connection generation. *)
 module Endpoint : sig
   type t
-  (** An explicit socket description, independent of the environment. *)
+  (** A tmux socket description. *)
 
   type kind = Named_socket of string | Socket_path of string
 
   val named_socket : string -> t
-  (** [named_socket name] describes tmux's [-L name] endpoint. Raises
-      [Invalid_argument] if [name] is empty or contains NUL or [/]. *)
+  (** [named_socket name] describes tmux's [-L name] endpoint without reading
+      selector variables. Raises [Invalid_argument] if [name] is empty, ["."] or
+      [".."], or contains NUL or [/]. *)
 
   val socket_path : string -> t
-  (** [socket_path path] describes an absolute [-S path] endpoint. It does not
-      check existence or resolve symbolic links. Raises [Invalid_argument] if
-      [path] is relative, empty or contains NUL. *)
+  (** [socket_path path] describes an absolute [-S path] endpoint without
+      reading selector variables. It does not check existence or resolve
+      symbolic links. Raises [Invalid_argument] if [path] is relative, empty or
+      contains NUL. *)
+
+  val from_env : ?getenv:(string -> string option) -> ?cwd:string -> unit -> t
+  (** Resolve the server tmux reaches when no explicit socket is chosen. Inspect
+      [LIBTMUX_SOCKET_PATH] ([-S], ignoring [LIBTMUX_SOCKET] when both are set),
+      else [LIBTMUX_SOCKET] ([-L]), else the socket path before the first comma
+      in [TMUX] ([-S]), else tmux's [default] socket ([-L default]).
+
+      Empty and whitespace-only values count as unset; other values are used
+      untrimmed. Relative socket paths resolve against [cwd], defaulting to
+      [Sys.getcwd ()]. Performs no tmux I/O. Raises [Invalid_argument] if [cwd]
+      is not an absolute NUL-free path or the selected value fails
+      {!socket_path} or {!named_socket} validation. *)
 
   val kind : t -> kind
 

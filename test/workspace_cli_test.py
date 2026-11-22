@@ -12,7 +12,7 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-from support.tmux_fixture import TmuxFixture
+from support.tmux_fixture import AMBIENT_SELECTORS, TmuxFixture
 
 root = Path(__file__).resolve().parents[1]
 standin = root / "_build/default/test/tmux_standin.exe"
@@ -73,23 +73,30 @@ with tempfile.TemporaryDirectory(prefix="libtmux-ocaml-cli-install-") as install
                 expected=0,
                 json_output=True,
                 endpoint=None,
+                socket_name=None,
                 program=None,
                 reply=None,
+                extra_env=None,
             ):
                 argv = [str(cli), name]
                 if json_output:
                     argv += ["--json"]
                 if endpoint is not None:
                     argv += ["--socket", str(endpoint)]
+                if socket_name is not None:
+                    argv += ["--socket-name", str(socket_name)]
                 if name != "check":
                     argv += ["--tmux", str(program or wrapper)]
                 argv += [*args, str(document)]
+                run_env = dict(environment)
+                if extra_env is not None:
+                    run_env.update(extra_env)
+                if reply is not None:
+                    run_env["LIBTMUX_STANDIN_REPLY"] = reply
                 result = subprocess.run(
                     argv,
                     cwd=directory,
-                    env=environment
-                    if reply is None
-                    else dict(environment, LIBTMUX_STANDIN_REPLY=reply),
+                    env=run_env,
                     capture_output=True,
                     timeout=1,
                     check=False,
@@ -376,8 +383,56 @@ with tempfile.TemporaryDirectory(prefix="libtmux-ocaml-cli-install-") as install
                 process.stdout.close()
                 process.stderr.close()
             assert fixture.command("list-clients").stdout == b""
+            write(config("cli-env-select"))
+            both_flags = command(
+                "plan",
+                endpoint=fixture.socket,
+                socket_name="conflict",
+                expected=2,
+            )
+            assert both_flags["error"]["code"] == "invalid_endpoint"
+            bad_name = command("plan", socket_name="bad/slash", expected=2)
+            assert bad_name["error"]["code"] == "invalid_endpoint"
+            bad_env = command(
+                "plan",
+                extra_env={"LIBTMUX_SOCKET": "bad/slash"},
+                expected=2,
+            )
+            assert bad_env["error"]["code"] == "invalid_endpoint"
+            override = command(
+                "plan",
+                endpoint=fixture.socket,
+                extra_env={
+                    "LIBTMUX_SOCKET_PATH": str(directory / "other"),
+                    "LIBTMUX_SOCKET": "bad/slash",
+                    "TMUX": "/unrelated/server,123,0",
+                },
+            )
+            assert override["source"]["server_pid"] == fixture.server.pid
+            env_path = command(
+                "plan",
+                extra_env={
+                    "LIBTMUX_SOCKET_PATH": "server",
+                    "LIBTMUX_SOCKET": "bad/slash",
+                    "TMUX": "/unrelated/server,123,0",
+                },
+            )
+            assert env_path["source"]["server_pid"] == fixture.server.pid
+            env_tmux = command(
+                "apply",
+                extra_env={
+                    "LIBTMUX_SOCKET_PATH": "   ",
+                    "LIBTMUX_SOCKET": "\t",
+                    "TMUX": f"{fixture.socket},4242,0",
+                    "TMUX_PANE": "%0",
+                },
+            )
+            assert env_tmux["status"] == "succeeded"
+            assert env_tmux["source"]["server_pid"] == fixture.server.pid
+            fixture.track_panes()
+            assert fixture.command("list-clients").stdout == b""
             print(
-                f"PASS {Path(binary).parent.name}: installed CLI validation, planning, apply, collisions, partial recovery, SIGINT and stalled output"
+                f"PASS {Path(binary).parent.name}: installed CLI validation, planning, apply, default server selection, collisions, partial recovery, SIGINT and stalled output"
             )
 
         with tempfile.TemporaryDirectory(
@@ -388,104 +443,168 @@ with tempfile.TemporaryDirectory(prefix="libtmux-ocaml-cli-install-") as install
             document.write_bytes(
                 (root / "examples/workspace/project.json").read_bytes()
             )
-            socket = directory / "server"
+            sandbox = directory / "sandbox"
+            sandbox.mkdir(mode=0o700)
             wrapper = directory / "tmux"
             wrapper.symlink_to(standin)
             environment = {
                 key: value
                 for key, value in os.environ.items()
-                if key not in {"TMUX", "TMUX_PANE"}
-            } | {"LIBTMUX_STANDIN_TMUX": actual, "LIBTMUX_STANDIN_CONFIG": "/dev/null"}
+                if key not in AMBIENT_SELECTORS
+            } | {
+                "LIBTMUX_STANDIN_TMUX": actual,
+                "LIBTMUX_STANDIN_CONFIG": "/dev/null",
+                "TMUX_TMPDIR": str(sandbox),
+                "LIBTMUX_TEST_SANDBOX": str(sandbox),
+            }
             child_file = Path(f"/proc/self/task/{os.getpid()}/children")
-            before = set(map(int, child_file.read_text().split()))
-            pane_pidfds = []
-            daemon = None
-            try:
-                result = subprocess.run(
-                    [
-                        str(cli),
-                        "apply",
-                        "--json",
-                        "--socket",
-                        str(socket),
-                        "--tmux",
-                        str(wrapper),
-                        str(document),
-                    ],
-                    cwd=directory,
-                    env=environment,
-                    capture_output=True,
-                    timeout=1,
-                    check=False,
-                )
-                assert result.returncode == 0, (
-                    result.returncode,
-                    result.stdout,
-                    result.stderr,
-                )
-                assert result.stderr == b""
-                receipt = json.loads(result.stdout)
-                assert receipt["status"] == "succeeded" and not receipt["failed"]
-                daemon = receipt["source"]["server_pid"]
-                assert daemon in set(map(int, child_file.read_text().split())) - before
-
-                def tmux(*args):
-                    return subprocess.run(
-                        [actual, "-S", str(socket), *args],
-                        env=environment,
+            for label, extra in [
+                ("default", {}),
+                (
+                    "named",
+                    {"LIBTMUX_SOCKET_PATH": "  ", "LIBTMUX_SOCKET": "named"},
+                ),
+            ]:
+                before = set(map(int, child_file.read_text().split()))
+                pane_pidfds = []
+                try:
+                    preview = subprocess.run(
+                        [
+                            str(cli),
+                            "plan",
+                            "--json",
+                            "--tmux",
+                            str(wrapper),
+                            str(document),
+                        ],
+                        cwd=directory,
+                        env=environment | extra,
                         capture_output=True,
-                        check=True,
                         timeout=1,
-                    ).stdout
-
-                assert tmux("list-clients") == b""
-                assert (
-                    tmux(
-                        "list-windows",
-                        "-t",
-                        "ocaml-project",
-                        "-F",
-                        "#{window_name}:#{window_panes}",
+                        check=True,
                     )
-                    == b"editor:2\nlogs:1\n"
-                )
-                assert (
-                    tmux("show-options", "-t", "ocaml-project", "-v", "@project")
-                    == b"ocaml\n"
-                )
-                rows = (
-                    tmux("list-panes", "-a", "-F", "#{pane_pid}|#{pane_current_path}")
-                    .decode()
-                    .splitlines()
-                )
-                assert len(rows) == 3 and all(
-                    row.split("|", 1)[1] == str(directory) for row in rows
-                )
-                for row in rows:
-                    pane_pidfds.append(os.pidfd_open(int(row.split("|", 1)[0])))
-            finally:
-                while True:
-                    children = set(map(int, child_file.read_text().split())) - before
-                    if not children:
-                        break
-                    for pid in children:
-                        descriptor = os.pidfd_open(pid)
-                        try:
-                            with contextlib.suppress(ProcessLookupError):
-                                signal.pidfd_send_signal(descriptor, signal.SIGTERM)
-                            with selectors.DefaultSelector() as ready:
-                                ready.register(descriptor, selectors.EVENT_READ)
-                                assert ready.select(1), (
-                                    "owned CLI bootstrap descendant did not exit"
-                                )
-                            os.waitpid(pid, 0)
-                        finally:
-                            os.close(descriptor)
-                for descriptor in pane_pidfds:
-                    with selectors.DefaultSelector() as ready:
-                        ready.register(descriptor, selectors.EVENT_READ)
-                        assert ready.select(1), "owned CLI bootstrap pane did not exit"
-                    os.close(descriptor)
+                    planned = json.loads(preview.stdout)
+                    assert planned["endpoint"] == {
+                        "kind": "named_socket",
+                        "value": label,
+                    }
+                    result = subprocess.run(
+                        [
+                            str(cli),
+                            "apply",
+                            "--json",
+                            "--tmux",
+                            str(wrapper),
+                            str(document),
+                        ],
+                        cwd=directory,
+                        env=environment | extra,
+                        capture_output=True,
+                        timeout=1,
+                        check=False,
+                    )
+                    assert result.returncode == 0, (
+                        result.returncode,
+                        result.stdout,
+                        result.stderr,
+                    )
+                    assert result.stderr == b""
+                    receipt = json.loads(result.stdout)
+                    assert receipt["status"] == "succeeded" and not receipt["failed"]
+                    daemon = receipt["source"]["server_pid"]
+                    assert (
+                        daemon in set(map(int, child_file.read_text().split())) - before
+                    )
+
+                    def tmux(*args, sock_label=label):
+                        assert (
+                            environment["LIBTMUX_TEST_SANDBOX"]
+                            == environment["TMUX_TMPDIR"]
+                        )
+                        return subprocess.run(
+                            [actual, "-L", sock_label, *args],
+                            env=environment,
+                            capture_output=True,
+                            check=True,
+                            timeout=1,
+                        ).stdout
+
+                    assert tmux("list-clients") == b""
+                    assert (
+                        tmux(
+                            "list-windows",
+                            "-t",
+                            "ocaml-project",
+                            "-F",
+                            "#{window_name}:#{window_panes}",
+                        )
+                        == b"editor:2\nlogs:1\n"
+                    )
+                    assert (
+                        tmux("show-options", "-t", "ocaml-project", "-v", "@project")
+                        == b"ocaml\n"
+                    )
+                    rows = (
+                        tmux(
+                            "list-panes",
+                            "-a",
+                            "-F",
+                            "#{pane_pid}|#{pane_current_path}",
+                        )
+                        .decode()
+                        .splitlines()
+                    )
+                    assert len(rows) == 3 and all(
+                        row.split("|", 1)[1] == str(directory) for row in rows
+                    )
+                    for row in rows:
+                        pane_pidfds.append(os.pidfd_open(int(row.split("|", 1)[0])))
+                    named_plan = subprocess.run(
+                        [
+                            str(cli),
+                            "plan",
+                            "--json",
+                            "--socket-name",
+                            label,
+                            "--tmux",
+                            str(wrapper),
+                            str(document),
+                        ],
+                        cwd=directory,
+                        env=environment
+                        | {"LIBTMUX_SOCKET_PATH": "/unrelated", "LIBTMUX_SOCKET": "x"},
+                        capture_output=True,
+                        timeout=1,
+                        check=False,
+                    )
+                    assert named_plan.returncode == 4
+                finally:
+                    while True:
+                        children = (
+                            set(map(int, child_file.read_text().split())) - before
+                        )
+                        if not children:
+                            break
+                        for pid in children:
+                            descriptor = os.pidfd_open(pid)
+                            try:
+                                with contextlib.suppress(ProcessLookupError):
+                                    signal.pidfd_send_signal(descriptor, signal.SIGTERM)
+                                with selectors.DefaultSelector() as ready:
+                                    ready.register(descriptor, selectors.EVENT_READ)
+                                    assert ready.select(1), (
+                                        "owned CLI bootstrap descendant did not exit"
+                                    )
+                                os.waitpid(pid, 0)
+                            finally:
+                                os.close(descriptor)
+                    for descriptor in pane_pidfds:
+                        with selectors.DefaultSelector() as ready:
+                            ready.register(descriptor, selectors.EVENT_READ)
+                            assert ready.select(1), (
+                                "owned CLI bootstrap pane did not exit"
+                            )
+                        os.close(descriptor)
             print(
-                f"PASS {Path(binary).parent.name}: installed CLI applies the shipped workspace on a fresh endpoint; owned daemon and panes exit"
+                f"PASS {Path(binary).parent.name}: installed CLI applies the shipped workspace on default and named endpoints; owned daemons and panes exit"
             )

@@ -307,12 +307,15 @@ module Client : sig
     ?timeout:float ->
     Libtmux.Endpoint.t ->
     (t, Libtmux.Error.t) result
-  (** Attach to an existing local daemon with at least one session. The caller
-      and daemon must share the PID namespace and filesystem. A local socket
-      pathname alone does not establish these preconditions. [timeout] is the
-      maximum seconds per control exchange, defaulting to one second. Requires
-      Linux pidfd support. The client belongs to the current domain. Initial and
-      auxiliary attachments suppress tmux's [update-environment] behavior. *)
+  (** Attach to an existing local daemon with at least one session. Pass
+      {!Libtmux.Endpoint.from_env} [()] for default server selection or
+      {!Libtmux.Endpoint.socket_path} / {!Libtmux.Endpoint.named_socket} for an
+      explicit socket. The caller and daemon must share the PID namespace and
+      filesystem. A local socket pathname alone does not establish these
+      preconditions. [timeout] is the maximum seconds per control exchange,
+      defaulting to one second. Requires Linux pidfd support. The client belongs
+      to the current domain. Initial and auxiliary attachments suppress tmux's
+      [update-environment] behavior. *)
 
   val cleanup : t -> Cleanup.t
   (** Read the report supplied at connection time, or its fresh default.

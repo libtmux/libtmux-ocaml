@@ -23,8 +23,17 @@ let socket =
     & opt (some string) None
     & info [ "socket" ] ~docv:"PATH"
         ~doc:
-          "Explicit tmux socket path. Required for plan and apply; relative \
-           paths use the current directory.")
+          "Explicit tmux socket path (-S); relative paths use the current \
+           directory. Overrides LIBTMUX_SOCKET_PATH, LIBTMUX_SOCKET and TMUX.")
+
+let socket_name =
+  Arg.(
+    value
+    & opt (some string) None
+    & info [ "socket-name" ] ~docv:"NAME"
+        ~doc:
+          "Explicit tmux socket name (-L). Mutually exclusive with --socket; \
+           overrides LIBTMUX_SOCKET_PATH, LIBTMUX_SOCKET and TMUX.")
 
 let binary =
   Arg.(
@@ -89,23 +98,23 @@ let exits =
     ]
 
 let term command =
-  let run json file socket binary timeout require_existing append keep_partial
-      expect_document =
-    Runtime.run ~command ~json ~file ~socket ~binary ~timeout ~require_existing
-      ~append ~keep_partial ~expect_document
+  let run json file socket socket_name binary timeout require_existing append
+      keep_partial expect_document =
+    Runtime.run ~command ~json ~file ~socket ~socket_name ~binary ~timeout
+      ~require_existing ~append ~keep_partial ~expect_document
   in
   if command = `Check then
     Term.(
       const (fun json file expected ->
-          run json file None "tmux" 1. false false false expected)
+          run json file None None "tmux" 1. false false false expected)
       $ json $ file $ expect_document)
   else
     let keep_partial =
       if command = `Apply then keep_partial else Term.const false
     in
     Term.(
-      const run $ json $ file $ socket $ binary $ timeout $ require_existing
-      $ append $ keep_partial $ expect_document)
+      const run $ json $ file $ socket $ socket_name $ binary $ timeout
+      $ require_existing $ append $ keep_partial $ expect_document)
 
 let command name mode doc = Cmd.v (Cmd.info name ~doc ~exits) (term mode)
 
@@ -118,6 +127,10 @@ let main =
          performs no tmux I/O; plan observes without starting a daemon; apply \
          makes and rechecks a fresh plan.";
       `P
+        "Without --socket or --socket-name, plan and apply select \
+         LIBTMUX_SOCKET_PATH (-S), else LIBTMUX_SOCKET (-L), else the socket \
+         in TMUX, else tmux's default socket.";
+      `P
         "Previews are advisory and cannot be supplied as executable targets. \
          Cancellation does not undo admitted commands. Inspect completed, \
          uncertain and cleanup outcomes before recovery.";
@@ -127,7 +140,7 @@ let main =
          implicit reconnect or mutation retry occurs.";
       `S Manpage.s_examples;
       `P "tmux-workspace check project.json";
-      `P "tmux-workspace plan --socket /tmp/project.sock --json project.json";
+      `P "tmux-workspace plan --json project.json";
       `P "tmux-workspace apply --socket /tmp/project.sock --json project.json";
       `S Manpage.s_bugs;
       `P "Report issues at https://github.com/libtmux/libtmux-ocaml/issues.";

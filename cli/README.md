@@ -92,11 +92,14 @@ then uses [`Plan`][plan] and the [Eio workspace executor][eio-workspace] to appl
 | Command | Result | tmux effects |
 | --- | --- | --- |
 | `check` | Validate the document; `--json` includes its digest | None |
-| `plan` | Observe an explicit socket and print an advisory plan | Never starts a daemon |
+| `plan` | Observe the selected server and print an advisory plan | Never starts a daemon |
 | `apply` | Read the document again, check current state and execute a fresh plan | Creates and configures resources |
 
-- `plan` and `apply` require `--socket`. Needs tmux 3.3a or newer and a local
-  daemon.
+- `--socket PATH` (`-S`) and `--socket-name NAME` (`-L`) choose an explicit
+  server and are mutually exclusive.
+- With neither flag, `plan` and `apply` select `LIBTMUX_SOCKET_PATH`, else
+  `LIBTMUX_SOCKET`, else the socket in `TMUX`, else tmux's `default` socket.
+  Needs tmux 3.3a or newer and a local daemon.
 - `--require-existing` fails on a missing endpoint instead of starting a session.
 - Closing the CLI's client leaves the daemon running.
 

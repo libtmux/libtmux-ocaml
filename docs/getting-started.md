@@ -34,11 +34,15 @@ project.
 $ opam exec -- dune build
 ```
 
-## Select an endpoint explicitly
+## Select an endpoint
 
-`Endpoint.socket_path` accepts an absolute socket path; `Endpoint.named_socket`
-describes tmux's `-L` name. Constructing either performs no I/O. Ordinary
-`Client.connect` attaches to an existing daemon and does not start one.
+`Endpoint.from_env ()` selects the server tmux reaches when no socket is named:
+`LIBTMUX_SOCKET_PATH` (`-S`), else `LIBTMUX_SOCKET` (`-L`), else the socket path
+in `TMUX`, else tmux's `default` socket. `Endpoint.socket_path` accepts an
+explicit absolute socket path, and `Endpoint.named_socket` describes an explicit
+`-L` name without reading selector variables. Constructing any endpoint performs
+no tmux I/O. Ordinary `Client.connect` attaches to an existing daemon and does
+not start one.
 
 The graph program takes the tmux binary and a socket path. It captures the
 graph, closes its connection and prints what it captured. For a self-contained

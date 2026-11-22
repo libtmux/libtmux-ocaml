@@ -1,8 +1,10 @@
 {0 Blocking Linux tmux clients}
 
-{!Libtmux_unix.Client} attaches to an explicit existing endpoint and returns
-immutable snapshots. Clients require Linux pidfds, the daemon's PID namespace
-and a shared local scratch filesystem. Closing a client leaves the daemon alive.
+{!Libtmux_unix.Client} attaches to an existing endpoint — from
+{!Libtmux.Endpoint.from_env} or an explicit {!Libtmux.Endpoint} constructor —
+and returns immutable snapshots. Clients require Linux pidfds, the daemon's PID
+namespace and a shared local scratch filesystem. Closing a client leaves the
+daemon alive.
 
 {1 Cancellation and retained outcomes}
 

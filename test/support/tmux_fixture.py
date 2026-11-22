@@ -10,6 +10,10 @@ import subprocess
 import tempfile
 from pathlib import Path
 
+AMBIENT_SELECTORS = frozenset(
+    {"TMUX", "TMUX_PANE", "LIBTMUX_SOCKET", "LIBTMUX_SOCKET_PATH"}
+)
+
 
 class TmuxFixture:
     def __init__(self, binary):
@@ -19,7 +23,7 @@ class TmuxFixture:
         self.environment = {
             key: value
             for key, value in os.environ.items()
-            if key not in {"TMUX", "TMUX_PANE"}
+            if key not in AMBIENT_SELECTORS
         }
         self.server = None
         self.pidfd = None

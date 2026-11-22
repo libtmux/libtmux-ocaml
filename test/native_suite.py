@@ -6,10 +6,13 @@ import sys
 import time
 from pathlib import Path
 
+from support.tmux_fixture import AMBIENT_SELECTORS
+
 root = Path(__file__).resolve().parents[1]
 if len(sys.argv) != 2:
     raise SystemExit("usage: native_suite.py /path/to/tmux")
 binary = str(Path(sys.argv[1]).resolve(strict=True))
+clean_env = {k: v for k, v in os.environ.items() if k not in AMBIENT_SELECTORS}
 # A driver's deadline is a bound, not a target: far above its run time, so a
 # loaded runner does not fail a healthy driver, and finite, so a hung one fails
 # the job instead of stalling it.
@@ -34,12 +37,14 @@ for name in [
     "stream_close",
     "bootstrap",
     "private_daemon",
+    "default_server",
     "workspace",
 ]:
     started = time.monotonic()
     subprocess.run(
         [sys.executable, str(root / "test" / f"{name}_test.py"), binary],
         cwd=root,
+        env=clean_env,
         check=True,
         timeout=30,
     )
@@ -47,12 +52,14 @@ for name in [
 subprocess.run(
     [sys.executable, str(root / "test/workspace_test.py"), "--eio", binary],
     cwd=root,
+    env=clean_env,
     check=True,
     timeout=5,
 )
 subprocess.run(
     [sys.executable, str(root / "test/workspace_cli_test.py"), binary],
     cwd=root,
+    env=clean_env,
     check=True,
     timeout=5,
 )
@@ -66,6 +73,7 @@ if os.environ.get("EIO_BACKEND") != "posix":
         ("streaming", []),
         ("bootstrap", []),
         ("private_daemon", []),
+        ("default_server", []),
         ("workspace", ["--eio"]),
     ]:
         subprocess.run(
@@ -78,12 +86,13 @@ if os.environ.get("EIO_BACKEND") != "posix":
             cwd=root,
             check=True,
             timeout=5,
-            env=os.environ | {"EIO_BACKEND": "posix"},
+            env=clean_env | {"EIO_BACKEND": "posix"},
         )
         print(f"PASS Eio POSIX lifecycle: {name}", flush=True)
 subprocess.run(
     [sys.executable, str(root / "test/pid_race_test.py")],
     cwd=root,
+    env=clean_env,
     check=True,
     timeout=5,
 )
@@ -91,7 +100,7 @@ for backend in ("linux", "posix"):
     subprocess.run(
         [str(root / "_build/default/test/ownership_peer.exe")],
         cwd=root,
-        env=os.environ | {"EIO_BACKEND": backend},
+        env=clean_env | {"EIO_BACKEND": backend},
         check=True,
         timeout=1,
     )

@@ -138,6 +138,74 @@ let exists fs path =
     true
   with Eio.Io (Eio.Fs.E (Not_found _), _) -> false
 
+let named_socket_path name =
+  let base =
+    match Sys.getenv_opt "TMUX_TMPDIR" with
+    | None | Some "" -> "/tmp"
+    | Some dir -> dir
+  in
+  if
+    String.length base = 0
+    || base.[0] <> '/'
+    || String.contains base '\000'
+    || List.mem ".." (String.split_on_char '/' base)
+  then
+    native
+      (Error.Filesystem
+         {
+           operation = "TMUX_TMPDIR";
+           message = "socket directory must be an absolute path without ..";
+         });
+  let resolved =
+    try Unix.realpath base
+    with Unix.Unix_error (error, _, _) ->
+      native
+        (Error.Filesystem
+           { operation = "TMUX_TMPDIR"; message = Unix.error_message error })
+  in
+  Filename.concat
+    (Filename.concat resolved (Printf.sprintf "tmux-%d" (Unix.getuid ())))
+    name
+
+let endpoint_socket_path endpoint =
+  match Endpoint.kind endpoint with
+  | Socket_path path -> path
+  | Named_socket name -> named_socket_path name
+
+let resolve_endpoint ~socket ~socket_name =
+  match (socket, socket_name) with
+  | Some _, Some _ ->
+      stop 2
+        (object_
+           [
+             ("code", text "invalid_endpoint");
+             ("message", text "choose at most one of --socket and --socket-name");
+           ])
+  | Some value, None -> (
+      try Endpoint.socket_path (absolute value)
+      with Invalid_argument _ ->
+        stop 2
+          (object_
+             [
+               ("code", text "invalid_endpoint");
+               ("message", text "invalid socket path");
+             ]))
+  | None, Some name -> (
+      try Endpoint.named_socket name
+      with Invalid_argument _ ->
+        stop 2
+          (object_
+             [
+               ("code", text "invalid_endpoint");
+               ("message", text "invalid socket name");
+             ]))
+  | None, None -> (
+      try Endpoint.from_env ()
+      with Invalid_argument message ->
+        stop 2
+          (object_
+             [ ("code", text "invalid_endpoint"); ("message", text message) ]))
+
 let local_version ~process_mgr ~mono_clock ~fs ~binary ~timeout =
   with_deadline mono_clock timeout (fun () ->
       Eio.Switch.run (fun child_sw ->
@@ -349,8 +417,8 @@ let human document =
         (Yojson.Safe.Util.to_int (Option.get (member "panes" document)))
   | _ -> Yojson.Safe.pretty_to_string document ^ "\n"
 
-let run ~command ~json ~file ~socket ~binary ~timeout ~require_existing ~append
-    ~keep_partial ~expect_document =
+let run ~command ~json ~file ~socket ~socket_name ~binary ~timeout
+    ~require_existing ~append ~keep_partial ~expect_document =
   Eio_main.run (fun env ->
       Eio.Switch.run (fun sw ->
           let retained = ref None
@@ -430,32 +498,10 @@ let run ~command ~json ~file ~socket ~binary ~timeout ~require_existing ~append
                                  0 windows) );
                         ] )
                   else
-                    let socket =
-                      match socket with
-                      | Some value -> absolute value
-                      | None ->
-                          stop 2
-                            (object_
-                               [
-                                 ("code", text "missing_endpoint");
-                                 ( "message",
-                                   text
-                                     "supply --socket with an explicit socket \
-                                      path" );
-                               ])
-                    in
-                    let endpoint =
-                      try Endpoint.socket_path socket
-                      with Invalid_argument _ ->
-                        stop 2
-                          (object_
-                             [
-                               ("code", text "invalid_endpoint");
-                               ("message", text "invalid socket path");
-                             ])
-                    in
+                    let endpoint = resolve_endpoint ~socket ~socket_name in
+                    let socket_path = endpoint_socket_path endpoint in
                     let client, version, observed =
-                      if exists fs socket then (
+                      if exists fs socket_path then (
                         let client =
                           get
                             (C.connect ~binary ~timeout ~sw

@@ -1,7 +1,7 @@
 # Create a workspace from JSON
 
 `tmux-workspace` validates a JSON configuration, previews an advisory plan, and
-applies a fresh plan to an explicit socket. Install it through the
+applies a fresh plan to the selected tmux server. Install it through the
 [source installation](../README.md#install-from-source); `opam install .`
 includes the CLI. Run this guide from the repository root.
 
@@ -56,9 +56,11 @@ $ opam exec -- tmux-workspace check examples/workspace/project.json
 
 Expected output: `Valid workspace "ocaml-project": 2 windows, 3 panes`.
 
-`plan` and `apply` act on a socket you name with `--socket`, on a tmux 3.3a or
-newer server you run. `plan` prints the advisory actions without changing
-anything. `apply` rereads the document and runs a fresh plan; `--json` writes a
+`plan` and `apply` act on `--socket PATH` (`-S`) or `--socket-name NAME` (`-L`),
+or when neither flag is given, on `LIBTMUX_SOCKET_PATH`, else `LIBTMUX_SOCKET`,
+else the socket in `TMUX`, else tmux's `default` socket, requiring tmux 3.3a or
+newer. `plan` prints the advisory actions without changing anything. `apply`
+rereads the document and runs a fresh plan; `--json` writes a
 [`libtmux.workspace-receipt/1`](../json/libtmux_json.mli) document whose
 `status` is `succeeded` when `failed`, `uncertain` and `skipped` are empty, and
 each creation records the IDs tmux returned. Without `--require-existing`,

@@ -89,7 +89,12 @@ with tempfile.TemporaryDirectory(
         TMUX="/unrelated/server,99999,0",
         TMUX_PANE="%99999",
     )
-    for key in ["DUNE_SOURCEROOT", "DUNE_WORKSPACE"]:
+    for key in [
+        "DUNE_SOURCEROOT",
+        "DUNE_WORKSPACE",
+        "LIBTMUX_SOCKET",
+        "LIBTMUX_SOCKET_PATH",
+    ]:
         environment.pop(key, None)
     environment["OPAMSWITCH"] = subprocess.check_output(
         ["opam", "switch", "show", "--safe"], cwd=root, env=environment, text=True

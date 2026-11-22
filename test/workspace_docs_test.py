@@ -44,7 +44,7 @@ with tempfile.TemporaryDirectory(prefix="libtmux-ocaml-workspace-docs-") as temp
     environment = {
         key: value
         for key, value in os.environ.items()
-        if key not in {"TMUX", "TMUX_PANE"}
+        if key not in {"TMUX", "TMUX_PANE", "LIBTMUX_SOCKET", "LIBTMUX_SOCKET_PATH"}
     }
     environment["PATH"] = os.pathsep.join([str(prefix / "bin"), environment["PATH"]])
     environment["TMPDIR"] = str(runtime)
@@ -68,7 +68,13 @@ with tempfile.TemporaryDirectory(prefix="libtmux-ocaml-workspace-docs-") as temp
         result = subprocess.run(
             [*apply[:-1], actual],
             cwd=root,
-            env=dict(environment, TMUX="/unrelated/server,99999,0", TMUX_PANE="%99999"),
+            env=dict(
+                environment,
+                TMUX="/unrelated/server,99999,0",
+                TMUX_PANE="%99999",
+                LIBTMUX_SOCKET="unrelated",
+                LIBTMUX_SOCKET_PATH="/unrelated/socket",
+            ),
             capture_output=True,
             timeout=5,
             check=False,

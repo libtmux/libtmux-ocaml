@@ -266,10 +266,16 @@ the supported range. Historical evidence remains available; fixture success
 alone does not establish library compatibility.
 
 Every test or probe must use a unique owned socket and temporary directory,
-with a `libtmux-ocaml-` prefix. Clear inherited `TMUX` and `TMUX_PANE` for child
-commands and address the socket explicitly. Clean up only resources created
-by that run and verify that its processes exit. Never use or stop the default
-tmux server.
+with a `libtmux-ocaml-` prefix. Clear inherited `TMUX`, `TMUX_PANE`,
+`LIBTMUX_SOCKET`, and `LIBTMUX_SOCKET_PATH` for child commands unless ambient
+server discovery is the test's explicit subject, and address the owned socket
+explicitly. When a test routes named or default sockets through a private
+directory, create it with mode `0700` and set both `TMUX_TMPDIR` and
+`LIBTMUX_TEST_SANDBOX` to its path. For manual local commands, set
+`LIBTMUX_SOCKET` or `LIBTMUX_SOCKET_PATH` in an uncommitted `.env` file so
+invocations stay off your interactive tmux server. Clean up only resources
+created by that run and verify that its processes exit. Never use or stop the
+user's default tmux server.
 
 Record exact OCaml, Dune, tmux, and OS versions. A passing subset does not
 establish a compatibility matrix. Test examples as shipped, including imports,

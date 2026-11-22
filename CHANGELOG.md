@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Add `Libtmux.Endpoint.from_env` and default server selection in
+  `tmux-workspace` (`LIBTMUX_SOCKET_PATH`, else `LIBTMUX_SOCKET`, else `TMUX`,
+  else `default`, plus `--socket-name`), and scrub `LIBTMUX_SOCKET` and
+  `LIBTMUX_SOCKET_PATH` across the test and documentation harnesses.
 - Support every tmux release from 3.3a through 3.8.
 - Add `Client.kill_server` and `with_private_daemon` to the blocking and Eio
   clients, and `?config_file` to `Workspace.submit_bootstrap`, so a program

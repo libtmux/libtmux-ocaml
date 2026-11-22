@@ -10,7 +10,12 @@ from pathlib import Path
 
 root = Path(__file__).resolve().parents[1]
 peer = root / "_build/default/test/private_daemon_peer.exe"
-BOGUS = {"TMUX": "/unrelated/server,99999,0", "TMUX_PANE": "%99999"}
+BOGUS = {
+    "TMUX": "/unrelated/server,99999,0",
+    "TMUX_PANE": "%99999",
+    "LIBTMUX_SOCKET": "unrelated",
+    "LIBTMUX_SOCKET_PATH": "/unrelated/socket",
+}
 
 
 def exited(descriptor: int) -> bool:
