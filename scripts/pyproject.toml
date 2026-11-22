@@ -1,0 +1,59 @@
+[project]
+name = "libtmux-ocaml-scripts"
+version = "0"
+description = "Support scripts and outer test drivers for libtmux for OCaml"
+requires-python = ">=3.11"
+
+[dependency-groups]
+dev = ["pytest==9.2.0", "ruff==0.17.4", "ty==0.0.101"]
+
+[tool.uv]
+exclude-newer = "3 days"
+
+[tool.pytest.ini_options]
+testpaths = ["."]
+addopts = "--doctest-modules -p no:cacheprovider"
+pythonpath = [
+    "docs_snippets",
+    "export_api",
+    "generate",
+    "bench",
+    "toolchain",
+]
+markers = [
+    "native: starts a real tmux; set TMUX_BINARY to its path",
+]
+
+[tool.ruff]
+target-version = "py311"
+src = [".."]
+
+[tool.ruff.lint]
+extend-select = ["ANN", "B", "C4", "I", "RUF", "SIM", "UP"]
+
+[tool.ruff.lint.per-file-ignores]
+# These drivers collect every cleanup failure, including BaseException, and
+# report them together instead of stopping at the first.
+"**/bench/control.py" = ["BLE001"]
+"**/bench/mixed.py" = ["BLE001"]
+# These drivers predate the ANN rule. Annotate one when rewriting it and drop
+# its ANN entry. B023: helper closures are defined inside a loop and called in
+# the same iteration.
+"**/test/capture_cancel_test.py" = ["ANN"]
+"**/test/fixture_diagnostics_test.py" = ["ANN"]
+"**/test/fixture_test.py" = ["ANN"]
+"**/test/installed_consumer.py" = ["ANN"]
+"**/test/bootstrap_test.py" = ["ANN"]
+"**/test/pid_race_tmux.py" = ["ANN"]
+"**/test/protocol_test.py" = ["ANN"]
+"**/test/read_process_test.py" = ["ANN"]
+"**/test/showcase_test.py" = ["ANN"]
+"**/test/shutdown_test.py" = ["ANN"]
+"**/test/terminal_test.py" = ["ANN"]
+"**/test/installed_consumer_diagnostics_test.py" = ["ANN", "B023", "BLE001"]
+"**/test/support/tmux_fixture.py" = ["ANN"]
+"**/test/workspace_cli_test.py" = ["ANN", "B023"]
+
+[tool.ty.environment]
+python-version = "3.11"
+extra-paths = ["../test", "docs_snippets", "export_api", "generate", "bench", "toolchain"]
