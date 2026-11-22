@@ -12,7 +12,9 @@ let () =
   let decoded = get (Libtmux_json.Expr.of_string Model.pane document) in
   assert (Expr.describe decoded = Expr.describe query);
   let invalid =
-    {|{"schema":"libtmux.filter/1","model":"pane","expr":{"node":"compare","field":"pane_width","op":"ge","value":"wide"}}|}
+    {|{"schema":"libtmux.filter/1","model":"pane",|}
+    ^ {|"expr":{"node":"compare","field":"pane_width",|}
+    ^ {|"op":"ge","value":"wide"}}|}
   in
   match Libtmux_json.Expr.of_string Model.pane invalid with
   | Error error -> Printf.printf "invalid operand at %s\n" error.pointer

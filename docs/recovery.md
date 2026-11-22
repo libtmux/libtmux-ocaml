@@ -147,8 +147,9 @@ let recover client session =
         Snapshot.find_window (get (Client.capture client)) (Window.id window)
         |> Option.get
       in
-      assert (Window.name after = "recovery-complete");
-      Printf.printf "operation=finished; postcondition=%s\n" (Window.name after))
+      let name = Window.name after in
+      assert (name = "recovery-complete");
+      Printf.printf "operation=finished; postcondition=%s\n" name)
 
 let session_named snapshot name =
   Snapshot.sessions snapshot |> Iarray.to_seq

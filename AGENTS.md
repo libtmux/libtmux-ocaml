@@ -8,8 +8,8 @@ Follow the active implementation epic and retain its remaining acceptance gates.
 
 - Setup, checks, tmux isolation, and pull requests:
   [.github/CONTRIBUTING.md](.github/CONTRIBUTING.md).
-- Documentation, comments, and commit messages:
-  [.github/WRITING.md](.github/WRITING.md).
+- Documentation, [examples](.github/WRITING.md#examples), comments, and commit
+  messages: [.github/WRITING.md](.github/WRITING.md).
 - Support scripts: what may stay, their language, layout and checks:
   [.github/SCRIPTS.md](.github/SCRIPTS.md).
 

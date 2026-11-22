@@ -1,8 +1,8 @@
 <!-- libtmux-logo -->
 <div align="center">
   <picture>
-    <source srcset="../docs/assets/logo.svg" type="image/svg+xml">
-    <img src="../docs/assets/logo-512.png" width="128" height="128" alt="libtmux for OCaml">
+    <source srcset="../assets/logo.svg" type="image/svg+xml">
+    <img src="../assets/logo.png" width="128" height="128" alt="libtmux for OCaml">
   </picture>
 </div>
 <!-- /libtmux-logo -->
@@ -67,7 +67,9 @@ let () =
   let decoded = get (Libtmux_json.Expr.of_string Model.pane document) in
   assert (Expr.describe decoded = Expr.describe query);
   let invalid =
-    {|{"schema":"libtmux.filter/1","model":"pane","expr":{"node":"compare","field":"pane_width","op":"ge","value":"wide"}}|}
+    {|{"schema":"libtmux.filter/1","model":"pane",|}
+    ^ {|"expr":{"node":"compare","field":"pane_width",|}
+    ^ {|"op":"ge","value":"wide"}}|}
   in
   match Libtmux_json.Expr.of_string Model.pane invalid with
   | Error error -> Printf.printf "invalid operand at %s\n" error.pointer
@@ -78,15 +80,14 @@ let () =
 $ opam exec -- dune exec examples/query_json.exe
 ```
 
-The first line is the portable document:
-
 ```json
 {"schema":"libtmux.filter/1","model":"pane","expr":{"node":"compare","field":"pane_current_command","op":"starts_with","value":"nv"}}
+invalid operand at /expr/value
 ```
 
-The second line is `invalid operand at /expr/value`. Run a decoded expression
-with [`Query.matching`][matching] or [`Expr.compile`][compile]; decoding does no
-I/O. More: [query interchange](../docs/query-interchange.md).
+Run a decoded expression with [`Query.matching`][matching] or
+[`Expr.compile`][compile]; decoding does no I/O. More:
+[query interchange](../docs/query-interchange.md).
 
 ## Supported documents and limits
 

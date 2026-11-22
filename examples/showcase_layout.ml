@@ -10,12 +10,9 @@ let get = function
   | Error error -> failwith (Format.asprintf "%a" Error.pp error)
 
 let set_layout client (initial : Created.t) spawn =
-  ignore
-    (get
-       (Client.split_pane client initial.pane ~direction:Geometry.Right ~spawn));
-  ignore
-    (get
-       (Client.split_pane client initial.pane ~direction:Geometry.Right ~spawn));
+  let pane = initial.pane and direction = Geometry.Right in
+  ignore (get (Client.split_pane client pane ~direction ~spawn));
+  ignore (get (Client.split_pane client pane ~direction ~spawn));
   get (Client.select_layout client initial.window Layout.Even_horizontal);
   let window =
     Snapshot.find_window

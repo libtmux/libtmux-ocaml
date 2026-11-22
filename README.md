@@ -1,8 +1,8 @@
 <!-- libtmux-logo -->
 <div align="center">
   <picture>
-    <source srcset="docs/assets/logo.svg" type="image/svg+xml">
-    <img src="docs/assets/logo-512.png" width="128" height="128" alt="libtmux for OCaml">
+    <source srcset="assets/logo.svg" type="image/svg+xml">
+    <img src="assets/logo.png" width="128" height="128" alt="libtmux for OCaml">
   </picture>
 </div>
 <!-- /libtmux-logo -->
@@ -65,7 +65,8 @@ Activate the switch in this shell:
 $ eval "$(opam env --switch=. --set-switch)"
 ```
 
-More: [installation guide](docs/getting-started.md), for use from another Dune project.
+More: [installation guide](docs/getting-started.md), for use from another Dune
+project.
 
 ## Start and stop a private server
 
@@ -410,25 +411,23 @@ let tune_options client (initial : Created.t) =
   (* Unsetting restores tmux's default, which differs between releases. *)
   get (Client.unset_option client server "escape-time");
   assert (integer client server "escape-time" <> 13);
-  get (Client.set_option client session ~name:"@project" (Options.Text "ocaml"));
+  let name = "@project" in
+  get (Client.set_option client session ~name (Options.Text "ocaml"));
   assert (
-    Options.lookup (get (Client.capture_options client session)) "@project"
-    <> None);
+    Options.lookup (get (Client.capture_options client session)) name <> None);
   get (Client.clear_option_array client server "command-alias")
 
 let tune_environment client =
+  let global = Environment.Global and name = "LIBTMUX_DEMO" in
   let lookup () =
-    Environment.lookup
-      (get (Client.capture_environment client Environment.Global))
-      "LIBTMUX_DEMO"
+    Environment.lookup (get (Client.capture_environment client global)) name
   in
-  get
-    (Client.set_environment client Environment.Global ~name:"LIBTMUX_DEMO" "one");
+  get (Client.set_environment client global ~name "one");
   assert (lookup () = Some (Environment.Value "one"));
   (* A removal marker masks a global value; unsetting drops the entry. *)
-  get (Client.remove_environment client Environment.Global "LIBTMUX_DEMO");
+  get (Client.remove_environment client global name);
   assert (lookup () = Some Environment.Removed);
-  get (Client.unset_environment client Environment.Global "LIBTMUX_DEMO");
+  get (Client.unset_environment client global name);
   assert (lookup () = None)
 ```
 
@@ -606,14 +605,6 @@ another. More: [streaming and cancellation](docs/streaming.md).
 | [libtmux-workspace](workspace/) | [Libtmux_workspace][workspace-api] | Configuration, plans and execution journals | [Preview a native workspace](workspace/README.md#preview-a-native-workspace) |
 | [libtmux-workspace-cli](cli/) | [Workspace commands](docs/workspaces.md) | Validate, preview and apply JSON workspaces | [Check a configuration](cli/README.md#install-and-validate) |
 
-- **Dependencies.** Core and the workspace library use the standard library
-  alone; JSON and Eio are optional. [Package boundaries](docs/packages.md).
-- **Not supported.** macOS, Windows and remote daemons.
-- **Status.** [Adoption gaps](docs/status.md) ·
-  [Compatibility](docs/compatibility.md).
-- **More.** [API docs](docs/api.md) · [Testing](docs/testing.md) ·
-  [Benchmarks](docs/benchmarking.md) · [Workspace guide](docs/workspaces.md).
-
 ### [`libtmux`](https://github.com/libtmux/libtmux-ocaml/tree/master/lib): the immutable graph and typed queries
 
 [`Libtmux`][core-api] models captured sessions, window links and panes, and
@@ -660,10 +651,42 @@ shell.
 [Workspace docs](https://libtmux.org/en/ocaml/latest/workspace/) ·
 [Command guide](docs/workspaces.md) · [README](cli/README.md)
 
-For development, read [CONTRIBUTING.md](.github/CONTRIBUTING.md).
-Licensed under [MIT](LICENSE).
+## What it leaves out
 
-[Branding assets](docs/branding.md) include the logo, icons, and social cards.
+- **Live objects.** [`Session.t`][session], [`Window.t`][window] and
+  [`Pane.t`][pane] are immutable values from one [`Snapshot.t`][snapshot].
+  Capture again with [`Client.capture`][unix-capture], or subscribe with
+  [`Client.subscribe`][subscribe], to observe changes.
+- **A terminal emulator.** [`Client.capture_text`][unix-capture-text] reads
+  visible rows rendered by tmux, and [`Client.subscribe`][subscribe] streams
+  pane output bytes; neither runs an in-process terminal or TUI.
+- **Implicit reconnection or `~/.tmux.conf` edits.** Clients bind targets to
+  one connection generation, never reconnect on your behalf, and never edit
+  user configuration files.
+- **macOS, Windows and remote daemons.** The I/O packages require Linux
+  pidfds, a shared PID namespace with the daemon, and local scratch storage.
+
+## Support and status
+
+- **Not on opam yet.** Install from source; remaining adoption gates are
+  tracked in [status](docs/status.md) and
+  [compatibility](docs/compatibility.md).
+- **OCaml 5 and tmux 3.3a through 3.8 on Linux.** CI runs on OCaml 5.5.2
+  against real tmux 3.3a and 3.8 servers without mocks.
+- **Standard-library core.** `libtmux` and `libtmux-workspace` have no
+  third-party runtime dependencies; Yojson, Eio and Cmdliner stay in their
+  optional packages ([package boundaries](docs/packages.md)).
+
+[Guides](docs/README.md) · [API docs](docs/api.md) ·
+[Testing](docs/testing.md) · [Benchmarks](docs/benchmarking.md) ·
+[Contributing](.github/CONTRIBUTING.md) · [Changelog](CHANGELOG.md) ·
+[Logo assets](assets/README.md) ·
+[AI policy](https://libtmux.org/en/meta/ai-policy/)
+
+Licensed under [MIT](LICENSE). Part of the [libtmux.org](https://libtmux.org/)
+family alongside Python [`libtmux`](https://github.com/tmux-python/libtmux),
+sibling [language ports](https://github.com/libtmux), and
+[`tmux`](https://github.com/tmux/tmux).
 
 [core-api]: https://libtmux.org/en/ocaml/latest/reference/libtmux/
 [unix-api]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix/

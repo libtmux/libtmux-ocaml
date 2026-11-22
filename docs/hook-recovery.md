@@ -44,9 +44,8 @@ module Client = Libtmux_unix.Client
 module Operation = Libtmux_unix.Operation
 module Cleanup = Libtmux_unix.Cleanup
 
-let get = function
-  | Ok value -> value
-  | Error error -> failwith (Format.asprintf "%a" Error.pp error)
+let fail error = failwith (Format.asprintf "%a" Error.pp error)
+let get = function Ok value -> value | Error error -> fail error
 
 let protect ~finally use =
   match use () with
@@ -131,19 +130,19 @@ let () =
                           arguments = [ "-t"; "%4294967294" ];
                         };
                       ]);
+                 let spawn =
+                   Spawn.make (Exec { program = "/bin/cat"; args = [ "-u" ] })
+                 in
                  let operation =
                    get
                      (Client.submit client
                         (Operations.create_window ~index:4 ~name:"hook-created"
-                           ~spawn:
-                             (Spawn.make
-                                (Exec { program = "/bin/cat"; args = [ "-u" ] }))
-                           (Session.target session)))
+                           ~spawn (Session.target session)))
                  in
                  pending := Some operation;
                  match Client.await operation with
                  | Ok _ | Error (Error.Outcome_unknown _) -> ()
-                 | Error error -> failwith (Format.asprintf "%a" Error.pp error)))))
+                 | Error error -> fail error))))
 ```
 
 To use this file outside the checkout, save it as `main.ml` in the Dune project

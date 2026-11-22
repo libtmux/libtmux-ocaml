@@ -31,6 +31,7 @@ the library: [fields](fields.md), [options](options.md), [formats](formats.md),
 and [operation conveniences](operations.md).
 
 See [compatibility](compatibility.md) for qualified components,
-[testing](testing.md) to reproduce checks, and [status](status.md) for
-remaining adoption requirements. The [README](../README.md) runs a complete
-example on a private server.
+[testing](testing.md) to reproduce checks, [status](status.md) for remaining
+adoption requirements, and [logo assets](../assets/README.md) for artwork
+provenance. The [README](../README.md) runs a complete example on a private
+server.

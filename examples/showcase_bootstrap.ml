@@ -105,7 +105,8 @@ let () =
   assert (Iarray.length (Snapshot.sessions snapshot) = 1);
   assert (Iarray.length (Snapshot.windows snapshot) = 1);
   assert (Iarray.length (Snapshot.panes snapshot) = 1);
-  assert (
-    Session.name (Iarray.get (Snapshot.sessions snapshot) 0) = "bootstrap-demo");
-  assert (Window.name (Iarray.get (Snapshot.windows snapshot) 0) = "editor");
+  let session = Iarray.get (Snapshot.sessions snapshot) 0 in
+  let window = Iarray.get (Snapshot.windows snapshot) 0 in
+  assert (Session.name session = "bootstrap-demo");
+  assert (Window.name window = "editor");
   print_endline "bootstrapped: 1 session, 1 window, 1 pane"

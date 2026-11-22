@@ -98,14 +98,13 @@ let () =
   let binary = if Array.length Sys.argv = 2 then Sys.argv.(1) else "tmux" in
   Eio_main.run @@ fun env ->
   let process_mgr = Eio.Stdenv.process_mgr env
-  and clock = Eio.Stdenv.mono_clock env in
+  and mono_clock = Eio.Stdenv.mono_clock env in
   get
     (Libtmux_eio.with_private_daemon ~binary ~session:"stream-demo" ~process_mgr
-       ~mono_clock:clock (fun endpoint ->
+       ~mono_clock (fun endpoint ->
          Eio.Switch.run @@ fun sw ->
          let client =
-           get
-             (Client.connect ~sw ~binary ~process_mgr ~mono_clock:clock endpoint)
+           get (Client.connect ~sw ~binary ~process_mgr ~mono_clock endpoint)
          in
          protect
            ~finally:(fun () -> get (Client.close client))
@@ -116,4 +115,4 @@ let () =
                |> Seq.find (fun session -> Session.name session = "stream-demo")
                |> Option.get
              in
-             recover ~clock client (Session.target session))))
+             recover ~clock:mono_clock client (Session.target session))))
