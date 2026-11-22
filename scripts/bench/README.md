@@ -29,22 +29,24 @@ smoke test for each driver, on the smallest workload its options allow, with
 ## Run
 
 Build the executable, then run the driver on an exact tmux release binary
-with a new output path:
+(passed positionally or through `LIBTMUX_TEST_TMUX`, with `TMUX_BINARY` and
+`tmux` on `PATH` as fallbacks) with a new output path:
 
 ```console
 $ opam exec -- dune build bench/capture.exe
 ```
 
 ```console
-$ opam exec -- uv run scripts/bench/capture.py /path/to/tmux-3.8/bin/tmux \
+$ LIBTMUX_TEST_TMUX=/path/to/tmux-3.8/bin/tmux \
+    opam exec -- uv run scripts/bench/capture.py \
     --output scratch/capture.json
 ```
 
 The docs page lists the options for each driver. A driver refuses an existing
 output file.
 
-Run the smoke tests. They skip when `TMUX_BINARY` is unset or an executable is
-not built. Build all five first:
+Run the smoke tests. They skip when `LIBTMUX_TEST_TMUX` (and fallback
+`TMUX_BINARY`) is unset or an executable is not built. Build all five first:
 
 ```console
 $ opam exec -- dune build \
@@ -56,7 +58,7 @@ $ opam exec -- dune build \
 ```
 
 ```console
-$ TMUX_BINARY=/path/to/tmux-3.8/bin/tmux \
+$ LIBTMUX_TEST_TMUX=/path/to/tmux-3.8/bin/tmux \
     opam exec -- uv run \
     --project scripts \
     --locked \

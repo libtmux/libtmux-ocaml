@@ -7,12 +7,14 @@ import selectors
 import shlex
 import signal
 import subprocess
-import sys
 import tempfile
 from pathlib import Path
 
+from support.tmux_fixture import AMBIENT_SELECTORS, test_tmux_binaries
+
 PR_SET_CHILD_SUBREAPER = 36
 
+binaries = test_tmux_binaries()
 root = Path(__file__).resolve().parents[1]
 libc = ctypes.CDLL(None, use_errno=True)
 if libc.prctl(PR_SET_CHILD_SUBREAPER, 1, 0, 0, 0):
@@ -42,9 +44,7 @@ with tempfile.TemporaryDirectory(prefix="libtmux-ocaml-workspace-docs-") as temp
     runtime = temporary / "runtime"
     runtime.mkdir(mode=0o700)
     environment = {
-        key: value
-        for key, value in os.environ.items()
-        if key not in {"TMUX", "TMUX_PANE", "LIBTMUX_SOCKET", "LIBTMUX_SOCKET_PATH"}
+        key: value for key, value in os.environ.items() if key not in AMBIENT_SELECTORS
     }
     environment["PATH"] = os.pathsep.join([str(prefix / "bin"), environment["PATH"]])
     environment["TMPDIR"] = str(runtime)
@@ -62,8 +62,7 @@ with tempfile.TemporaryDirectory(prefix="libtmux-ocaml-workspace-docs-") as temp
         result
     )
     assert not result.stderr, result
-    for binary in sys.argv[1:]:
-        actual = str(Path(binary).resolve(strict=True))
+    for actual in binaries:
         previous = set(map(int, child_file.read_text().split()))
         result = subprocess.run(
             [*apply[:-1], actual],
@@ -97,5 +96,5 @@ with tempfile.TemporaryDirectory(prefix="libtmux-ocaml-workspace-docs-") as temp
             finally:
                 os.close(descriptor)
         print(
-            f"PASS {Path(binary).parent.name}: workspace guide check, apply and owned teardown"
+            f"PASS {Path(actual).parent.name}: workspace guide check, apply and owned teardown"
         )

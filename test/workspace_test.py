@@ -5,11 +5,11 @@ import subprocess
 import sys
 from pathlib import Path
 
-from support.tmux_fixture import TmuxFixture
+from support.tmux_fixture import TmuxFixture, test_tmux_binaries
 
 peer_name = "workspace_eio_peer" if "--eio" in sys.argv else "workspace_peer"
 peer = Path(__file__).resolve().parents[1] / f"_build/default/test/{peer_name}.exe"
-for binary in [arg for arg in sys.argv[1:] if arg != "--eio"]:
+for binary in test_tmux_binaries([arg for arg in sys.argv[1:] if arg != "--eio"]):
     with TmuxFixture(binary) as fixture:
         process = subprocess.Popen(
             [str(peer), fixture.binary, str(fixture.socket)],

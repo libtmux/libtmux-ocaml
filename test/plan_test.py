@@ -2,13 +2,12 @@
 
 import json
 import subprocess
-import sys
 from pathlib import Path
 
-from support.tmux_fixture import TmuxFixture
+from support.tmux_fixture import TmuxFixture, test_tmux_binaries
 
 root = Path(__file__).resolve().parents[1]
-for binary in sys.argv[1:]:
+for binary in test_tmux_binaries():
     with TmuxFixture(binary) as fixture:
         fixture.command("split-window", "-d", "-h", "-t", "fixture:0", "exec cat")
         fixture.track_panes()

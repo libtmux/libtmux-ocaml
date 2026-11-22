@@ -4,10 +4,9 @@ import os
 import selectors
 import socket
 import subprocess
-import sys
 from pathlib import Path
 
-from support.tmux_fixture import TmuxFixture
+from support.tmux_fixture import TmuxFixture, test_tmux_binaries
 
 root = Path(__file__).resolve().parents[1]
 peer = root / "_build/default/test/read_process_peer.exe"
@@ -20,7 +19,7 @@ def readable(stream):
         assert ready.select(1), "read-process boundary not ready"
 
 
-for binary in sys.argv[1:]:
+for binary in test_tmux_binaries():
     for backend in ["unix", "eio"]:
         with TmuxFixture(binary) as fixture, TmuxFixture(binary) as replacement:
             for mode in [

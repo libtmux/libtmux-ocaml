@@ -119,7 +119,7 @@ def sample(
 def main() -> None:
     whole_start = time.perf_counter()
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("binary")
+    parser.add_argument("binary", nargs="?")
     parser.add_argument("--iterations", type=int, default=100)
     parser.add_argument("--repeat", type=int, default=5)
     parser.add_argument("--windows", type=int, default=4)

@@ -23,6 +23,7 @@ from typing import Any
 
 from capture import ROOT, TmuxFixture, source_digest
 from concurrency import child_count, distribution
+from support.tmux_fixture import resolve_test_tmux
 
 
 class BenchmarkFixture(TmuxFixture):
@@ -194,7 +195,7 @@ def sample(binary: str, requests: int, concurrency: int) -> dict[str, Any]:
 def main() -> None:
     started = time.perf_counter()
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("binary")
+    parser.add_argument("binary", nargs="?")
     parser.add_argument("--requests", type=int, default=128)
     parser.add_argument("--concurrency", nargs="+", type=int, default=[1, 8, 32])
     parser.add_argument("--repeat", type=int, default=6)
@@ -208,7 +209,7 @@ def main() -> None:
         parser.error("concurrency must be 1..32")
     if args.output.exists():
         parser.error("output exists; choose another file")
-    binary = str(Path(args.binary).resolve(strict=True))
+    binary = resolve_test_tmux(args.binary)
     executable = ROOT / "_build/default/bench/control.exe"
     result = {
         "schema": "libtmux.control-benchmark/1",

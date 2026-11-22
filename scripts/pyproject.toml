@@ -14,6 +14,7 @@ exclude-newer = "3 days"
 testpaths = ["."]
 addopts = "--doctest-modules -p no:cacheprovider"
 pythonpath = [
+    "../test",
     "docs_snippets",
     "export_api",
     "generate",
@@ -21,7 +22,7 @@ pythonpath = [
     "toolchain",
 ]
 markers = [
-    "native: starts a real tmux; set TMUX_BINARY to its path",
+    "native: starts a real tmux; set LIBTMUX_TEST_TMUX to its path",
 ]
 
 [tool.ruff]

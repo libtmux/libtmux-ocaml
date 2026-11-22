@@ -585,7 +585,7 @@ def core_diagnostics(fixture: TmuxFixture, args: argparse.Namespace) -> dict[str
 def main() -> None:
     started = time.perf_counter()
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("binary")
+    parser.add_argument("binary", nargs="?")
     parser.add_argument("--rounds", type=int, default=3)
     parser.add_argument("--workers", type=int, default=8)
     parser.add_argument("--frames", type=int, default=4)

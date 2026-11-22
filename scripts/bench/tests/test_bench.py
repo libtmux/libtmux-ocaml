@@ -1,13 +1,13 @@
 """Tests for the benchmark drivers.
 
 The smoke tests run each driver on the smallest workload its options allow
-against the tmux binary named by TMUX_BINARY, and check the JSON record's keys
-and the invariants the driver itself asserts. Select them with `-m native`.
-The option checks need no tmux.
+against the tmux binary named by LIBTMUX_TEST_TMUX (or TMUX_BINARY as a
+migration alias), and check the JSON record's keys and the invariants the
+driver itself asserts. Select them with `-m native`. The option checks need no
+tmux.
 """
 
 import json
-import os
 import shutil
 import subprocess
 import sys
@@ -16,6 +16,12 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from support.tmux_fixture import (
+    LEGACY_TEST_TMUX_ENV,
+    TEST_TMUX_ENV,
+    configured_test_tmux,
+    resolve_test_tmux,
+)
 
 REPOSITORY = Path(__file__).resolve().parents[3]
 DRIVERS = REPOSITORY / "scripts/bench"
@@ -35,12 +41,13 @@ def run(name: str, *arguments: str) -> subprocess.CompletedProcess[str]:
 
 @pytest.fixture
 def drive(tmp_path: Path) -> Drive:
-    """Run a driver against TMUX_BINARY and return its JSON record."""
-    binary = os.environ.get("TMUX_BINARY")
-    if not binary:
-        pytest.skip("set TMUX_BINARY to a tmux release binary")
+    """Run a driver against LIBTMUX_TEST_TMUX and return its JSON record."""
+    configured = configured_test_tmux()
+    if not configured:
+        pytest.skip(f"set {TEST_TMUX_ENV} to a tmux release binary")
     if not shutil.which("ocamlc"):
         pytest.skip("ocamlc is not on PATH; run the tests under `opam exec --`")
+    binary = resolve_test_tmux(configured)
 
     def drive(name: str, **options: int) -> dict[str, Any]:
         executable = REPOSITORY / f"_build/default/bench/{name}.exe"
@@ -52,7 +59,7 @@ def drive(tmp_path: Path) -> Drive:
             for key, value in options.items()
             for argument in (f"--{key.replace('_', '-')}", str(value))
         ]
-        result = run(name, binary, *flags, "--output", str(output))
+        result = run(name, *flags, "--output", str(output))
         assert result.returncode == 0, result.stdout + result.stderr
         record = json.loads(output.read_text())
         reported = subprocess.run(
@@ -63,6 +70,38 @@ def drive(tmp_path: Path) -> Drive:
         return record
 
     return drive
+
+
+def test_configured_test_tmux_precedence_and_fallback(tmp_path: Path) -> None:
+    primary = tmp_path / "primary-tmux"
+    legacy = tmp_path / "legacy-tmux"
+    path_dir = tmp_path / "bin"
+    path_dir.mkdir()
+    on_path = path_dir / "tmux"
+    for executable in (primary, legacy, on_path):
+        executable.write_bytes(b"#!/bin/sh\nexit 0\n")
+        executable.chmod(0o700)
+
+    env = {
+        TEST_TMUX_ENV: str(primary),
+        LEGACY_TEST_TMUX_ENV: str(legacy),
+        "PATH": str(path_dir),
+    }
+    assert configured_test_tmux(env) == str(primary)
+    assert resolve_test_tmux(env=env) == str(primary.resolve(strict=True))
+    assert configured_test_tmux({**env, TEST_TMUX_ENV: " \t "}) == str(legacy)
+    assert resolve_test_tmux(env={**env, TEST_TMUX_ENV: ""}) == str(
+        legacy.resolve(strict=True)
+    )
+    assert (
+        configured_test_tmux(
+            {TEST_TMUX_ENV: " ", LEGACY_TEST_TMUX_ENV: "", "PATH": str(path_dir)}
+        )
+        is None
+    )
+    assert resolve_test_tmux(
+        env={TEST_TMUX_ENV: " ", LEGACY_TEST_TMUX_ENV: "", "PATH": str(path_dir)}
+    ) == str(on_path.resolve(strict=True))
 
 
 @pytest.mark.parametrize(
@@ -78,9 +117,10 @@ def drive(tmp_path: Path) -> Drive:
 def test_driver_rejects_out_of_range_options(
     name: str, arguments: list[str], message: str, tmp_path: Path
 ) -> None:
-    result = run(name, "tmux", *arguments, "--output", str(tmp_path / "new.json"))
-    assert result.returncode == 2
-    assert message in result.stderr
+    for prefix in (["tmux"], []):
+        result = run(name, *prefix, *arguments, "--output", str(tmp_path / "new.json"))
+        assert result.returncode == 2
+        assert message in result.stderr
 
 
 @pytest.mark.parametrize(

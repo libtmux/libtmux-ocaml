@@ -9,11 +9,13 @@ import tempfile
 from pathlib import Path
 
 from support import readme_walkthrough
-from support.tmux_fixture import TmuxFixture
+from support.tmux_fixture import TmuxFixture, test_tmux_binaries
 
 root = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(root / "scripts/docs_snippets"))
 from docs_snippets import snippet
+
+binaries = test_tmux_binaries()
 
 with tempfile.TemporaryDirectory(prefix="libtmux-ocaml-consumer-") as directory:
     temporary = Path(directory)
@@ -270,9 +272,6 @@ let () = Eio_main.run (fun env -> Eio.Switch.run (fun sw ->
         check=True,
     )
     walkthrough = readme_walkthrough.prepare(root, temporary, environment)
-    binaries = sys.argv[1:]
-    if not binaries:
-        raise SystemExit("usage: installed_consumer.py /path/to/tmux...")
     for binary in binaries:
         with TmuxFixture(binary) as fixture:
             result = subprocess.run(

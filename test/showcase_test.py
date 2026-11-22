@@ -8,10 +8,12 @@ import selectors
 import shutil
 import signal
 import subprocess
-import sys
 import tempfile
 from pathlib import Path
 
+from support.tmux_fixture import test_tmux_binaries
+
+binaries = test_tmux_binaries()
 root = Path(__file__).resolve().parents[1]
 manifest = json.loads((root / "examples/showcase.json").read_text())
 programs = {}
@@ -116,8 +118,7 @@ with tempfile.TemporaryDirectory(
         check=False,
     )
     assert built.returncode == 0, (built.stdout + built.stderr).decode(errors="replace")
-    for index, binary in enumerate(sys.argv[1:]):
-        actual = str(Path(binary).resolve(strict=True))
+    for index, actual in enumerate(binaries):
         fault = temporary / f"fault-tmux-{index}"
         audit = temporary / f"fault-directory-{index}"
         fault.write_text(
@@ -211,7 +212,7 @@ with tempfile.TemporaryDirectory(
                         os.close(descriptor)
                 outcome = "startup failure" if should_fail else "installed entry point"
                 print(
-                    f"PASS {Path(binary).parent.name}: {name}, {outcome} and owned teardown"
+                    f"PASS {Path(actual).parent.name}: {name}, {outcome} and owned teardown"
                 )
             finally:
                 if process.poll() is None:

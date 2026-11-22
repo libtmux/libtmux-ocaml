@@ -5,11 +5,10 @@ import os
 import selectors
 import signal
 import subprocess
-import sys
 import tempfile
 from pathlib import Path
 
-from support.tmux_fixture import AMBIENT_SELECTORS, TmuxFixture
+from support.tmux_fixture import AMBIENT_SELECTORS, TmuxFixture, test_tmux_binaries
 
 root = Path(__file__).resolve().parents[1]
 peer = root / "_build/default/test/bootstrap_peer.exe"
@@ -141,8 +140,8 @@ def exercise(binary, socket, environment, fresh, public_backend=None, config_fil
             os.close(descriptor)
 
 
-for binary in sys.argv[1:]:
-    actual = str(Path(binary).resolve(strict=True))
+for binary in test_tmux_binaries():
+    actual = binary
     with TmuxFixture(actual) as fixture:
         try:
             exercise(actual, fixture.socket, fixture.environment, False)

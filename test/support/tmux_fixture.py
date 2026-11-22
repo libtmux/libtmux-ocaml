@@ -4,20 +4,69 @@ import contextlib
 import ctypes
 import os
 import selectors
+import shutil
 import signal
 import stat
 import subprocess
+import sys
 import tempfile
+from collections.abc import Iterable, Mapping
 from pathlib import Path
 
+TEST_TMUX_ENV = "LIBTMUX_TEST_TMUX"
+LEGACY_TEST_TMUX_ENV = "TMUX_BINARY"
 AMBIENT_SELECTORS = frozenset(
     {"TMUX", "TMUX_PANE", "LIBTMUX_SOCKET", "LIBTMUX_SOCKET_PATH"}
 )
 
 
+def configured_test_tmux(env: Mapping[str, str] | None = None) -> str | None:
+    mapping = os.environ if env is None else env
+    for key in (TEST_TMUX_ENV, LEGACY_TEST_TMUX_ENV):
+        value = mapping.get(key)
+        if value is not None and value.strip():
+            return value
+    return None
+
+
+def resolve_test_tmux(
+    binary: str | os.PathLike[str] | None = None,
+    *,
+    env: Mapping[str, str] | None = None,
+) -> str:
+    mapping = os.environ if env is None else env
+    raw = os.fspath(binary) if binary is not None else configured_test_tmux(mapping)
+    if raw is None:
+        found = shutil.which("tmux", path=mapping.get("PATH"))
+        if found is None:
+            raise FileNotFoundError(
+                f"tmux executable not found on PATH; set {TEST_TMUX_ENV}"
+            )
+        return str(Path(found).resolve(strict=True))
+    if not raw.strip():
+        raise FileNotFoundError("tmux executable path must not be empty")
+    if os.sep in raw or (os.altsep is not None and os.altsep in raw):
+        return str(Path(raw).resolve(strict=True))
+    found = shutil.which(raw, path=mapping.get("PATH"))
+    if found is None:
+        raise FileNotFoundError(f"tmux executable {raw!r} not found on PATH")
+    return str(Path(found).resolve(strict=True))
+
+
+def test_tmux_binaries(
+    argv: Iterable[str | os.PathLike[str]] | None = None,
+    *,
+    env: Mapping[str, str] | None = None,
+) -> list[str]:
+    arguments = sys.argv[1:] if argv is None else list(argv)
+    if arguments:
+        return [resolve_test_tmux(item, env=env) for item in arguments]
+    return [resolve_test_tmux(env=env)]
+
+
 class TmuxFixture:
-    def __init__(self, binary):
-        self.binary = str(Path(binary).resolve(strict=True))
+    def __init__(self, binary=None):
+        self.binary = resolve_test_tmux(binary)
         self.directory = tempfile.TemporaryDirectory(prefix="libtmux-ocaml-")
         self.socket = Path(self.directory.name) / "server"
         self.environment = {

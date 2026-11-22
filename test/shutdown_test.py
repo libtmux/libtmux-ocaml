@@ -13,7 +13,7 @@ import sys
 import time
 from pathlib import Path
 
-from support.tmux_fixture import TmuxFixture
+from support.tmux_fixture import TmuxFixture, test_tmux_binaries
 
 
 def helper():
@@ -198,7 +198,7 @@ if os.environ.get("LIBTMUX_SHUTDOWN_HELPER") == "1":
     helper()
 else:
     failures = []
-    for binary in sys.argv[1:]:
+    for binary in test_tmux_binaries():
         with TmuxFixture(binary) as fixture:
             for backend, eio_backend in (
                 ("unix", None),

@@ -4,10 +4,9 @@ import json
 import os
 import selectors
 import subprocess
-import sys
 from pathlib import Path
 
-from support.tmux_fixture import TmuxFixture
+from support.tmux_fixture import TmuxFixture, test_tmux_binaries
 
 peer = Path(__file__).resolve().parents[1] / "_build/default/test/codec_peer.exe"
 
@@ -104,7 +103,7 @@ class Control:
         self.ready.close()
 
 
-for binary in sys.argv[1:]:
+for binary in test_tmux_binaries():
     with TmuxFixture(binary) as fixture:
         control = Control(fixture, 1)
         try:

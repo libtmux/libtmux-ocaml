@@ -25,7 +25,7 @@ MODES = ["discard", "snapshots", "panes", "latest-pane", "summaries", "targets"]
 def main() -> None:
     started = time.perf_counter()
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("binary")
+    parser.add_argument("binary", nargs="?")
     parser.add_argument("--captures", type=int, default=100)
     parser.add_argument("--windows", type=int, default=16)
     parser.add_argument("--repeat", type=int, default=6)

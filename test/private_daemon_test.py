@@ -4,9 +4,10 @@ import os
 import selectors
 import signal
 import subprocess
-import sys
 import tempfile
 from pathlib import Path
+
+from support.tmux_fixture import test_tmux_binaries
 
 root = Path(__file__).resolve().parents[1]
 peer = root / "_build/default/test/private_daemon_peer.exe"
@@ -143,5 +144,5 @@ def check(binary: str) -> None:
 
 
 if __name__ == "__main__":
-    for tmux_binary in sys.argv[1:]:
-        check(str(Path(tmux_binary).resolve(strict=True)))
+    for tmux_binary in test_tmux_binaries():
+        check(tmux_binary)
