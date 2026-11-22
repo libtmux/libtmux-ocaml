@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Select the test and benchmark `tmux` executable from `LIBTMUX_TEST_TMUX` when
+  no positional binary path is passed, falling back to `TMUX_BINARY` and `tmux`
+  on `PATH`.
 - Add `Libtmux.Endpoint.from_env` and default server selection in
   `tmux-workspace` (`LIBTMUX_SOCKET_PATH`, else `LIBTMUX_SOCKET`, else `TMUX`,
   else `default`, plus `--socket-name`), and scrub `LIBTMUX_SOCKET` and

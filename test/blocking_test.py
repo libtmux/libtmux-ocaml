@@ -1,13 +1,12 @@
 """Outer: native binding, graph capture, domain affinity and release teardown."""
 
 import subprocess
-import sys
 from pathlib import Path
 
-from support.tmux_fixture import TmuxFixture
+from support.tmux_fixture import TmuxFixture, test_tmux_binaries
 
 peer = Path(__file__).resolve().parents[1] / "_build/default/test/blocking_peer.exe"
-for binary in sys.argv[1:]:
+for binary in test_tmux_binaries():
     with TmuxFixture(binary) as fixture:
         fixture.command("link-window", "-s", "@0", "-t", "fixture:3")
         fixture.command("rename-window", "-t", "@0", "hostile-%end-λ")

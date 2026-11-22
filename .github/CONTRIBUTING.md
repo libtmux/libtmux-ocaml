@@ -128,10 +128,14 @@ $ /usr/bin/time -p mise exec -- opam exec -- uv run \
     --check
 ```
 
-Verify installation from an independent temporary consumer in the outer loop:
+Verify installation from an independent temporary consumer in the outer loop
+(set `LIBTMUX_TEST_TMUX` to target a specific tmux binary; `TMUX_BINARY` and
+`tmux` on `PATH` serve as fallbacks when no positional path is passed):
 
 ```console
-$ /usr/bin/time -p mise exec -- opam exec -- python3 test/installed_consumer.py
+$ LIBTMUX_TEST_TMUX=/path/to/tmux-3.8/bin/tmux \
+    /usr/bin/time -p mise exec -- opam exec -- \
+    python3 test/installed_consumer.py
 ```
 
 Check generated versioned option and hook descriptors:
@@ -207,10 +211,12 @@ $ LIBTMUX_API_EXPORT=1 /usr/bin/time -p mise exec -- opam exec -- uv run \
 ```
 
 Smoke-test each benchmark driver on its smallest workload against an owned
-tmux binary. This needs the benchmark executables from `dune build @all`:
+tmux binary (`TMUX_BINARY` remains accepted as a fallback when
+`LIBTMUX_TEST_TMUX` is unset). This needs the benchmark executables from
+`dune build @all`:
 
 ```console
-$ TMUX_BINARY=/path/to/tmux-3.8/bin/tmux \
+$ LIBTMUX_TEST_TMUX=/path/to/tmux-3.8/bin/tmux \
     /usr/bin/time -p mise exec -- opam exec -- uv run \
     --project scripts \
     --locked \
@@ -242,16 +248,21 @@ under one hour; reduce workloads when necessary. The drivers live in
 
 ## Owned tmux fixtures
 
-Fixture tests take the path of an exact tmux release binary. Build 3.3a and
-3.8 outside validation loops from the
+Fixture tests select the tmux executable under test from positional CLI
+arguments when given, else `LIBTMUX_TEST_TMUX` (treating empty or
+whitespace-only values as unset), else `TMUX_BINARY` as a migration alias, else
+`tmux` on `PATH`. Published OCaml packages and `tmux-workspace` never read
+`LIBTMUX_TEST_TMUX`. Build 3.3a and 3.8 outside validation loops from the
 [official release archives](https://github.com/tmux/tmux/releases). CI builds
 the same releases with the shared
 [build-tmux action](https://github.com/libtmux/.github/tree/30f81842b1e639ea4e25f93f1f2543504178e228/actions/build-tmux),
 which pins each archive's SHA256.
 
 Verify fixture cleanup after success, failure and cancellation, and that the
-daemon reports the version the binary does. This probe stays in this repository
-because the shared action does not exercise the owned pidfd fixture:
+daemon reports the version the binary does. Pass one or more release binaries
+positionally or set `LIBTMUX_TEST_TMUX` for a single binary. This probe stays
+in this repository because the shared action does not exercise the owned pidfd
+fixture:
 
 ```console
 $ /usr/bin/time -p python3 test/fixture_test.py \
@@ -267,15 +278,15 @@ alone does not establish library compatibility.
 
 Every test or probe must use a unique owned socket and temporary directory,
 with a `libtmux-ocaml-` prefix. Clear inherited `TMUX`, `TMUX_PANE`,
-`LIBTMUX_SOCKET`, and `LIBTMUX_SOCKET_PATH` for child commands unless ambient
-server discovery is the test's explicit subject, and address the owned socket
-explicitly. When a test routes named or default sockets through a private
-directory, create it with mode `0700` and set both `TMUX_TMPDIR` and
-`LIBTMUX_TEST_SANDBOX` to its path. For manual local commands, set
-`LIBTMUX_SOCKET` or `LIBTMUX_SOCKET_PATH` in an uncommitted `.env` file so
-invocations stay off your interactive tmux server. Clean up only resources
-created by that run and verify that its processes exit. Never use or stop the
-user's default tmux server.
+`LIBTMUX_SOCKET`, and `LIBTMUX_SOCKET_PATH` (while preserving
+`LIBTMUX_TEST_TMUX`) for child commands unless ambient server discovery is the
+test's explicit subject, and address the owned socket explicitly. When a test
+routes named or default sockets through a private directory, create it with
+mode `0700` and set both `TMUX_TMPDIR` and `LIBTMUX_TEST_SANDBOX` to its path.
+For manual local commands, set `LIBTMUX_SOCKET` or `LIBTMUX_SOCKET_PATH` in an
+uncommitted `.env` file so invocations stay off your interactive tmux server.
+Clean up only resources created by that run and verify that its processes exit.
+Never use or stop the user's default tmux server.
 
 Record exact OCaml, Dune, tmux, and OS versions. A passing subset does not
 establish a compatibility matrix. Test examples as shipped, including imports,

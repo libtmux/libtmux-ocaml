@@ -7,11 +7,10 @@ import selectors
 import signal
 import stat
 import subprocess
-import sys
 import tempfile
 from pathlib import Path
 
-from support.tmux_fixture import AMBIENT_SELECTORS
+from support.tmux_fixture import AMBIENT_SELECTORS, test_tmux_binaries
 
 root = Path(__file__).resolve().parents[1]
 peer = root / "_build/default/test/default_server_peer.exe"
@@ -385,5 +384,5 @@ def check(binary: str) -> None:
 
 
 if __name__ == "__main__":
-    for tmux_binary in sys.argv[1:]:
+    for tmux_binary in test_tmux_binaries():
         check(tmux_binary)

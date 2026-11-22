@@ -1,13 +1,12 @@
 """Outer: real Eio operation ownership at queue, write, acknowledgement and closure."""
 
 import subprocess
-import sys
 from pathlib import Path
 
-from support.tmux_fixture import TmuxFixture
+from support.tmux_fixture import TmuxFixture, test_tmux_binaries
 
 peer = Path(__file__).resolve().parents[1] / "_build/default/test/eio_peer.exe"
-for binary in sys.argv[1:]:
+for binary in test_tmux_binaries():
     with TmuxFixture(binary) as fixture:
         fixture.command("split-window", "-d", "")
         subprocess.run(

@@ -25,7 +25,7 @@ budget. Before handing off a change to a script or an outer test driver, run:
 - `uv run --project scripts --locked ty check --project scripts scripts test`
 - `opam exec -- uv run --project scripts --locked pytest scripts`; set
   `LIBTMUX_API_EXPORT=1` to include the compiler-backed exporter tests and
-  `TMUX_BINARY` with `-m native` for the benchmark smoke tests.
+  `LIBTMUX_TEST_TMUX` with `-m native` for the benchmark smoke tests.
 
 For OCaml sources, run `opam exec -- dune build @fmt` and
 `opam exec -- dune build @all @install`.

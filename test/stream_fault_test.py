@@ -1,13 +1,12 @@
 """Outer: real bounded pipe faults exercise the shared stream reader and teardown."""
 
 import subprocess
-import sys
 from pathlib import Path
 
-from support.tmux_fixture import TmuxFixture
+from support.tmux_fixture import TmuxFixture, test_tmux_binaries
 
 peer = Path(__file__).resolve().parents[1] / "_build/default/test/stream_fault_peer.exe"
-for binary in sys.argv[1:]:
+for binary in test_tmux_binaries():
     with TmuxFixture(binary) as fixture:
         result = subprocess.run(
             [str(peer), fixture.binary, str(fixture.socket)],

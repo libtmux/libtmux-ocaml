@@ -6,12 +6,12 @@ import socket
 import subprocess
 from pathlib import Path
 
-from support.tmux_fixture import TmuxFixture
+from support.tmux_fixture import TmuxFixture, test_tmux_binaries
 
 root = Path(__file__).resolve().parents[1]
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--backend", choices=["eio", "unix"], default="eio")
-parser.add_argument("binaries", nargs="+")
+parser.add_argument("binaries", nargs="*")
 args = parser.parse_args()
 peer_name = "blocking_cancel_peer" if args.backend == "unix" else "capture_cancel_peer"
 peer = root / f"_build/default/test/{peer_name}.exe"
@@ -24,7 +24,7 @@ def readable(stream):
         assert ready.select(1), "capture cancellation boundary did not become ready"
 
 
-for binary in args.binaries:
+for binary in test_tmux_binaries(args.binaries):
     with TmuxFixture(binary) as fixture:
         fixture.command("split-window", "-d", "")
         subprocess.run(

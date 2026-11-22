@@ -12,7 +12,7 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-from support.tmux_fixture import AMBIENT_SELECTORS, TmuxFixture
+from support.tmux_fixture import AMBIENT_SELECTORS, TmuxFixture, test_tmux_binaries
 
 root = Path(__file__).resolve().parents[1]
 standin = root / "_build/default/test/tmux_standin.exe"
@@ -48,8 +48,10 @@ with tempfile.TemporaryDirectory(prefix="libtmux-ocaml-cli-install-") as install
     version = subprocess.check_output([str(cli), "--version"], timeout=1)
     assert version == b"unreleased\n"
     unsupported = "--unsupported" in sys.argv
-    for binary in [value for value in sys.argv[1:] if value != "--unsupported"]:
-        actual = str(Path(binary).resolve(strict=True))
+    for binary in test_tmux_binaries(
+        [value for value in sys.argv[1:] if value != "--unsupported"]
+    ):
+        actual = binary
         with TmuxFixture(actual) as fixture:
             directory = Path(fixture.directory.name)
             document = directory / "project.json"

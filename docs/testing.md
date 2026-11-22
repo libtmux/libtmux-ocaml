@@ -34,10 +34,13 @@ test command separately and retain the existing inner/mid budgets. Native and
 installed-consumer checks belong to the outer loop because they launch processes
 and own real tmux servers.
 
-Run the implemented native contract suite against one explicit release binary:
+Run the implemented native contract suite against an explicit release binary via
+`LIBTMUX_TEST_TMUX` (or a positional path; `TMUX_BINARY` and `tmux` on `PATH`
+serve as fallbacks):
 
 ```console
-$ opam exec -- python3 test/native_suite.py /path/to/tmux
+$ LIBTMUX_TEST_TMUX=/path/to/tmux \
+    opam exec -- python3 test/native_suite.py
 ```
 
 The [CI workflow](../.github/workflows/ocaml.yml) uses exactly OCaml 5.5.2,

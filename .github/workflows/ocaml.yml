@@ -101,24 +101,24 @@ jobs:
         run: opam exec -- dune build @all @install
       - name: Exercise the native clients
         env:
-          TMUX_BINARY: ${{ steps.tmux.outputs.binary }}
-        run: opam exec -- python3 test/native_suite.py "$TMUX_BINARY"
+          LIBTMUX_TEST_TMUX: ${{ steps.tmux.outputs.binary }}
+        run: opam exec -- python3 test/native_suite.py
       - name: Exercise the installed consumer
         env:
-          TMUX_BINARY: ${{ steps.tmux.outputs.binary }}
-        run: opam exec -- python3 test/installed_consumer.py "$TMUX_BINARY"
+          LIBTMUX_TEST_TMUX: ${{ steps.tmux.outputs.binary }}
+        run: opam exec -- python3 test/installed_consumer.py
       - name: Smoke-test the benchmark drivers
         env:
-          TMUX_BINARY: ${{ steps.tmux.outputs.binary }}
+          LIBTMUX_TEST_TMUX: ${{ steps.tmux.outputs.binary }}
         run: opam exec -- uv run --project scripts --locked pytest -m native scripts/bench
       - name: Execute the installed workspace documentation
         env:
-          TMUX_BINARY: ${{ steps.tmux.outputs.binary }}
-        run: opam exec -- python3 test/workspace_docs_test.py "$TMUX_BINARY"
+          LIBTMUX_TEST_TMUX: ${{ steps.tmux.outputs.binary }}
+        run: opam exec -- python3 test/workspace_docs_test.py
       - name: Execute the standalone showcase programs
         env:
-          TMUX_BINARY: ${{ steps.tmux.outputs.binary }}
-        run: opam exec -- python3 test/showcase_test.py "$TMUX_BINARY"
+          LIBTMUX_TEST_TMUX: ${{ steps.tmux.outputs.binary }}
+        run: opam exec -- python3 test/showcase_test.py
       - name: Retain failed build diagnostics
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

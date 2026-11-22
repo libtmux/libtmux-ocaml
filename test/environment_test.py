@@ -1,13 +1,12 @@
 """Outer: exact environment bytes and scope semantics on both native backends."""
 
 import subprocess
-import sys
 from pathlib import Path
 
-from support.tmux_fixture import TmuxFixture
+from support.tmux_fixture import TmuxFixture, test_tmux_binaries
 
 peer = Path(__file__).resolve().parents[1] / "_build/default/test/environment_peer.exe"
-for binary in sys.argv[1:]:
+for binary in test_tmux_binaries():
     for backend in ["unix", "eio"]:
         with TmuxFixture(binary) as fixture:
             fixture.command(

@@ -127,7 +127,7 @@ def distribution(values: list[float]) -> dict[str, float]:
 def main() -> None:
     started = time.perf_counter()
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("binary")
+    parser.add_argument("binary", nargs="?")
     parser.add_argument("--requests", type=int, default=128)
     parser.add_argument("--concurrency", type=int, default=8)
     parser.add_argument("--streams", type=int, default=10)

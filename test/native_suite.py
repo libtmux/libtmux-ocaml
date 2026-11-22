@@ -6,13 +6,15 @@ import sys
 import time
 from pathlib import Path
 
-from support.tmux_fixture import AMBIENT_SELECTORS
+from support.tmux_fixture import AMBIENT_SELECTORS, TEST_TMUX_ENV, resolve_test_tmux
 
 root = Path(__file__).resolve().parents[1]
-if len(sys.argv) != 2:
-    raise SystemExit("usage: native_suite.py /path/to/tmux")
-binary = str(Path(sys.argv[1]).resolve(strict=True))
-clean_env = {k: v for k, v in os.environ.items() if k not in AMBIENT_SELECTORS}
+if len(sys.argv) > 2:
+    raise SystemExit("usage: native_suite.py [/path/to/tmux]")
+binary = resolve_test_tmux(sys.argv[1] if len(sys.argv) == 2 else None)
+clean_env = {k: v for k, v in os.environ.items() if k not in AMBIENT_SELECTORS} | {
+    TEST_TMUX_ENV: binary
+}
 # A driver's deadline is a bound, not a target: far above its run time, so a
 # loaded runner does not fail a healthy driver, and finite, so a hung one fails
 # the job instead of stalling it.
