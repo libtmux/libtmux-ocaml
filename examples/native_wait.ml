@@ -21,6 +21,7 @@ let () =
           Fun.protect
             ~finally:(fun () -> ignore (get (C.close client)))
             (fun () ->
+              let text = Sys.argv.(3) in
               let snapshot = get (C.capture client) in
               let pane =
                 match
@@ -30,7 +31,5 @@ let () =
                 | Error error ->
                     failwith (Format.asprintf "%a" Cardinality.pp_error error)
               in
-              ignore
-                (get
-                   (C.wait_for_text ~timeout:0.5 client pane ~text:Sys.argv.(3)));
+              ignore (get (C.wait_for_text ~timeout:0.5 client pane ~text));
               print_endline (Pane.Id.to_string (Pane.id pane)))))

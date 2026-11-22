@@ -56,7 +56,8 @@ let run_hook client (initial : Created.t) =
          };
        ]);
   assert (configured (get (Client.read_hook client scope name)));
-  assert (Options.lookup (get (Client.capture_hooks client scope)) name <> None);
+  let hooks = get (Client.capture_hooks client scope) in
+  assert (Options.lookup hooks name <> None);
   get (Client.run_hook client (Options.Session initial.session) name);
   assert (
     Environment.lookup

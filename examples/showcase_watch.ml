@@ -38,6 +38,7 @@ let watch_output binary blocking (initial : Created.t) _spawn =
         ~finally:(fun () ->
           Eio.Cancel.protect (fun () -> get (Subscription.close subscription)))
         (fun () ->
+          let target = Pane.target pane in
           let cursor, () =
             Eio.Fiber.pair
               (fun () ->
@@ -51,8 +52,8 @@ let watch_output binary blocking (initial : Created.t) _spawn =
                 | Error (Output.Ended reason) ->
                     failwith (Format.asprintf "%a" Output.reason_pp reason))
               (fun () ->
-                get (Client.send_text client (Pane.target pane) ~text:"changed");
-                get (Client.send_keys client (Pane.target pane) [ Key.Enter ]))
+                get (Client.send_text client target ~text:"changed");
+                get (Client.send_keys client target [ Key.Enter ]))
           in
           assert (cursor.offset >= 7L);
           print_endline "observed: changed"))

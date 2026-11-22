@@ -1,0 +1,27 @@
+width = 80
+markdown = ["**/*.md"]
+sources = ["examples/**/*.ml", "examples/workspace/*.json"]
+shared_digest = "872d3f4cb1eb2b5cd9c5b7adc9cd140a153e4bbed3cb5bd0b7400a905e6dae4d"
+allow_ceiling = 2
+
+[[exclude]]
+glob = ".github/CONTRIBUTING.md"
+reason = "maintainer check commands, not reader-facing examples"
+
+[[exclude]]
+glob = "examples/dune"
+reason = "Dune build stanza file, not a reader-facing example"
+
+[[exclude]]
+glob = "examples/showcase.json"
+reason = "test runner manifest for showcase_test.py, not a reader-facing example"
+
+[[allow]]
+path = ".github/WRITING.md"
+line = '  get (Client.set_environment client Environment.Global ~name:"LIBTMUX_DEMO" "one");'
+reason = "the deliberately wide Bad example in the repository width rules"
+
+[[allow]]
+path = "json/README.md"
+line = '{"schema":"libtmux.filter/1","model":"pane","expr":{"node":"compare","field":"pane_current_command","op":"starts_with","value":"nv"}}'
+reason = "single-line compact JSON wire output emitted by write_filter"
