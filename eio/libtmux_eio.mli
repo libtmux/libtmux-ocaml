@@ -139,10 +139,12 @@ module Client : sig
     Libtmux.Endpoint.t ->
     (t, Libtmux.Error.t) result
   (** Attach to an existing local Linux daemon in the same PID namespace and
-      shared filesystem. Requires pidfd support. Default exchange timeout: one
-      second. All client calls belong to the connecting OCaml domain. Initial
-      and auxiliary attachments suppress tmux's [update-environment] behavior.
-  *)
+      shared filesystem. Pass {!Libtmux.Endpoint.from_env} [()] for default
+      server selection or {!Libtmux.Endpoint.socket_path} /
+      {!Libtmux.Endpoint.named_socket} for an explicit socket. Requires pidfd
+      support. Default exchange timeout: one second. All client calls belong to
+      the connecting OCaml domain. Initial and auxiliary attachments suppress
+      tmux's [update-environment] behavior. *)
 
   val cleanup : t -> Cleanup.t
   (** Read the supplied report or the client's fresh default without I/O.

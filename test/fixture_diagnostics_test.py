@@ -10,7 +10,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from support.tmux_fixture import TmuxFixture
+from support.tmux_fixture import AMBIENT_SELECTORS, TmuxFixture
 
 
 class EnteredFixture(TmuxFixture):
@@ -78,6 +78,20 @@ class FixtureDiagnostics(unittest.TestCase):
         with self.assertRaises(OSError) as closed:
             os.fstat(notification)
         self.assertEqual(closed.exception.errno, errno.EBADF)
+
+    def test_ambient_selectors_are_scrubbed(self):
+        injected = {
+            "TMUX": "/unrelated/server,99999,0",
+            "TMUX_PANE": "%99999",
+            "LIBTMUX_SOCKET": "ambient-socket",
+            "LIBTMUX_SOCKET_PATH": "/unrelated/socket",
+        }
+        with patch.dict(os.environ, injected, clear=False):
+            fixture = TmuxFixture("/bin/sh")
+            try:
+                self.assertEqual(AMBIENT_SELECTORS & fixture.environment.keys(), set())
+            finally:
+                fixture.close()
 
 
 if __name__ == "__main__":

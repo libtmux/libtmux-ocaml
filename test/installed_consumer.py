@@ -53,6 +53,10 @@ let () =
     with Exit -> true);
   let endpoint = Endpoint.named_socket "installed-consumer" in
   assert (Endpoint.equal endpoint (Endpoint.named_socket "installed-consumer"));
+  assert (Endpoint.equal
+    (Endpoint.from_env ~cwd:"/srv"
+       ~getenv:(function "LIBTMUX_SOCKET_PATH" -> Some "run/s" | _ -> None) ())
+    (Endpoint.socket_path "/srv/run/s"));
   assert (Query.exactly_one (List.to_seq [42]) = Ok 42);
   assert (Query.exactly_one (List.to_seq [42; 42]) =
           Error (Cardinality.Multiple_matches {at_least = 2}));
@@ -97,7 +101,14 @@ let () =
     exported = re.search(r"^OPAMSWITCH='?([^';\n]+)", exports, re.MULTILINE)
     assert exported, "README switch activation did not export OPAMSWITCH"
     environment["OPAMSWITCH"] = exported.group(1)
-    for key in ("DUNE_SOURCEROOT", "DUNE_WORKSPACE"):
+    for key in (
+        "DUNE_SOURCEROOT",
+        "DUNE_WORKSPACE",
+        "TMUX",
+        "TMUX_PANE",
+        "LIBTMUX_SOCKET",
+        "LIBTMUX_SOCKET_PATH",
+    ):
         environment.pop(key, None)
     for package in packages:
         resolved = subprocess.check_output(

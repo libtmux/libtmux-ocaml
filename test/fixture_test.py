@@ -5,8 +5,9 @@ import subprocess
 import sys
 import time
 from pathlib import Path
+from unittest.mock import patch
 
-from support.tmux_fixture import TmuxFixture
+from support.tmux_fixture import AMBIENT_SELECTORS, TmuxFixture
 
 
 def check(binary):
@@ -14,10 +15,27 @@ def check(binary):
     reported = subprocess.run(
         [binary, "-V"], capture_output=True, check=True, text=True
     ).stdout.strip()
+    ambient = {
+        "TMUX": "/unrelated/server,99999,0",
+        "TMUX_PANE": "%99999",
+        "LIBTMUX_SOCKET": "ambient-socket",
+        "LIBTMUX_SOCKET_PATH": "/unrelated/socket",
+    }
     for outcome in (None, RuntimeError, asyncio.CancelledError):
-        fixture = TmuxFixture(binary)
+        with patch.dict("os.environ", ambient, clear=False):
+            fixture = TmuxFixture(binary)
+        assert not (AMBIENT_SELECTORS & fixture.environment.keys())
         try:
             with fixture:
+                assert fixture.server is not None
+                daemon_env = {
+                    entry.split(b"=", 1)[0].decode("latin1")
+                    for entry in Path(f"/proc/{fixture.server.pid}/environ")
+                    .read_bytes()
+                    .split(b"\0")
+                    if b"=" in entry
+                }
+                assert not (AMBIENT_SELECTORS & daemon_env)
                 assert (
                     fixture.command("list-sessions", "-F", "#{session_name}").stdout
                     == b"fixture\n"

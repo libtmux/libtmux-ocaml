@@ -207,6 +207,11 @@
  (libraries libtmux libtmux-workspace libtmux-unix libtmux-eio eio_main unix))
 
 (executable
+ (name default_server_peer)
+ (modules default_server_peer)
+ (libraries libtmux libtmux-workspace libtmux-unix libtmux-eio eio_main unix))
+
+(executable
  (name tmux_standin)
  (modules tmux_standin)
  (libraries unix))

@@ -7,7 +7,9 @@ let () =
     |> Seq.filter (fun entry ->
         not
           (String.starts_with ~prefix:"TMUX=" entry
-          || String.starts_with ~prefix:"TMUX_PANE=" entry))
+          || String.starts_with ~prefix:"TMUX_PANE=" entry
+          || String.starts_with ~prefix:"LIBTMUX_SOCKET=" entry
+          || String.starts_with ~prefix:"LIBTMUX_SOCKET_PATH=" entry))
     |> Array.of_seq
   in
   let pid =

@@ -33,6 +33,8 @@ with tempfile.TemporaryDirectory(
             EIO_BACKEND=backend,
             TMUX="/unrelated/server,99999,0",
             TMUX_PANE="%99999",
+            LIBTMUX_SOCKET="bad/socket",
+            LIBTMUX_SOCKET_PATH="/unrelated/socket",
         )
         for size in [len(raw), 65_536, 65_537]:
             document = raw + b" " * (size - len(raw))

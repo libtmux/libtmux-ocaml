@@ -9,7 +9,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-from support.tmux_fixture import TmuxFixture
+from support.tmux_fixture import AMBIENT_SELECTORS, TmuxFixture
 
 root = Path(__file__).resolve().parents[1]
 peer = root / "_build/default/test/bootstrap_peer.exe"
@@ -153,7 +153,7 @@ for binary in sys.argv[1:]:
         environment = {
             key: value
             for key, value in os.environ.items()
-            if key not in {"TMUX", "TMUX_PANE"}
+            if key not in AMBIENT_SELECTORS
         }
         exercise(actual, directory / "server", environment, True, None, "/dev/null")
     print(
