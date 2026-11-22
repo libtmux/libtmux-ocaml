@@ -1,8 +1,8 @@
 <!-- libtmux-logo -->
 <div align="center">
   <picture>
-    <source srcset="docs/assets/logo.svg" type="image/svg+xml">
-    <img src="docs/assets/logo-512.png" width="128" height="128" alt="libtmux for OCaml">
+    <source srcset="assets/logo.svg" type="image/svg+xml">
+    <img src="assets/logo.png" width="128" height="128" alt="libtmux for OCaml">
   </picture>
 </div>
 <!-- /libtmux-logo -->
@@ -663,7 +663,7 @@ shell.
 For development, read [CONTRIBUTING.md](.github/CONTRIBUTING.md).
 Licensed under [MIT](LICENSE).
 
-[Branding assets](docs/branding.md) include the logo, icons, and social cards.
+[Logo assets](assets/README.md) record the artwork and kit revision.
 
 [core-api]: https://libtmux.org/en/ocaml/latest/reference/libtmux/
 [unix-api]: https://libtmux.org/en/ocaml/latest/reference/libtmux_unix/

@@ -2,7 +2,7 @@
 <div align="center">
   <picture>
     <source srcset="assets/logo.svg" type="image/svg+xml">
-    <img src="assets/logo-128.png" width="128" height="128" alt="libtmux workspace for OCaml">
+    <img src="assets/logo.png" width="128" height="128" alt="libtmux workspace for OCaml">
   </picture>
 
 # libtmux workspace for OCaml
