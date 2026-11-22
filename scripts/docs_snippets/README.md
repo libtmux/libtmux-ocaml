@@ -39,7 +39,7 @@ $ uv run scripts/docs_snippets/docs_snippets.py
 Run its tests:
 
 ```console
-$ uv run pytest scripts/docs_snippets
+$ uv run --project scripts --locked pytest scripts/docs_snippets
 ```
 
 The tests run the check on this repository and on temporary trees built from

@@ -39,6 +39,6 @@ CLAUDE.local.md
 __pycache__/
 
 # Python tooling
-/.venv/
-/.ruff_cache/
-/.pytest_cache/
+.venv/
+.ruff_cache/
+.pytest_cache/

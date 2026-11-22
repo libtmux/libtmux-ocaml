@@ -27,7 +27,7 @@ $ uv run scripts/toolchain/check_toolchain.py
 Run its tests:
 
 ```console
-$ uv run pytest scripts/toolchain
+$ uv run --project scripts --locked pytest scripts/toolchain
 ```
 
 The tests build pin files in temporary directories and replace the version

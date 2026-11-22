@@ -20,12 +20,12 @@ Each guide owns its subject. `CLAUDE.md` is a relative symlink to this file.
 [.github/CONTRIBUTING.md](.github/CONTRIBUTING.md) lists every command and its
 budget. Before handing off a change to a script or an outer test driver, run:
 
-- `uv run ruff format --check scripts test`
-- `uv run ruff check scripts test`
-- `uv run ty check scripts test`
-- `opam exec -- uv run pytest scripts`; set `LIBTMUX_API_EXPORT=1` to include
-  the compiler-backed exporter tests and `TMUX_BINARY` with `-m native` for
-  the benchmark smoke tests.
+- `uv run --project scripts --locked ruff format --check --config scripts/pyproject.toml scripts test`
+- `uv run --project scripts --locked ruff check --config scripts/pyproject.toml scripts test`
+- `uv run --project scripts --locked ty check --project scripts scripts test`
+- `opam exec -- uv run --project scripts --locked pytest scripts`; set
+  `LIBTMUX_API_EXPORT=1` to include the compiler-backed exporter tests and
+  `TMUX_BINARY` with `-m native` for the benchmark smoke tests.
 
 For OCaml sources, run `opam exec -- dune build @fmt` and
 `opam exec -- dune build @all @install`.

@@ -60,7 +60,7 @@ $ opam exec -- uv run scripts/generate/generate_options.py --source-dir DIR
 Run the tests:
 
 ```console
-$ opam exec -- uv run pytest scripts/generate
+$ opam exec -- uv run --project scripts --locked pytest scripts/generate
 ```
 
 The tests run each generator on the repository and on temporary copies of the
